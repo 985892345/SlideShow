@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SlideShow">
+        <!--设置内部 ImageView 的宽度-->
+        <attr name="slide_imgWight" format="dimension">
+            <enum name="fill_parent" value="-1" />
+            <enum name="match_parent" value="-1" />
+            <enum name="wrap_content" value="-2" />
+        </attr>
+
+        <!--设置内部 ImageView 的高度-->
+        <attr name="slide_imgHeight" format="dimension">
+            <enum name="fill_parent" value="-1" />
+            <enum name="match_parent" value="-1" />
+            <enum name="wrap_content" value="-2" />
+        </attr>
+
+        <attr name="slide_imgMargin" format="dimension"  />
+        <attr name="slide_imgMarginHorizontal" format="dimension"  />
+        <attr name="slide_imgMarginVertical" format="dimension" />
+
+        <attr name="slide_imgRadius" format="dimension"/>
+        <attr name="slide_imgLeftTopRadius" format="dimension"/>
+        <attr name="slide_imgRightTopRadius" format="dimension"/>
+        <attr name="slide_imgLeftBottomRadius" format="dimension"/>
+        <attr name="slide_imgRightBottomRadius" format="dimension"/>
+
+        <attr name="slide_orientation" format="enum">
+            <enum name="horizontal" value="0"/>
+            <enum name="vertical" value="1"/>
+        </attr>
+
+        <!--设置 ViewPager2 内部页面的边距，Orientation 为水平时设置左右的间隔，垂直时设置上下的间隔。\n
+            1、app:slide_imgWight 为 match_parent 时，设置 slide_pageInterval，图片宽度 *会* 改变，
+               两图片的间距为 app:slide_imgMarginHorizontal 的值的两倍。\n
+            2、app:slide_imgWight 为 具体值 时，设置 slide_pageInterval，图片宽度不会改变，
+               且设置的 app:slide_imgMarginHorizontal 无效，此时两图片的间距为 slide_pageInterval-->
+        <attr name="slide_pageInterval" format="dimension"/>
+
+        <!--是否显示指示器-->
+        <attr name="slide_isShowIndicators" format="boolean"/>
+        <!--指示器圆点半径大小-->
+        <attr name="slide_indicatorsRadius" format="dimension"/>
+        <!--指示器圆点颜色-->
+        <attr name="slide_indicatorsColor" format="color"/>
+        <!--指示器横幅颜色-->
+        <attr name="slide_indicatorsBannerColor" format="color"/>
+
+        <attr name="slide_indicatorsStyle" format="enum">
+            <enum name="null_view" value="0"/>
+            <enum name="normal" value="1"/>
+        </attr>
+
+        <attr name="slide_indicatorsGravity">
+            <flag name="top" value="0x30" />
+            <flag name="bottom" value="0x50" />
+            <flag name="left" value="0x03" />
+            <flag name="right" value="0x05" />
+            <flag name="center" value="0x11" />
+            <flag name="center_vertical" value="0x10" />
+            <flag name="center_horizontal" value="0x01" />
+        </attr>
+    </declare-styleable>
+</resources>
