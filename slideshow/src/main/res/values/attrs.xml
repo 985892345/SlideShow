@@ -30,9 +30,9 @@
             <enum name="vertical" value="1"/>
         </attr>
 
-        <!--设置 ViewPager2 内部页面的边距，Orientation 为水平时设置左右的间隔，垂直时设置上下的间隔。\n
+        <!--设置 ViewPager2 内部页面的边距，Orientation 为水平时设置左右的间隔，垂直时设置上下的间隔。&#x000A;
             1、app:slide_imgWight 为 match_parent 时，设置 slide_pageInterval，图片宽度 *会* 改变，
-               两图片的间距为 app:slide_imgMarginHorizontal 的值的两倍。\n
+               两图片的间距为 app:slide_imgMarginHorizontal 的值的两倍。&#x000A;
             2、app:slide_imgWight 为 具体值 时，设置 slide_pageInterval，图片宽度不会改变，
                且设置的 app:slide_imgMarginHorizontal 无效，此时两图片的间距为 slide_pageInterval-->
         <attr name="slide_pageInterval" format="dimension"/>

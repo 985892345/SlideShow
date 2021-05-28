@@ -9,8 +9,8 @@
 
     <com.ndhzs.slideshow.SlideShow
         android:id="@+id/slideShow"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
@@ -22,7 +22,7 @@
         app:cardCornerRadius="20dp"
         app:slide_imgHeight="400dp"
         app:slide_imgWight="240dp"
-        app:slide_pageInterval="40dp"
+        app:slide_pageInterval="20dp"
         app:slide_imgRadius="20dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

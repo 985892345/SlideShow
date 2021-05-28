@@ -41,8 +41,8 @@ internal object Attrs {
     fun initialize(context: Context, attrs: AttributeSet) {
         val ty = context.obtainStyledAttributes(attrs, R.styleable.SlideShow)
 
-        imgWidth = ty.getDimension(R.styleable.SlideShow_slide_imgWight, -1F).toInt()
-        imgHeight = ty.getDimension(R.styleable.SlideShow_slide_imgHeight, -1F).toInt()
+        imgWidth = ty.getLayoutDimension(R.styleable.SlideShow_slide_imgWight, -1)
+        imgHeight = ty.getLayoutDimension(R.styleable.SlideShow_slide_imgHeight, -1)
 
         val imgMargin = ty.getDimension(R.styleable.SlideShow_slide_imgMargin, 0F).toInt()
         if (imgMargin == 0) {
