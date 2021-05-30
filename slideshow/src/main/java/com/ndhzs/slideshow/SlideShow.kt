@@ -4,7 +4,6 @@ import android.animation.TimeInterpolator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
@@ -398,10 +397,13 @@ class SlideShow : CardView {
     }
 
     /**
-     * 设置自动滑动的延迟时间，默认时间是 4 秒
+     * 设置自动滑动的延迟时间，默认时间是 4 秒，最低只能设置成 2 秒
      */
     fun setDelayTime(delayTime: Long): SlideShow {
         mDelayTime = delayTime
+        if (delayTime < 2000) {
+            mDelayTime = 2000
+        }
         return this
     }
 
@@ -653,7 +655,6 @@ class SlideShow : CardView {
     private val mViewPager2 = ViewPager2(context)
     private val mPageChangeCallback = BasePageChangeCallBack(mViewPager2) {
         mPrePosition = it
-        start()
     }
     private val mPageTransformers = BaseMultipleTransformer()
     private var mImgRealItemCount = 1
@@ -754,6 +755,9 @@ class SlideShow : CardView {
                         mAnimator.cancel()
                     }
                 }
+                MotionEvent.ACTION_UP -> {
+                    start()
+                }
             }
             super.dispatchTouchEvent(ev)
         }else {
@@ -763,13 +767,12 @@ class SlideShow : CardView {
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        Log.d("SlideView","(SlideShow.kt:766)-->> onAttachedToWindow")
         start()
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        Log.d("SlideView","(SlideShow.kt:772)-->> onDetachedFromWindow")
+        stop()
         mRunnableManger.destroy()
         if (this::mAnimator.isInitialized) {
             mAnimator.cancel()

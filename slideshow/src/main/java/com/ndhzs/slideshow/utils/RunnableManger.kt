@@ -16,7 +16,6 @@ class RunnableManger(private val view: View) {
     fun post(runnable: Runnable) {
         hashSet.add(runnable)
         view.post(runnable)
-
     }
 
     fun postDelay(delayMillis: Long, runnable: Runnable) {
