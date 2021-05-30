@@ -83,13 +83,14 @@ import com.ndhzs.slideshow.viewpager2.transformer.BaseMultipleTransformer
  * @data 2021/5/26
  */
 class SlideShow : CardView {
+    private val mAttrs = com.ndhzs.slideshow.utils.Attrs()
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        Attrs.initialize(context, attrs)
+        mAttrs.initialize(context, attrs)
         setPageInterval()
         init()
     }
-    constructor(context: Context, builder: Builder) : super(context) {
-        Attrs.setAttrs()
+    constructor(context: Context, attrs: Attrs) : super(context) {
+        attrs.setAttrs()
         init()
     }
     /**
@@ -158,7 +159,7 @@ class SlideShow : CardView {
      * **NOTICE：** 使用该方法可能意为着你需要自动滑动，请使用 [setAutoSlideEnabled]
      */
     fun <T> setAdapter(datas: List<T>, imgAdapter: BaseImgAdapter<T>): SlideShow {
-        imgAdapter.setData(datas)
+        imgAdapter.setData(datas, mAttrs)
         mViewPager2.adapter = imgAdapter
         mImgRealItemCount = datas.size
         if (mIsCirculateEnabled && mImgRealItemCount > 1) {
@@ -427,7 +428,7 @@ class SlideShow : CardView {
      * 设置指示器的横幅背景颜色
      */
     fun setIndicatorsBannerColor(color: Int): SlideShow {
-        Attrs.indicatorBannerColor = color
+        mAttrs.indicatorBannerColor = color
         return this
     }
 
@@ -435,7 +436,7 @@ class SlideShow : CardView {
      * 设置指示器的圆点颜色
      */
     fun setIndicatorsColor(color: Int): SlideShow {
-        Attrs.indicatorColor = color
+        mAttrs.indicatorColor = color
         return this
     }
 
@@ -443,7 +444,7 @@ class SlideShow : CardView {
      * 设置指示器的圆点半径
      */
     fun setIndicatorsRadius(radius: Float): SlideShow {
-        Attrs.indicatorRadius = radius
+        mAttrs.indicatorRadius = radius
         return this
     }
 
@@ -453,7 +454,7 @@ class SlideShow : CardView {
      * @param gravity 数据来自 [Indicators]
      */
     fun setIndicatorsGravity(@Indicators.Gravity gravity: Int): SlideShow {
-        Attrs.indicatorGravity = gravity
+        mAttrs.indicatorGravity = gravity
         return this
     }
 
@@ -462,7 +463,7 @@ class SlideShow : CardView {
      */
     @Indicators.Gravity
     fun getIndicatorsGravity(): Int {
-        return Attrs.indicatorGravity
+        return mAttrs.indicatorGravity
     }
 
     /**
@@ -471,7 +472,7 @@ class SlideShow : CardView {
      * @see style 数据来自 [Indicators]
      */
     fun setIndicatorsStyle(@Indicators.Style style: Int): SlideShow {
-        Attrs.indicatorStyle = style
+        mAttrs.indicatorStyle = style
         return this
     }
 
@@ -480,14 +481,14 @@ class SlideShow : CardView {
      */
     @Indicators.Style
     fun getIndicatorsStyle(): Int {
-        return Attrs.indicatorStyle
+        return mAttrs.indicatorStyle
     }
 
     /**
      * 设置是否显示指示器
      */
     fun setShowIndicators(boolean: Boolean): SlideShow {
-        Attrs.isShowIndicators = boolean
+        mAttrs.isShowIndicators = boolean
         return this
     }
 
@@ -498,7 +499,7 @@ class SlideShow : CardView {
      */
     @ViewPager2.Orientation
     fun getOrientation(): Int {
-        return Attrs.orientation
+        return mAttrs.orientation
     }
 
     /**
@@ -545,13 +546,13 @@ class SlideShow : CardView {
     private fun setPageInterval() {
         mRunnableManger.post {
             if (mViewPager2.adapter is BaseImgAdapter<*>) {
-                val distance = if (Attrs.imgWidth == ViewGroup.LayoutParams.MATCH_PARENT) {
-                    Attrs.pageInterval
+                val distance = if (mAttrs.imgWidth == ViewGroup.LayoutParams.MATCH_PARENT) {
+                    mAttrs.pageInterval
                 }else {
                     /*
                 * 两图片的间距为 (初始的ImageView.left - pageInterval) * 2，我使用了 distance 做中间值来转换
                 * */
-                    (width - Attrs.imgWidth) / 2 - Attrs.pageInterval / 2
+                    (width - mAttrs.imgWidth) / 2 - mAttrs.pageInterval / 2
                 }
                 val childView = mViewPager2.getChildAt(0) as RecyclerView
                 when (getOrientation()) {
@@ -686,7 +687,8 @@ class SlideShow : CardView {
         )
         mViewPager2.registerOnPageChangeCallback(mPageChangeCallback)
         mViewPager2.setPageTransformer(mPageTransformers)
-        mViewPager2.orientation = Attrs.orientation
+        mViewPager2.orientation = mAttrs.orientation
+        mViewPager2.setBackgroundColor(0x00000000)
         addView(mViewPager2)
     }
 
@@ -779,16 +781,16 @@ class SlideShow : CardView {
         }
     }
 
-    class Builder() {
+    inner class Builder() {
 
         /**
          * 使用自带的图片加载的 setAdapter 方法后可以调用，用于设置内部 ImageView 的圆角
          */
         fun setImgRadius(radius: Float): Builder {
-            Attrs.imgLeftTopRadius = radius
-            Attrs.imgRightTopRadius = radius
-            Attrs.imgLeftBottomRadius = radius
-            Attrs.imgRightBottomRadius = radius
+            mAttrs.imgLeftTopRadius = radius
+            mAttrs.imgRightTopRadius = radius
+            mAttrs.imgLeftBottomRadius = radius
+            mAttrs.imgRightBottomRadius = radius
             return this
         }
 
@@ -796,10 +798,10 @@ class SlideShow : CardView {
          * 使用自带的图片加载的 setAdapter 方法后可以调用，用于设置内部 ImageView 的圆角
          */
         fun setImgRadius(leftTop: Float, rightTop: Float, leftBottom: Float, rightBottom: Float): Builder {
-            Attrs.imgLeftTopRadius = leftTop
-            Attrs.imgRightTopRadius = rightTop
-            Attrs.imgLeftBottomRadius = leftBottom
-            Attrs.imgRightBottomRadius = rightBottom
+            mAttrs.imgLeftTopRadius = leftTop
+            mAttrs.imgRightTopRadius = rightTop
+            mAttrs.imgLeftBottomRadius = leftBottom
+            mAttrs.imgRightBottomRadius = rightBottom
             return this
         }
 
@@ -807,7 +809,7 @@ class SlideShow : CardView {
          * 使用自带的图片加载的 setAdapter 方法后可以调用，用于设置内部 ImageView 的默认颜色
          */
         fun setImgDefaultColor(color: Int): Builder {
-            Attrs.imgDefaultColor = color
+            mAttrs.imgDefaultColor = color
             return this
         }
 
@@ -819,7 +821,7 @@ class SlideShow : CardView {
                 throw IllegalAccessException(
                         "Your ${Attrs.Library_name}#setImgWidth(): The pixel is < -2")
             }
-            Attrs.imgWidth = pixel
+            mAttrs.imgWidth = pixel
             return this
         }
 
@@ -831,12 +833,12 @@ class SlideShow : CardView {
                 throw IllegalAccessException(
                         "Your ${Attrs.Library_name}#setImgHeight(): The pixel is < -2")
             }
-            Attrs.imgHeight = pixel
+            mAttrs.imgHeight = pixel
             return this
         }
 
         fun setImgMargin(imgMargin: Int): Builder {
-            Attrs.imgMargin = imgMargin
+            mAttrs.imgMargin = imgMargin
             return this
         }
 
@@ -844,7 +846,7 @@ class SlideShow : CardView {
          * **WARNING：** 如果在水平滑动时 imgWidth 不为 match_parent 或者设置了 slide_outPageInterval，设置 imgMarginHorizontal 将无效
          */
         fun setImgMarginHorizontal(imgMarginHorizontal: Int): Builder {
-            Attrs.imgMarginHorizontal = imgMarginHorizontal
+            mAttrs.imgMarginHorizontal = imgMarginHorizontal
             return this
         }
 
@@ -852,7 +854,7 @@ class SlideShow : CardView {
          * **WARNING：** 如果在垂直滑动时 imgHeight 不为 match_parent 或者设置了 slide_outPageInterval，设置 imgMarginVertical 将无效
          */
         fun setImgMarginVertical(imgMarginVertical: Int): Builder {
-            Attrs.imgMarginVertical = imgMarginVertical
+            mAttrs.imgMarginVertical = imgMarginVertical
             return this
         }
 
@@ -861,7 +863,7 @@ class SlideShow : CardView {
          * @param orientation 数据来自 [ViewPager2.ORIENTATION_HORIZONTAL]、[ViewPager2.ORIENTATION_VERTICAL]
          */
         fun setOrientation(@ViewPager2.Orientation orientation: Int): Builder {
-            Attrs.orientation = orientation
+            mAttrs.orientation = orientation
             return this
         }
 
@@ -876,10 +878,10 @@ class SlideShow : CardView {
          * @param outPageInterval 内部页面于外部页面的边距
          */
         fun setPageInterval(adjacentPageInterval: Int, outPageInterval: Int): Builder {
-            Attrs.adjacentPageInterval = adjacentPageInterval
-            Attrs.outPageInterval = outPageInterval
-            Attrs.pageInterval = outPageInterval - adjacentPageInterval / 2
-            if (Attrs.pageInterval < 0) {
+            mAttrs.adjacentPageInterval = adjacentPageInterval
+            mAttrs.outPageInterval = outPageInterval
+            mAttrs.pageInterval = outPageInterval - adjacentPageInterval / 2
+            if (mAttrs.pageInterval < 0) {
                 throw IllegalAccessException(
                         "Your ${Attrs.Library_name}#setPageInterval(): " +
                                 "outPageInterval must > adjacentPageInterval / 2 !")
@@ -887,8 +889,8 @@ class SlideShow : CardView {
             return this
         }
 
-        fun build(): Builder {
-            return this
+        fun build(): Attrs {
+            return mAttrs
         }
     }
 }

@@ -12,9 +12,11 @@ import com.ndhzs.slideshow.R
  * @email 2767465918@qq.com
  * @data 2021/5/27
  */
-internal object Attrs {
+class Attrs {
 
-    const val Library_name = "SlideShow"
+    companion object {
+        const val Library_name = "SlideShow"
+    }
 
     var imgWidth = ViewGroup.LayoutParams.MATCH_PARENT
     var imgHeight = ViewGroup.LayoutParams.MATCH_PARENT

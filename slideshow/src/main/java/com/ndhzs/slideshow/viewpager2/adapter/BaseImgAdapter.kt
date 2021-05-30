@@ -21,31 +21,32 @@ import com.ndhzs.slideshow.utils.Refresh
 abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgViewHolder>() {
 
     private lateinit var datas: List<T>
+    private lateinit var attrs: Attrs
     private val array = SparseArray<ConditionWithListener>()
     private var mIsCirculate = false
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseImgViewHolder {
         val imageView = ShapeableImageView(parent.context)
-        val lp = FrameLayout.LayoutParams(Attrs.imgWidth, Attrs.imgHeight)
+        val lp = FrameLayout.LayoutParams(attrs.imgWidth, attrs.imgHeight)
         lp.gravity = Gravity.CENTER
-        lp.leftMargin = Attrs.imgMarginHorizontal
-        lp.topMargin = Attrs.imgMarginVertical
-        lp.rightMargin = Attrs.imgMarginHorizontal
-        lp.bottomMargin = Attrs.imgMarginVertical
+        lp.leftMargin = attrs.imgMarginHorizontal
+        lp.topMargin = attrs.imgMarginVertical
+        lp.rightMargin = attrs.imgMarginHorizontal
+        lp.bottomMargin = attrs.imgMarginVertical
         imageView.layoutParams = lp
         imageView.scaleType = ImageView.ScaleType.CENTER_CROP
         imageView.shapeAppearanceModel = ShapeAppearanceModel.builder()
-                .setTopLeftCornerSize(Attrs.imgLeftTopRadius)
-                .setTopRightCornerSize(Attrs.imgRightTopRadius)
-                .setBottomLeftCornerSize(Attrs.imgLeftBottomRadius)
-                .setBottomRightCornerSize(Attrs.imgRightBottomRadius)
+                .setTopLeftCornerSize(attrs.imgLeftTopRadius)
+                .setTopRightCornerSize(attrs.imgRightTopRadius)
+                .setBottomLeftCornerSize(attrs.imgLeftBottomRadius)
+                .setBottomRightCornerSize(attrs.imgRightBottomRadius)
                 .build()
         val frameLayout = FrameLayout(parent.context)
         val lpFl = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
-        imageView.setBackgroundColor(Attrs.imgDefaultColor)
+        imageView.setBackgroundColor(attrs.imgDefaultColor)
         frameLayout.layoutParams = lpFl
         frameLayout.addView(imageView, lp)
         return BaseImgViewHolder(frameLayout)
@@ -107,8 +108,9 @@ abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgVi
     /**
      * **WARNING：** 请不要自己调用
      */
-    fun setData(datas: List<T>) {
+    fun setData(datas: List<T>, attrs: Attrs) {
         this.datas = datas
+        this.attrs = attrs
     }
 
     /**

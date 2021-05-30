@@ -1,6 +1,5 @@
 package com.ndhzs.slideshow.viewpager2.pagecallback
 
-import android.util.Log
 import androidx.viewpager2.widget.ViewPager2
 
 /**
@@ -9,7 +8,7 @@ import androidx.viewpager2.widget.ViewPager2
  * @email 2767465918@qq.com
  * @data 2021/5/28
  */
-class BasePageChangeCallBack(
+internal class BasePageChangeCallBack(
         private val viewPager2: ViewPager2,
         private val positionChangeCallback: ((position: Int) -> Unit)
 ) : ViewPager2.OnPageChangeCallback() {
@@ -90,7 +89,7 @@ class BasePageChangeCallBack(
                     if (mPositionFloat <= 1F) {
                         viewPager2.setCurrentItem(mPositionFloat.toInt() + mItemCount - 4, false)
                     }else if (mPositionFloat >= (mItemCount - 2).toFloat()) {
-                        viewPager2.setCurrentItem(mItemCount - mPositionFloat.toInt(), false)
+                        viewPager2.setCurrentItem(mPositionFloat.toInt() - (mItemCount - 4), false)
                     }
                 }
             }
