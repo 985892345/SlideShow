@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="280dp">
+
+    <com.ndhzs.slideshow.SlideShow
+        android:id="@+id/recycler_slideShow"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:slide_imgWight="160dp"
+        app:slide_imgHeight="240dp"
+        app:slide_adjacentPageInterval="50dp"
+        app:slide_imgRadius="20dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -11,9 +11,9 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
  * @data 2021/5/28
  */
 abstract class BaseFragmentStateAdapter(
-        fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragmentActivity) {
-
-    private lateinit var fragments: List<Fragment>
+    fragmentActivity: FragmentActivity,
+    private val fragments: List<Fragment>
+) : FragmentStateAdapter(fragmentActivity) {
 
     override fun getItemCount(): Int {
         return fragments.size
@@ -21,9 +21,5 @@ abstract class BaseFragmentStateAdapter(
 
     override fun createFragment(position: Int): Fragment {
         return fragments[position]
-    }
-
-    fun setFragments(fragments: List<Fragment>) {
-        this.fragments = fragments
     }
 }

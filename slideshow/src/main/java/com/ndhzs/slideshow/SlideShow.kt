@@ -7,8 +7,6 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.ViewGroup
-import android.view.animation.BaseInterpolator
-import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import androidx.cardview.widget.CardView
 import androidx.core.animation.addListener
@@ -222,10 +220,8 @@ class SlideShow : CardView {
                     "Your ${Attrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
                             "The adapter does not support circular presentation!")
         }
-        val adapter = object : BaseFragmentStateAdapter(fragmentActivity) {}
-        adapter.setFragments(fragments)
+        val adapter = object : BaseFragmentStateAdapter(fragmentActivity, fragments) {}
         mViewPager2.adapter = adapter
-        stop()
         return this
     }
 
@@ -244,14 +240,13 @@ class SlideShow : CardView {
                             "The adapter does not support circular presentation!")
         }
         mViewPager2.adapter = fragmentAdapter
-        stop()
         return this
     }
 
     /**
      * 用于设置通用 RecyclerView.Adapter
      *
-     * 不推荐使用自己的 adapter，建议使用 BaseRecyclerAdapter，用法一样，但可以调用 [notifyRefresh] 方法进行特殊刷新
+     * 不推荐使用自己的 adapter，建议使用 BaseRecyclerAdapter，用法一样，但可以调用 [notifyItemRefresh] 方法进行特殊刷新
      */
     @Deprecated("不建议使用自己的 adapter", ReplaceWith("使用 BaseRecyclerAdapter 代替"))
     fun setAdapter(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>): SlideShow {
@@ -266,14 +261,13 @@ class SlideShow : CardView {
                             "The adapter does not support circular presentation!")
         }
         mViewPager2.adapter = adapter
-        stop()
         return this
     }
 
     /**
      * 用于设置 BaseRecyclerAdapter
      *
-     * 使用该 adapter 后可以调用 [notifyRefresh] 方法进行特殊刷新
+     * 使用该 adapter 后可以调用 [notifyItemRefresh] 方法进行特殊刷新
      */
     fun setAdapter(adapter: BaseRecyclerAdapter<out RecyclerView.ViewHolder>): SlideShow {
         if (mIsAutoSlideEnabled) {
@@ -287,7 +281,6 @@ class SlideShow : CardView {
                             "The adapter does not support circular presentation!")
         }
         mViewPager2.adapter = adapter
-        stop()
         return this
     }
 
@@ -321,7 +314,7 @@ class SlideShow : CardView {
      *
      * **WARNING：** 使用该方法的前提是 [setAdapter] 是 [BaseRecyclerAdapter] 的实现类，否则将报错
      */
-    fun notifyRefresh(position: Int, @Refresh.Condition condition: Int, l: OnRefreshListener) {
+    fun notifyItemRefresh(position: Int, @Refresh.Condition condition: Int, l: OnRefreshListener) {
         val adapter = mViewPager2.adapter
         if (adapter is BaseRecyclerAdapter) {
             adapter.setRefreshListener(position, condition, l)
@@ -331,6 +324,14 @@ class SlideShow : CardView {
                     "Your ${Attrs.Library_name}#notifyRefresh(): " +
                             "The adapter is not BaseRecyclerAdapter, so you can't use function of notifyRefresh!")
         }
+    }
+
+    /**
+     * 用于刷新全部
+     */
+    fun notifyDataSetChanged() {
+        val adapter = mViewPager2.adapter
+        adapter?.notifyDataSetChanged()
     }
 
     /**
@@ -541,24 +542,26 @@ class SlideShow : CardView {
      */
     private fun setPageInterval() {
         mRunnableManger.post {
-            val distance = if (Attrs.imgWidth == ViewGroup.LayoutParams.MATCH_PARENT) {
-                Attrs.pageInterval
-            }else {
-                /*
+            if (mViewPager2.adapter is BaseImgAdapter<*>) {
+                val distance = if (Attrs.imgWidth == ViewGroup.LayoutParams.MATCH_PARENT) {
+                    Attrs.pageInterval
+                }else {
+                    /*
                 * 两图片的间距为 (初始的ImageView.left - pageInterval) * 2，我使用了 distance 做中间值来转换
                 * */
-                (width - Attrs.imgWidth) / 2 - Attrs.pageInterval / 2
-            }
-            val childView = mViewPager2.getChildAt(0) as RecyclerView
-            when (getOrientation()) {
-                ViewPager2.ORIENTATION_HORIZONTAL -> {
-                    childView.setPadding(distance, 0, distance, 0)
+                    (width - Attrs.imgWidth) / 2 - Attrs.pageInterval / 2
                 }
-                ViewPager2.ORIENTATION_VERTICAL -> {
-                    childView.setPadding(0, distance, 0, distance)
+                val childView = mViewPager2.getChildAt(0) as RecyclerView
+                when (getOrientation()) {
+                    ViewPager2.ORIENTATION_HORIZONTAL -> {
+                        childView.setPadding(distance, 0, distance, 0)
+                    }
+                    ViewPager2.ORIENTATION_VERTICAL -> {
+                        childView.setPadding(0, distance, 0, distance)
+                    }
                 }
+                childView.clipToPadding = false
             }
-            childView.clipToPadding = false
         }
     }
 
@@ -623,8 +626,6 @@ class SlideShow : CardView {
 
     /**
      * 用于开启自动滑动
-     *
-     * **NOTICE：** 在 [SlideShow] 刚被加载时可以不用调用该方法，因为已在内部调用
      */
     fun start() {
         if (mIsAutoSlideEnabled) {
@@ -652,7 +653,6 @@ class SlideShow : CardView {
     private val mViewPager2 = ViewPager2(context)
     private val mPageChangeCallback = BasePageChangeCallBack(mViewPager2) {
         mPrePosition = it
-        Log.d("123","(SlideShow.kt:640)-->> position = $it")
         start()
     }
     private val mPageTransformers = BaseMultipleTransformer()
@@ -757,18 +757,19 @@ class SlideShow : CardView {
             }
             super.dispatchTouchEvent(ev)
         }else {
-            Log.d("123","(SlideShow.kt:734)-->> false")
             false
         }
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        Log.d("SlideView","(SlideShow.kt:766)-->> onAttachedToWindow")
         start()
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
+        Log.d("SlideView","(SlideShow.kt:772)-->> onDetachedFromWindow")
         mRunnableManger.destroy()
         if (this::mAnimator.isInitialized) {
             mAnimator.cancel()

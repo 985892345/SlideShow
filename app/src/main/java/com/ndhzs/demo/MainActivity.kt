@@ -1,11 +1,13 @@
 package com.ndhzs.demo
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
+import android.widget.Button
 import androidx.viewpager2.widget.ViewPager2
 import com.ndhzs.slideshow.SlideShow
 import com.ndhzs.slideshow.utils.Refresh
@@ -27,7 +29,6 @@ class MainActivity : AppCompatActivity() {
                 .setAutoSlideEnabled(true)
                 .setDelayTime(5000)
                 .setTimeInterpolator(AccelerateDecelerateInterpolator())
-                .openCirculateEnabled()
                 .setStartItem(1) // 设置起始位置
                 .setAdapter(colorList) {
                     data, imageView, holder, position ->
@@ -44,6 +45,11 @@ class MainActivity : AppCompatActivity() {
             override fun onPageSelected(position: Int) {
             }
         })
+
+        findViewById<Button>(R.id.button).setOnClickListener {
+            val intent = Intent(this, ViewShowActivity::class.java)
+            startActivity(intent)
+        }
 
         /*
         * 下面是演示刷新

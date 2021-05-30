@@ -67,7 +67,6 @@ class BasePageChangeCallBack(
     }
 
     private fun pageSelected(position: Int) {
-        Log.d("123","(BasePageChangeCallBack.kt:70)-->> ============== position = $position")
         var realPosition = position
         var isCallback = true
         if (mIsCirculate) {
