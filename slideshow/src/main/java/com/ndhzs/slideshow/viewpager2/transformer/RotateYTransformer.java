@@ -7,7 +7,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 public class RotateYTransformer implements ViewPager2.PageTransformer {
     private static final float DEFAULT_CENTER = 0.5f;
-    private static final float DEFAULT_MAX_ROTATE = 35f;
+    private static final float DEFAULT_MAX_ROTATE = 20f;
     private float mMaxRotate = DEFAULT_MAX_ROTATE;
 
     public RotateYTransformer() {
