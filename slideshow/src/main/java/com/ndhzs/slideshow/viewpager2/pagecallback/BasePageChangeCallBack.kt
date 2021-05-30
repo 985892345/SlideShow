@@ -48,7 +48,7 @@ internal class BasePageChangeCallBack(
                 if (positionOffset > 0) {
                     isCallback = false
                 }
-            }else if (position > mItemCount - 3) {
+            }else if (position >= mItemCount - 2) {
                 isCallback = false
             }
             realPosition -= 2
@@ -71,7 +71,7 @@ internal class BasePageChangeCallBack(
         if (mIsCirculate) {
             if (position <= 1) {
                 isCallback = false
-            }else if (position > mItemCount - 3) {
+            }else if (position >= mItemCount - 2) {
                 isCallback = false
             }
             realPosition -= 2
@@ -86,9 +86,9 @@ internal class BasePageChangeCallBack(
         when (state) {
             ViewPager2.SCROLL_STATE_IDLE -> {
                 if (mItemCount != 1) {
-                    if (mPositionFloat <= 1F) {
+                    if (mPositionFloat <= 1) {
                         viewPager2.setCurrentItem(mPositionFloat.toInt() + mItemCount - 4, false)
-                    }else if (mPositionFloat >= (mItemCount - 2).toFloat()) {
+                    }else if (mPositionFloat >= mItemCount - 2) {
                         viewPager2.setCurrentItem(mPositionFloat.toInt() - (mItemCount - 4), false)
                     }
                 }

@@ -15,7 +15,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:slide_imgWight="160dp"
         app:slide_imgHeight="240dp"
-        app:slide_adjacentPageInterval="50dp"
+        app:slide_adjacentPageInterval="40dp"
         app:slide_imgRadius="20dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

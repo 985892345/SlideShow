@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.ndhzs.slideshow.myinterface.OnImgRefreshListener
-import com.ndhzs.slideshow.utils.Attrs
+import com.ndhzs.slideshow.utils.SlideShowAttrs
 import com.ndhzs.slideshow.utils.Refresh
 
 /**
@@ -21,7 +21,7 @@ import com.ndhzs.slideshow.utils.Refresh
 abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgViewHolder>() {
 
     private lateinit var datas: List<T>
-    private lateinit var attrs: Attrs
+    private lateinit var attrs: SlideShowAttrs
     private val array = SparseArray<ConditionWithListener>()
     private var mIsCirculate = false
 
@@ -41,14 +41,16 @@ abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgVi
                 .setBottomLeftCornerSize(attrs.imgLeftBottomRadius)
                 .setBottomRightCornerSize(attrs.imgRightBottomRadius)
                 .build()
+        imageView.setBackgroundColor(attrs.imgDefaultColor)
         val frameLayout = FrameLayout(parent.context)
         val lpFl = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
-        imageView.setBackgroundColor(attrs.imgDefaultColor)
         frameLayout.layoutParams = lpFl
         frameLayout.addView(imageView, lp)
+        frameLayout.setBackgroundColor(0x00000000)
+        parent.setBackgroundColor(0x00000000)
         return BaseImgViewHolder(frameLayout)
     }
 
@@ -59,32 +61,41 @@ abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgVi
     @Deprecated("禁止重写! ", ReplaceWith("onBindImageView"))
     override fun onBindViewHolder(
         holder: BaseImgViewHolder,
-        position: Int,
+        realPosition: Int,
         payloads: MutableList<Any>
     ) {
-        if (array.contains(position)) {
-            val conditionWithListener = array[position]
+        var falsePosition = realPosition
+        if (mIsCirculate) {
+            if (realPosition <= 1) {
+                falsePosition += datas.size - 4
+            }else if (realPosition >= datas.size - 2) {
+                falsePosition -= datas.size - 4
+            }
+            falsePosition -= 2
+        }
+        if (array.contains(falsePosition)) {
+            val conditionWithListener = array[falsePosition]
             when (conditionWithListener.condition) {
                 Refresh.Condition.COEXIST -> {
-                    onBindViewHolder(holder, position)
-                    conditionWithListener.l.onRefresh(holder.imageView, holder, position)
+                    onBindViewHolder(holder, falsePosition)
+                    conditionWithListener.l.onRefresh(holder.imageView, holder, falsePosition)
                 }
                 Refresh.Condition.COVERED -> {
-                    conditionWithListener.l.onRefresh(holder.imageView, holder, position)
+                    conditionWithListener.l.onRefresh(holder.imageView, holder, falsePosition)
                 }
-            }
-        }
-        if (payloads.isEmpty()) {
-            onBindViewHolder(holder, position)
-        }else {
-            payloads.forEach {
-                if (it == BaseRecyclerAdapter.ITEM_REFRESH) {
-                    array[position].l.onRefresh(holder.imageView, holder, position)
-                    if (array[position].condition == Refresh.Condition.ONLY_ONE) {
-                        array.remove(position)
+                Refresh.Condition.ONLY_ONE -> {
+                    payloads.forEach {
+                        if (it == BaseRecyclerAdapter.ITEM_REFRESH) {
+                            array[falsePosition].l.onRefresh(holder.imageView, holder, falsePosition)
+                            if (array[falsePosition].condition == Refresh.Condition.ONLY_ONE) {
+                                array.remove(falsePosition)
+                            }
+                        }
                     }
                 }
             }
+        }else if (payloads.isEmpty()) {
+            onBindViewHolder(holder, falsePosition)
         }
     }
 
@@ -93,8 +104,8 @@ abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgVi
      * @see [onBindImageView]
      */
     @Deprecated("禁止重写! ", ReplaceWith("onBindImageView"))
-    override fun onBindViewHolder(holder: BaseImgViewHolder, position: Int) {
-        onBindImageView(datas[position], holder.imageView, holder, position)
+    override fun onBindViewHolder(holder: BaseImgViewHolder, falsePosition: Int) {
+        onBindImageView(datas[falsePosition + 2], holder.imageView, holder, falsePosition)
     }
 
     /**
@@ -108,7 +119,8 @@ abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgVi
     /**
      * **WARNING：** 请不要自己调用
      */
-    fun setData(datas: List<T>, attrs: Attrs) {
+    @Deprecated("禁止自己调用! ")
+    fun setData(datas: List<T>, attrs: SlideShowAttrs) {
         this.datas = datas
         this.attrs = attrs
     }
@@ -116,6 +128,7 @@ abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgVi
     /**
      * **WARNING：** 请不要自己调用
      */
+    @Deprecated("禁止自己调用! ")
     fun openCirculateEnabled() {
         if (!mIsCirculate) {
             if (datas.size > 1) {
@@ -135,11 +148,23 @@ abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgVi
     /**
      * **WARNING：** 请不要自己调用
      */
-    fun setImgRefreshListener(position: Int,
-                           @Refresh.Condition
-                           condition: Int,
-                           l: OnImgRefreshListener) {
-        array.put(position, ConditionWithListener(condition, l))
+    fun setImgRefreshListener(falsePosition: Int,
+                              @Refresh.Condition
+                              condition: Int,
+                              l: OnImgRefreshListener) {
+        array.put(falsePosition, ConditionWithListener(condition, l))
+        if (mIsCirculate) {
+            val realPosition = falsePosition + 2
+            if (realPosition <= 3) {
+                notifyItemChanged(realPosition + datas.size - 4, BaseRecyclerAdapter.ITEM_REFRESH)
+            }
+            if (realPosition >= datas.size - 4) {
+                notifyItemChanged(realPosition - (datas.size - 4), BaseRecyclerAdapter.ITEM_REFRESH)
+            }
+            notifyItemChanged(realPosition, BaseRecyclerAdapter.ITEM_REFRESH)
+        }else {
+            notifyItemChanged(falsePosition, BaseRecyclerAdapter.ITEM_REFRESH)
+        }
     }
 
     fun removeImgRefreshListener(position: Int) {

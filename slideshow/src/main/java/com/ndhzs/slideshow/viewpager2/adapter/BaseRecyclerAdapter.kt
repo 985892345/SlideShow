@@ -15,7 +15,6 @@ abstract class BaseRecyclerAdapter<VH: RecyclerView.ViewHolder> : RecyclerView.A
 
     private val array = SparseArray<ConditionWithListener>()
 
-
     /**
      * 调用 SlideView#notifyRefresh 后，因为 notifyItemChanged 传入了 payload，所以该方法会被调用
      */
@@ -31,19 +30,19 @@ abstract class BaseRecyclerAdapter<VH: RecyclerView.ViewHolder> : RecyclerView.A
                 Refresh.Condition.COVERED -> {
                     conditionWithListener.l.onRefresh(holder, position)
                 }
-            }
-        }
-        if (payloads.isEmpty()) {
-            onBindViewHolder(holder, position)
-        }else {
-            payloads.forEach {
-                if (it == ITEM_REFRESH) {
-                    array[position].l.onRefresh(holder, position)
-                    if (array[position].condition == Refresh.Condition.ONLY_ONE) {
-                        array.remove(position)
+                Refresh.Condition.ONLY_ONE -> {
+                    payloads.forEach {
+                        if (it == ITEM_REFRESH) {
+                            array[position].l.onRefresh(holder, position)
+                            if (array[position].condition == Refresh.Condition.ONLY_ONE) {
+                                array.remove(position)
+                            }
+                        }
                     }
                 }
             }
+        }else if (payloads.isEmpty()) {
+            onBindViewHolder(holder, position)
         }
     }
 
@@ -55,6 +54,7 @@ abstract class BaseRecyclerAdapter<VH: RecyclerView.ViewHolder> : RecyclerView.A
                            condition: Int,
                            l: OnRefreshListener) {
         array.put(position, ConditionWithListener(condition, l))
+        notifyItemChanged(position, ITEM_REFRESH)
     }
 
     fun removeRefreshListener(position: Int) {

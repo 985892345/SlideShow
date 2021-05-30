@@ -83,16 +83,20 @@ import com.ndhzs.slideshow.viewpager2.transformer.BaseMultipleTransformer
  * @data 2021/5/26
  */
 class SlideShow : CardView {
-    private val mAttrs = com.ndhzs.slideshow.utils.Attrs()
+
+    private val mAttrs: SlideShowAttrs
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
+        mAttrs = SlideShowAttrs.Builder().build()
         mAttrs.initialize(context, attrs)
         setPageInterval()
         init()
     }
-    constructor(context: Context, attrs: Attrs) : super(context) {
+    constructor(context: Context, attrs: SlideShowAttrs) : super(context) {
+        mAttrs = attrs
         attrs.setAttrs()
         init()
     }
+
     /**
      * 该方法只能设置一个 transformer（页面移动动画）
      *
@@ -148,13 +152,7 @@ class SlideShow : CardView {
     /**
      * 用于设置图片加载的 Adapter
      *
-     * **NOTICE：** 如果你想使一个页面能看到相邻的图片边缘，
-     *
-     * 1、请设置 app:slide_imgWight 或者 app:slide_imgMarginHorizontal
-     *
-     * 2、再设置 app:slide_pageInterval 或者调用 [setPageInterval]
-     *
-     * 3、详细请看 [setPageInterval]
+     * **NOTICE：** 如果你想使一个页面能看到相邻的图片边缘，请设置 app:slide_adjacentPageInterval
      *
      * **NOTICE：** 使用该方法可能意为着你需要自动滑动，请使用 [setAutoSlideEnabled]
      */
@@ -172,13 +170,7 @@ class SlideShow : CardView {
     /**
      * 用于设置图片加载的 Adapter（使用 Lambda 填写）
      *
-     * **NOTICE：** 如果你想使一个页面能看到相邻的图片边缘，
-     *
-     * 1、请设置 app:slide_imgWight 或者 app:slide_imgMarginHorizontal
-     *
-     * 2、再设置 app:slide_pageInterval 或者调用 [setPageInterval]
-     *
-     * 3、详细请看 [setPageInterval]
+     * **NOTICE：** 如果你想使一个页面能看到相邻的图片边缘，请设置 app:slide_adjacentPageInterval
      *
      * **NOTICE：** 使用该方法可能意为着你需要自动滑动，请使用 [setAutoSlideEnabled]
      */
@@ -212,12 +204,12 @@ class SlideShow : CardView {
     fun setAdapter(fragments: List<Fragment>, fragmentActivity: FragmentActivity): SlideShow {
         if (mIsAutoSlideEnabled) {
             throw IllegalAccessException(
-                    "Your ${Attrs.Library_name}#setAdapter()、setAutoSlideEnabled(): " +
+                    "Your ${SlideShowAttrs.Library_name}#setAdapter()、setAutoSlideEnabled(): " +
                             "The adapter does not support automatic sliding!")
         }
         if (mIsCirculateEnabled) {
             throw IllegalAccessException(
-                    "Your ${Attrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
+                    "Your ${SlideShowAttrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
                             "The adapter does not support circular presentation!")
         }
         val adapter = object : BaseFragmentStateAdapter(fragmentActivity, fragments) {}
@@ -231,12 +223,12 @@ class SlideShow : CardView {
     fun setAdapter(fragmentAdapter: FragmentStateAdapter): SlideShow {
         if (mIsAutoSlideEnabled) {
             throw IllegalAccessException(
-                    "Your ${Attrs.Library_name}#setAdapter()、setAutoSlideEnabled(): " +
+                    "Your ${SlideShowAttrs.Library_name}#setAdapter()、setAutoSlideEnabled(): " +
                             "The adapter does not support automatic sliding!")
         }
         if (mIsCirculateEnabled) {
             throw IllegalAccessException(
-                    "Your ${Attrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
+                    "Your ${SlideShowAttrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
                             "The adapter does not support circular presentation!")
         }
         mViewPager2.adapter = fragmentAdapter
@@ -252,12 +244,12 @@ class SlideShow : CardView {
     fun setAdapter(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>): SlideShow {
         if (mIsAutoSlideEnabled) {
             throw IllegalAccessException(
-                    "Your ${Attrs.Library_name}#setAdapter()、setAutoSlideEnabled(): " +
+                    "Your ${SlideShowAttrs.Library_name}#setAdapter()、setAutoSlideEnabled(): " +
                             "The adapter does not support automatic sliding!")
         }
         if (mIsCirculateEnabled) {
             throw IllegalAccessException(
-                    "Your ${Attrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
+                    "Your ${SlideShowAttrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
                             "The adapter does not support circular presentation!")
         }
         mViewPager2.adapter = adapter
@@ -272,12 +264,12 @@ class SlideShow : CardView {
     fun setAdapter(adapter: BaseRecyclerAdapter<out RecyclerView.ViewHolder>): SlideShow {
         if (mIsAutoSlideEnabled) {
             throw IllegalAccessException(
-                    "Your ${Attrs.Library_name}#setAdapter()、setAutoSlideEnabled(): " +
+                    "Your ${SlideShowAttrs.Library_name}#setAdapter()、setAutoSlideEnabled(): " +
                             "The adapter does not support automatic sliding!")
         }
         if (mIsCirculateEnabled) {
             throw IllegalAccessException(
-                    "Your ${Attrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
+                    "Your ${SlideShowAttrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
                             "The adapter does not support circular presentation!")
         }
         mViewPager2.adapter = adapter
@@ -297,10 +289,9 @@ class SlideShow : CardView {
         val adapter = mViewPager2.adapter
         if (adapter is BaseImgAdapter<*>) {
             adapter.setImgRefreshListener(position, condition, l)
-            adapter.notifyItemChanged(position, BaseRecyclerAdapter.ITEM_REFRESH)
         }else {
             throw IllegalAccessException(
-                    "Your ${Attrs.Library_name}#notifyImageViewRefresh(): " +
+                    "Your ${SlideShowAttrs.Library_name}#notifyImageViewRefresh(): " +
                             "The adapter is not BaseImgAdapter, so you can't use function of notifyImageViewRefresh!")
         }
     }
@@ -318,10 +309,9 @@ class SlideShow : CardView {
         val adapter = mViewPager2.adapter
         if (adapter is BaseRecyclerAdapter) {
             adapter.setRefreshListener(position, condition, l)
-            adapter.notifyItemChanged(position, BaseRecyclerAdapter.ITEM_REFRESH)
         }else {
             throw IllegalAccessException(
-                    "Your ${Attrs.Library_name}#notifyRefresh(): " +
+                    "Your ${SlideShowAttrs.Library_name}#notifyRefresh(): " +
                             "The adapter is not BaseRecyclerAdapter, so you can't use function of notifyRefresh!")
         }
     }
@@ -335,6 +325,34 @@ class SlideShow : CardView {
     }
 
     /**
+     * 用于清除之前设置的刷新
+     *
+     * 只会在 [Refresh.Condition.COEXIST]、[Refresh.Condition.COVERED] 时调用才有用
+     */
+    fun removeImgRefreshListener(position: Int) {
+        val adapter = mViewPager2.adapter
+        if (adapter is BaseImgAdapter<*>) {
+            adapter.removeImgRefreshListener(position)
+        }else if (adapter is BaseRecyclerAdapter) {
+            adapter.removeRefreshListener(position)
+        }
+    }
+
+    /**
+     * 用于清除之前设置的刷新
+     *
+     * 只会在 [Refresh.Condition.COEXIST]、[Refresh.Condition.COVERED] 时调用才有用
+     */
+    fun clearImgRefreshListener() {
+        val adapter = mViewPager2.adapter
+        if (adapter is BaseImgAdapter<*>) {
+            adapter.clearImgRefreshListener()
+        }else if (adapter is BaseRecyclerAdapter) {
+            adapter.clearRefreshListener()
+        }
+    }
+
+    /**
      * 设置是否自动滑动
      *
      * **WARNING：** 传入 true 后，为了能够循环，将会使 ViewPager2 的 item 位置发生变化，该变化即使在之后传入 false 也不能取消
@@ -345,7 +363,7 @@ class SlideShow : CardView {
             if (adapter != null) {
                 if (adapter !is BaseImgAdapter<*>) {
                     throw IllegalAccessException(
-                            "Your ${Attrs.Library_name}#setAutoSlideEnabled(): " +
+                            "Your ${SlideShowAttrs.Library_name}#setAutoSlideEnabled(): " +
                                     "The adapter does not support automatic sliding!")
                 }
             }
@@ -389,11 +407,12 @@ class SlideShow : CardView {
                 }
             }else {
                 throw IllegalAccessException(
-                        "Your ${Attrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
+                        "Your ${SlideShowAttrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
                                 "The adapter does not support circular presentation!")
             }
         }
         mIsCirculateEnabled = true
+        finalItem = 0
         return this
     }
 
@@ -492,8 +511,6 @@ class SlideShow : CardView {
         return this
     }
 
-
-
     /**
      * 得到内部 ViewPager2 的 orientation
      */
@@ -528,62 +545,14 @@ class SlideShow : CardView {
     }
 
     /**
-     * 设置 ViewPager2 内部页面的边距，Orientation 为水平时设置左右的间隔，垂直时设置上下的间隔
-     *
-     * **NOTICE：**
-     *
-     * 1、slide_imgWight 为 match_parent 时，设置 pageInterval，图片宽度 **会** 改变，
-     *   两图片的间距为 slide_imgMarginHorizontal 的值的两倍，显示的图片到外部页面的间距为
-     *   slide_imgMarginHorizontal + pageInterval
-     *
-     * 2、slide_imgWight 为 具体值 时，设置 pageInterval，图片宽度不会改变，
-     *   且设置的 slide_imgMarginHorizontal 无效，此时两图片的间距为 (初始的ImageView.left - pageInterval) * 2
-     *
-     * **NOTICE：** 感觉麻烦可以使用另一个同名方法
-     *
-     * **WARNING：** 只有在未加载视图时设置才有效
-     */
-    private fun setPageInterval() {
-        mRunnableManger.post {
-            if (mViewPager2.adapter is BaseImgAdapter<*>) {
-                val distance = if (mAttrs.imgWidth == ViewGroup.LayoutParams.MATCH_PARENT) {
-                    mAttrs.pageInterval
-                }else {
-                    /*
-                * 两图片的间距为 (初始的ImageView.left - pageInterval) * 2，我使用了 distance 做中间值来转换
-                * */
-                    (width - mAttrs.imgWidth) / 2 - mAttrs.pageInterval / 2
-                }
-                val childView = mViewPager2.getChildAt(0) as RecyclerView
-                when (getOrientation()) {
-                    ViewPager2.ORIENTATION_HORIZONTAL -> {
-                        childView.setPadding(distance, 0, distance, 0)
-                    }
-                    ViewPager2.ORIENTATION_VERTICAL -> {
-                        childView.setPadding(0, distance, 0, distance)
-                    }
-                }
-                childView.clipToPadding = false
-            }
-        }
-    }
-
-
-    // 临时数据
-    private var interimImgMarginHorizontal = 0
-    private var interimImgMarginVertical = 0
-    private var mIsSetPageInterval = false
-
-    /**
      * 设置 [SlideShow] 刚被加载时的起始页面
      * @see [setCurrentItem]
      */
     fun setStartItem(item: Int): SlideShow {
-        post {
-            setCurrentItem(item, false)
-        }
+        finalItem = item
         return this
     }
+    private var finalItem = 0
 
     /**
      * 与 ViewPager2#setCurrentItem 相同，默认有动画
@@ -678,6 +647,9 @@ class SlideShow : CardView {
     private fun init() {
         cardElevation = 0F
         initViewPager2()
+        mRunnableManger.post {
+            setCurrentItem(finalItem, false)
+        }
     }
 
     private fun initViewPager2() {
@@ -690,6 +662,47 @@ class SlideShow : CardView {
         mViewPager2.orientation = mAttrs.orientation
         mViewPager2.setBackgroundColor(0x00000000)
         addView(mViewPager2)
+    }
+
+    /**
+     * 设置 ViewPager2 内部页面的边距，Orientation 为水平时设置左右的间隔，垂直时设置上下的间隔
+     *
+     * **NOTICE：**
+     *
+     * 1、slide_imgWight 为 match_parent 时，设置 pageInterval，图片宽度 **会** 改变，
+     *   两图片的间距为 slide_imgMarginHorizontal 的值的两倍，显示的图片到外部页面的间距为
+     *   slide_imgMarginHorizontal + pageInterval
+     *
+     * 2、slide_imgWight 为 具体值 时，设置 pageInterval，图片宽度不会改变，
+     *   且设置的 slide_imgMarginHorizontal 无效，此时两图片的间距为 (初始的ImageView.left - pageInterval) * 2
+     *
+     * **NOTICE：** 感觉麻烦可以使用另一个同名方法
+     *
+     * **WARNING：** 只有在未加载视图时设置才有效
+     */
+    private fun setPageInterval() {
+        mRunnableManger.post {
+            if (mViewPager2.adapter is BaseImgAdapter<*>) {
+                val distance = if (mAttrs.imgWidth == ViewGroup.LayoutParams.MATCH_PARENT) {
+                    mAttrs.pageInterval
+                }else {
+                    /*
+                * 两图片的间距为 (初始的ImageView.left - pageInterval) * 2，我使用了 distance 做中间值来转换
+                * */
+                    (width - mAttrs.imgWidth) / 2 - mAttrs.pageInterval / 2
+                }
+                val childView = mViewPager2.getChildAt(0) as RecyclerView
+                when (getOrientation()) {
+                    ViewPager2.ORIENTATION_HORIZONTAL -> {
+                        childView.setPadding(distance, 0, distance, 0)
+                    }
+                    ViewPager2.ORIENTATION_VERTICAL -> {
+                        childView.setPadding(0, distance, 0, distance)
+                    }
+                }
+                childView.clipToPadding = false
+            }
+        }
     }
 
     private fun checkIsInItemCount(position: Int, positionMessage: String = "position") {
@@ -706,7 +719,7 @@ class SlideShow : CardView {
         }
         if (isError) {
             throw IndexOutOfBoundsException(
-                    "Your ${Attrs.Library_name}#slowlySlide(): " +
+                    "Your ${SlideShowAttrs.Library_name}#slowlySlide(): " +
                             "The $positionMessage is < 0 or >= itemCount")
         }
     }
@@ -778,119 +791,6 @@ class SlideShow : CardView {
         mRunnableManger.destroy()
         if (this::mAnimator.isInitialized) {
             mAnimator.cancel()
-        }
-    }
-
-    inner class Builder() {
-
-        /**
-         * 使用自带的图片加载的 setAdapter 方法后可以调用，用于设置内部 ImageView 的圆角
-         */
-        fun setImgRadius(radius: Float): Builder {
-            mAttrs.imgLeftTopRadius = radius
-            mAttrs.imgRightTopRadius = radius
-            mAttrs.imgLeftBottomRadius = radius
-            mAttrs.imgRightBottomRadius = radius
-            return this
-        }
-
-        /**
-         * 使用自带的图片加载的 setAdapter 方法后可以调用，用于设置内部 ImageView 的圆角
-         */
-        fun setImgRadius(leftTop: Float, rightTop: Float, leftBottom: Float, rightBottom: Float): Builder {
-            mAttrs.imgLeftTopRadius = leftTop
-            mAttrs.imgRightTopRadius = rightTop
-            mAttrs.imgLeftBottomRadius = leftBottom
-            mAttrs.imgRightBottomRadius = rightBottom
-            return this
-        }
-
-        /**
-         * 使用自带的图片加载的 setAdapter 方法后可以调用，用于设置内部 ImageView 的默认颜色
-         */
-        fun setImgDefaultColor(color: Int): Builder {
-            mAttrs.imgDefaultColor = color
-            return this
-        }
-
-        /**
-         * -1 为 match_parent，-2 为 wrap_content
-         */
-        fun setImgWidth(pixel: Int): Builder {
-            if (pixel < -2) {
-                throw IllegalAccessException(
-                        "Your ${Attrs.Library_name}#setImgWidth(): The pixel is < -2")
-            }
-            mAttrs.imgWidth = pixel
-            return this
-        }
-
-        /**
-         * -1 为 match_parent，-2 为 wrap_content
-         */
-        fun setImgHeight(pixel: Int): Builder {
-            if (pixel < -2) {
-                throw IllegalAccessException(
-                        "Your ${Attrs.Library_name}#setImgHeight(): The pixel is < -2")
-            }
-            mAttrs.imgHeight = pixel
-            return this
-        }
-
-        fun setImgMargin(imgMargin: Int): Builder {
-            mAttrs.imgMargin = imgMargin
-            return this
-        }
-
-        /**
-         * **WARNING：** 如果在水平滑动时 imgWidth 不为 match_parent 或者设置了 slide_outPageInterval，设置 imgMarginHorizontal 将无效
-         */
-        fun setImgMarginHorizontal(imgMarginHorizontal: Int): Builder {
-            mAttrs.imgMarginHorizontal = imgMarginHorizontal
-            return this
-        }
-
-        /**
-         * **WARNING：** 如果在垂直滑动时 imgHeight 不为 match_parent 或者设置了 slide_outPageInterval，设置 imgMarginVertical 将无效
-         */
-        fun setImgMarginVertical(imgMarginVertical: Int): Builder {
-            mAttrs.imgMarginVertical = imgMarginVertical
-            return this
-        }
-
-        /**
-         * 设置内部 ViewPager2 的 orientation
-         * @param orientation 数据来自 [ViewPager2.ORIENTATION_HORIZONTAL]、[ViewPager2.ORIENTATION_VERTICAL]
-         */
-        fun setOrientation(@ViewPager2.Orientation orientation: Int): Builder {
-            mAttrs.orientation = orientation
-            return this
-        }
-
-        /**
-         * 设置相邻内部页面边距和内部页面与外部页面
-         *
-         * **WARNING：** 如果在水平滑动时 imgWidth 或在垂直滑动时 imgHeight 不为 match_parent，设置 [outPageInterval] 将无效
-         *
-         * **WARNING：** 只有在未加载视图时设置才有效
-         *
-         * @param adjacentPageInterval 相邻页面间距
-         * @param outPageInterval 内部页面于外部页面的边距
-         */
-        fun setPageInterval(adjacentPageInterval: Int, outPageInterval: Int): Builder {
-            mAttrs.adjacentPageInterval = adjacentPageInterval
-            mAttrs.outPageInterval = outPageInterval
-            mAttrs.pageInterval = outPageInterval - adjacentPageInterval / 2
-            if (mAttrs.pageInterval < 0) {
-                throw IllegalAccessException(
-                        "Your ${Attrs.Library_name}#setPageInterval(): " +
-                                "outPageInterval must > adjacentPageInterval / 2 !")
-            }
-            return this
-        }
-
-        fun build(): Attrs {
-            return mAttrs
         }
     }
 }

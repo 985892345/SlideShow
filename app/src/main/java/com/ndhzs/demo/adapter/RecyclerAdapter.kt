@@ -1,6 +1,5 @@
 package com.ndhzs.demo.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,7 +24,6 @@ class RecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        Log.d("123","(RecyclerAdapter.kt:28)-->> viewTyre = $viewType")
         when (viewType) {
             SLIDE_VIEW -> {
                 val view = LayoutInflater.from(parent.context).inflate(R.layout.item_recycler_slideshow, parent, false)

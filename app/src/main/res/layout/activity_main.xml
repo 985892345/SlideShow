@@ -20,10 +20,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:slide_adjacentPageInterval="10dp"
+        app:slide_adjacentPageInterval="16dp"
         app:slide_imgHeight="400dp"
         app:slide_imgRadius="20dp"
-        app:slide_outPageInterval="20dp" />
+        app:slide_outPageInterval="40dp" />
 
     <Button
         android:id="@+id/button"
