@@ -73,7 +73,7 @@ abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgVi
             }
             falsePosition -= 2
         }
-        if (array.contains(falsePosition)) {
+        if (array.indexOfKey(falsePosition) >= 0) {
             val conditionWithListener = array[falsePosition]
             when (conditionWithListener.condition) {
                 Refresh.Condition.COEXIST -> {
