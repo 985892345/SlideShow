@@ -33,7 +33,6 @@ abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgVi
         lp.topMargin = attrs.imgMarginVertical
         lp.rightMargin = attrs.imgMarginHorizontal
         lp.bottomMargin = attrs.imgMarginVertical
-        imageView.layoutParams = lp
         imageView.scaleType = ImageView.ScaleType.CENTER_CROP
         imageView.shapeAppearanceModel = ShapeAppearanceModel.builder()
                 .setTopLeftCornerSize(attrs.imgLeftTopRadius)
@@ -123,6 +122,19 @@ abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgVi
     fun setData(datas: List<T>, attrs: SlideShowAttrs) {
         this.datas = datas
         this.attrs = attrs
+    }
+
+    /**
+     * **WARNING：** 请不要自己调用
+     */
+    @Deprecated("禁止自己调用! ")
+    fun refreshData(datas: List<T>) {
+        this.datas = datas
+        if (mIsCirculate) {
+            mIsCirculate = false
+            openCirculateEnabled()
+        }
+        notifyDataSetChanged()
     }
 
     /**

@@ -3,15 +3,12 @@ package com.ndhzs.demo
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.util.SparseArray
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.DecelerateInterpolator
 import android.widget.Button
+import android.widget.Toast
+import androidx.lifecycle.MutableLiveData
 import androidx.viewpager2.widget.ViewPager2
 import com.ndhzs.slideshow.SlideShow
-import com.ndhzs.slideshow.utils.Refresh
 import com.ndhzs.slideshow.viewpager2.transformer.*
 
 class MainActivity : AppCompatActivity() {
@@ -19,11 +16,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mSlideShow: SlideShow
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+            super.onCreate(savedInstanceState)
+            setContentView(R.layout.activity_main)
 
         mSlideShow = findViewById(R.id.slideShow)
 
+        val list = MutableLiveData<List<Int>>()
         val colorList = listOf(0xFFFF9800.toInt(), 0xFF616161.toInt(), 0xFFC8C8C8.toInt())
 
         mSlideShow.setTransformer(ScaleInTransformer()) // 设置移动动画
@@ -32,10 +30,11 @@ class MainActivity : AppCompatActivity() {
                 .openCirculateEnabled()
                 .setTimeInterpolator(AccelerateDecelerateInterpolator())
                 .setStartItem(1) // 设置起始位置
-                .setAdapter(colorList) {
+                .setAdapter(this, list) {
                     data, imageView, holder, position ->
                     imageView.setBackgroundColor(data)
         }
+        list.value = colorList
 
         /*
         * 进行滑动监听
@@ -57,9 +56,11 @@ class MainActivity : AppCompatActivity() {
         * 下面是演示刷新
         * */
         mSlideShow.postDelayed({
-            mSlideShow.notifyImageViewRefresh(0, Refresh.Condition.COVERED) { imageView, holder, position ->
-                imageView.setBackgroundColor(0xFF009688.toInt())
-            }
+            Toast.makeText(this, "开始更新", Toast.LENGTH_SHORT).show()
+            list.value = listOf(0xFF009688.toInt(), 0xFFC8C8C8.toInt(), 0xFFFF9800.toInt())
+//            mSlideShow.notifyImageViewRefresh(0, Refresh.Condition.COVERED) { imageView, holder, position ->
+//                imageView.setBackgroundColor()
+//            }
         }, 5000)
     }
 }

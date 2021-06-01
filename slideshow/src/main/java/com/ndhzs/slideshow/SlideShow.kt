@@ -4,6 +4,7 @@ import android.animation.TimeInterpolator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
@@ -11,6 +12,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.animation.addListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.*
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -168,6 +170,32 @@ class SlideShow : CardView {
     }
 
     /**
+     * 用于设置图片加载的 Adapter
+     *
+     * **NOTICE：** 如果你想使一个页面能看到相邻的图片边缘，请设置 app:slide_adjacentPageInterval
+     *
+     * **NOTICE：** 使用该方法可能意为着你需要自动滑动，请使用 [setAutoSlideEnabled]
+     *
+     * @param owner 如果该 View 在 Fragment 下，请传入 Fragment；在 Activity 下，请传入 Activity
+     */
+    fun <T> setAdapter(owner: LifecycleOwner, datas: MutableLiveData<List<T>>, imgAdapter: BaseImgAdapter<T>): SlideShow {
+        datas.observe(owner) {
+            if (isAttachedToWindow) {
+                imgAdapter.refreshData(it)
+                return@observe
+            }
+            imgAdapter.setData(it, mAttrs)
+            mViewPager2.adapter = imgAdapter
+            mImgRealItemCount = it.size
+            if (mIsCirculateEnabled && mImgRealItemCount > 1) {
+                imgAdapter.openCirculateEnabled()
+                mPageChangeCallback.openCirculateEnabled(mImgRealItemCount)
+            }
+        }
+        return this
+    }
+
+    /**
      * 用于设置图片加载的 Adapter（使用 Lambda 填写）
      *
      * **NOTICE：** 如果你想使一个页面能看到相邻的图片边缘，请设置 app:slide_adjacentPageInterval
@@ -194,6 +222,29 @@ class SlideShow : CardView {
             }
         }
         return setAdapter(datas, adapter)
+    }
+
+    fun <T> setAdapter(
+        fragment: LifecycleOwner,
+        datas: MutableLiveData<List<T>>,
+        onBindImageView:
+            (data: T,
+             imageView: ShapeableImageView,
+             holder: BaseImgAdapter.BaseImgViewHolder,
+             position: Int
+        ) -> Unit
+    ): SlideShow {
+        val adapter = object : BaseImgAdapter<T>() {
+            override fun onBindImageView(
+                data: T,
+                imageView: ShapeableImageView,
+                holder: BaseImgViewHolder,
+                position: Int
+            ) {
+                onBindImageView.invoke(data, imageView, holder, position)
+            }
+        }
+        return setAdapter(fragment, datas, adapter)
     }
 
     /**
@@ -321,7 +372,8 @@ class SlideShow : CardView {
      */
     fun notifyDataSetChanged() {
         val adapter = mViewPager2.adapter
-        adapter?.notifyDataSetChanged()
+        Log.d("123","(SlideShow.kt:370)-->> -----------------------")
+        adapter!!.notifyDataSetChanged()
     }
 
     /**
@@ -661,7 +713,8 @@ class SlideShow : CardView {
         mViewPager2.setPageTransformer(mPageTransformers)
         mViewPager2.orientation = mAttrs.orientation
         mViewPager2.setBackgroundColor(0x00000000)
-        addView(mViewPager2)
+        mViewPager2.getChildAt(0).setBackgroundColor(0x00000000)
+        attachViewToParent(mViewPager2, 0, mViewPager2.layoutParams)
     }
 
     /**

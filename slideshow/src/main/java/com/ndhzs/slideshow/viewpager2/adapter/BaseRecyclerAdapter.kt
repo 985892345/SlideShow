@@ -11,7 +11,7 @@ import com.ndhzs.slideshow.utils.Refresh
  * @email 2767465918@qq.com
  * @data 2021/5/29
  */
-abstract class BaseRecyclerAdapter<VH: RecyclerView.ViewHolder> : RecyclerView.Adapter<VH>() {
+abstract class BaseRecyclerAdapter<VH : RecyclerView.ViewHolder> : RecyclerView.Adapter<VH>() {
 
     private val array = SparseArray<ConditionWithListener>()
 
@@ -49,10 +49,12 @@ abstract class BaseRecyclerAdapter<VH: RecyclerView.ViewHolder> : RecyclerView.A
     /**
      * **WARNING：** 请不要自己调用
      */
-    fun setRefreshListener(position: Int,
-                           @Refresh.Condition
-                           condition: Int,
-                           l: OnRefreshListener) {
+    fun setRefreshListener(
+        position: Int,
+        @Refresh.Condition
+        condition: Int,
+        l: OnRefreshListener,
+    ) {
         array.put(position, ConditionWithListener(condition, l))
         notifyItemChanged(position, ITEM_REFRESH)
     }
@@ -66,8 +68,8 @@ abstract class BaseRecyclerAdapter<VH: RecyclerView.ViewHolder> : RecyclerView.A
     }
 
     class ConditionWithListener(
-            val condition: Int,
-            val l: OnRefreshListener
+        val condition: Int,
+        val l: OnRefreshListener,
     )
 
     companion object {
@@ -75,6 +77,6 @@ abstract class BaseRecyclerAdapter<VH: RecyclerView.ViewHolder> : RecyclerView.A
         /**
          * 表示刷新 item
          */
-        const val ITEM_REFRESH = 0
+        internal const val ITEM_REFRESH = 0
     }
 }
