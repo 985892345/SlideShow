@@ -829,7 +829,7 @@ class SlideShow : CardView {
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        return if (mViewPager2.isUserInputEnabled) {
+        if (mViewPager2.isUserInputEnabled) {
             requestDisallowInterceptTouchEvent(true)
             when (ev.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -842,10 +842,8 @@ class SlideShow : CardView {
                     start()
                 }
             }
-            super.dispatchTouchEvent(ev)
-        }else {
-            false
         }
+        return super.dispatchTouchEvent(ev)
     }
 
     override fun onAttachedToWindow() {
