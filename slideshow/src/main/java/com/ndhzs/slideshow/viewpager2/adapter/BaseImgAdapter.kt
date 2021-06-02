@@ -105,7 +105,7 @@ abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgVi
      */
     @Deprecated("禁止重写! ", ReplaceWith("onBindImageView"))
     override fun onBindViewHolder(holder: BaseImgViewHolder, falsePosition: Int) {
-        onBindImageView(datas[falsePosition + 2], holder.imageView, holder, falsePosition)
+        onBindImageView(oldData[falsePosition], holder.imageView, holder, falsePosition)
     }
 
     /**
@@ -183,7 +183,7 @@ abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgVi
                               condition: Int,
                               l: OnImgRefreshListener) {
         array.put(falsePosition, ConditionWithListener(condition, l))
-        if (mIsCirculate) {
+        if (mIsCirculate) { // 判断刷新的位置，如果开启循环就要进行计算
             val realPosition = falsePosition + 2
             if (realPosition <= 3) {
                 notifyItemChanged(realPosition + datas.size - 4, BaseRecyclerAdapter.ITEM_REFRESH)

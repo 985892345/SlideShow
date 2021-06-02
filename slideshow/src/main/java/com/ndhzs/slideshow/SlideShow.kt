@@ -165,6 +165,9 @@ class SlideShow : CardView {
         if (mIsCirculateEnabled && mImgRealItemCount > 1) {
             imgAdapter.openCirculateEnabled()
             mPageChangeCallback.openCirculateEnabled(mImgRealItemCount)
+            if (mIsAutoSlideEnabled) { // 在延迟加载 adapter 后，ViewPager2 仍然会显示，但 onAttachedToWindow 已经被调用，所以要在这里调用开始
+                start()
+            }
         }
         return this
     }
@@ -180,16 +183,10 @@ class SlideShow : CardView {
      */
     fun <T> setAdapter(owner: LifecycleOwner, datas: MutableLiveData<List<T>>, imgAdapter: BaseImgAdapter<T>): SlideShow {
         datas.observe(owner) {
-            if (isAttachedToWindow) {
+            if (mViewPager2.adapter != null) {
                 imgAdapter.refreshData(it)
-                return@observe
-            }
-            imgAdapter.setData(it, mAttrs)
-            mViewPager2.adapter = imgAdapter
-            mImgRealItemCount = it.size
-            if (mIsCirculateEnabled && mImgRealItemCount > 1) {
-                imgAdapter.openCirculateEnabled()
-                mPageChangeCallback.openCirculateEnabled(mImgRealItemCount)
+            }else {
+                setAdapter(it, imgAdapter)
             }
         }
         return this
@@ -445,6 +442,7 @@ class SlideShow : CardView {
             stop()
         }
         mIsAutoSlideEnabled = enabled
+        start() // 里面会判断
         return this
     }
 
@@ -462,15 +460,12 @@ class SlideShow : CardView {
      * @see [setAutoSlideEnabled]
      */
     fun openCirculateEnabled(): SlideShow {
-        if (getAutoSlideEnabled()) {
-            return this
-        }
-        if (mViewPager2.isAttachedToWindow) {
+        if (mIsCirculateEnabled) {
             return this
         }
 
         val adapter = mViewPager2.adapter
-        if (adapter != null) {
+        if (adapter != null) { // 等于 null 时交给 adapter 设置
             if (adapter is BaseImgAdapter<*>) {
                 if (mImgRealItemCount > 1) {
                     adapter.openCirculateEnabled()
@@ -701,7 +696,6 @@ class SlideShow : CardView {
     }
     private val mPageTransformers = BaseMultipleTransformer()
     private var mImgRealItemCount = 1
-
     private var mIsAutoSlideEnabled = false
     private var mIsCirculateEnabled = false
     private var mIsSliding = false

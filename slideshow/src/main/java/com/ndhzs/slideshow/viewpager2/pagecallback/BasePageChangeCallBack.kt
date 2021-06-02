@@ -22,9 +22,11 @@ internal class BasePageChangeCallBack(
     }
 
     fun openCirculateEnabled(itemCount: Int) {
-        if (itemCount > 1) {
-            mIsCirculate = true
-            mItemCount = itemCount + 4
+        if (!mIsCirculate) {
+            if (itemCount > 1) {
+                mIsCirculate = true
+                mItemCount = itemCount + 4
+            }
         }
     }
 

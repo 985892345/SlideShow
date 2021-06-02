@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity() {
         mSlideShow.postDelayed({
             Toast.makeText(this, "开始更新", Toast.LENGTH_SHORT).show()
             mSlideShow.notifyImgDataChange(listOf(0xFF009688.toInt(), 0xFFC8C8C8.toInt(), 0xFFFF9800.toInt()))
+
 //            mSlideShow.notifyImageViewRefresh(0, Refresh.Condition.COVERED) { imageView, holder, position ->
 //                imageView.setBackgroundColor()
 //            }
