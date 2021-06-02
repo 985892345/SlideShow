@@ -20,7 +20,8 @@ import com.ndhzs.slideshow.utils.Refresh
  */
 abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgViewHolder>() {
 
-    private lateinit var datas: List<T>
+    private lateinit var oldData: List<T>
+    private val datas = ArrayList<T>()
     private lateinit var attrs: SlideShowAttrs
     private val array = SparseArray<ConditionWithListener>()
     private var mIsCirculate = false
@@ -120,8 +121,22 @@ abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgVi
      */
     @Deprecated("禁止自己调用! ")
     fun setData(datas: List<T>, attrs: SlideShowAttrs) {
-        this.datas = datas
+        this.oldData = datas
+        this.datas.addAll(datas)
         this.attrs = attrs
+    }
+
+    /**
+     * 在修改了外部数组后可以调用该方法来刷新
+     */
+    fun refreshData() {
+        this.datas.clear()
+        this.datas.addAll(oldData)
+        if (mIsCirculate) {
+            mIsCirculate = false
+            openCirculateEnabled()
+        }
+        notifyDataSetChanged()
     }
 
     /**
@@ -129,7 +144,9 @@ abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgVi
      */
     @Deprecated("禁止自己调用! ")
     fun refreshData(datas: List<T>) {
-        this.datas = datas
+        this.oldData = datas
+        this.datas.clear()
+        this.datas.addAll(datas)
         if (mIsCirculate) {
             mIsCirculate = false
             openCirculateEnabled()
@@ -152,7 +169,8 @@ abstract class BaseImgAdapter<T> : RecyclerView.Adapter<BaseImgAdapter.BaseImgVi
                 newList.addAll(datas)
                 newList.add(datas[0])
                 newList.add(datas[1])
-                datas = newList
+                datas.clear()
+                datas.addAll(newList)
             }
         }
     }

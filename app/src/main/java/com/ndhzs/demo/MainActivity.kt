@@ -30,12 +30,10 @@ class MainActivity : AppCompatActivity() {
                 .openCirculateEnabled()
                 .setTimeInterpolator(AccelerateDecelerateInterpolator())
                 .setStartItem(1) // 设置起始位置
-                .setAdapter(this, list) {
+                .setAdapter(colorList) {
                     data, imageView, holder, position ->
                     imageView.setBackgroundColor(data)
         }
-        list.value = colorList
-
         /*
         * 进行滑动监听
         * */
@@ -57,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         * */
         mSlideShow.postDelayed({
             Toast.makeText(this, "开始更新", Toast.LENGTH_SHORT).show()
-            list.value = listOf(0xFF009688.toInt(), 0xFFC8C8C8.toInt(), 0xFFFF9800.toInt())
+            mSlideShow.notifyImgDataChange(listOf(0xFF009688.toInt(), 0xFFC8C8C8.toInt(), 0xFFFF9800.toInt()))
 //            mSlideShow.notifyImageViewRefresh(0, Refresh.Condition.COVERED) { imageView, holder, position ->
 //                imageView.setBackgroundColor()
 //            }

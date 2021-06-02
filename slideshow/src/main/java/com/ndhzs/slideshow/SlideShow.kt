@@ -369,11 +369,32 @@ class SlideShow : CardView {
 
     /**
      * 用于刷新全部
+     *
+     * **NOTE：** 如果使用的 [BaseImgAdapter]，可以在修改了外部数据的情况下调用该方法进行刷新
      */
     fun notifyDataSetChanged() {
         val adapter = mViewPager2.adapter
-        Log.d("123","(SlideShow.kt:370)-->> -----------------------")
+        if (adapter is BaseImgAdapter<*>) {
+            adapter.refreshData()
+            return
+        }
         adapter!!.notifyDataSetChanged()
+    }
+
+    /**
+     * 用于给设置了 [BaseImgAdapter] 的情况下传入新数据刷新
+     *
+     * **WARNING：** 使用该方法的前提是 [setAdapter] 是 [BaseImgAdapter] 的实现类，否则将报错
+     */
+    fun <T> notifyImgDataChange(data: List<T>) {
+        val adapter = mViewPager2.adapter
+        if (adapter is BaseImgAdapter<*>) {
+            adapter.refreshData(data as List<Nothing>)
+        }else {
+            throw IllegalAccessException(
+                "Your ${SlideShowAttrs.Library_name}#notifyImgDataChange(): " +
+                        "The adapter is not BaseImgAdapter, so you can't use function of notifyImgDataChange!")
+        }
     }
 
     /**
