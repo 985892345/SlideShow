@@ -773,8 +773,8 @@ class SlideShow : CardView {
                     mAttrs.pageInterval
                 }else {
                     /*
-                * 两图片的间距为 (初始的ImageView.left - pageInterval) * 2，我使用了 distance 做中间值来转换
-                * */
+                    * 两图片的间距为 (初始的ImageView.left - pageInterval) * 2，我使用了 distance 做中间值来转换
+                    * */
                     (width - mAttrs.imgWidth) / 2 - mAttrs.pageInterval / 2
                 }
                 val childView = mViewPager2.getChildAt(0) as RecyclerView
@@ -867,7 +867,7 @@ class SlideShow : CardView {
                     if (getOrientation() == ViewPager2.ORIENTATION_HORIZONTAL) {
                         val isLeft = !canScrollHorizontally(-1)
                         val isRight = !canScrollHorizontally(1)
-                        if (abs(y - mInitialY) > abs(x - mInitialX) + 5) {
+                        if (mViewPager2.adapter is BaseImgAdapter<*> && abs(y - mInitialY) > abs(x - mInitialX) + 5) {
                             return false
                         }
                         if (isLeft && x < mPreX || isRight && x > mPreX || !isLeft && !isRight) {
@@ -876,7 +876,7 @@ class SlideShow : CardView {
                     }else {
                         val isTop = !canScrollHorizontally(-1)
                         val isBottom = !canScrollHorizontally(1)
-                        if (abs(x - mInitialX) > abs(y - mInitialY) + 5) {
+                        if (mViewPager2.adapter is BaseImgAdapter<*> && abs(x - mInitialX) > abs(y - mInitialY) + 5) {
                             return false
                         }
                         if (isTop && y < mPreY || isBottom && y > mPreY || !isTop && !isBottom) {
