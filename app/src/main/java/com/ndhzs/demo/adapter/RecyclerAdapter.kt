@@ -1,5 +1,6 @@
 package com.ndhzs.demo.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,6 +36,7 @@ class RecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        Log.d("123","(RecyclerAdapter.kt:41)-->> position = $position")
         when (getItemViewType(position)) {
             SLIDE_VIEW -> {
                 val slideHolder = holder as SlideShowViewHolder
@@ -42,7 +44,6 @@ class RecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 val colorList = listOf(0xFFFF9800.toInt(), 0xFF616161.toInt(), 0xFFC8C8C8.toInt())
                 slideShow.addTransformer(ScaleInTransformer()) // 设置移动动画
                     .addTransformer(AlphaPageTransformer())
-                    .setAutoSlideEnabled(true) // 开启自动滑动
                     .setStartItem(1) // 设置起始位置
                     .setDelayTime(5000) // 设置自动滚动时间，但目前还没有实现自动滚动
                     .setTimeInterpolator(AccelerateDecelerateInterpolator())

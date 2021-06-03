@@ -9,32 +9,25 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ndhzs.demo.R
 import com.ndhzs.demo.adapter.RecyclerAdapter
-import com.ndhzs.slideshow.SlideShow
 
 /**
  * .....
  * @author 985892345
  * @email 2767465918@qq.com
- * @data 2021/5/30
+ * @data 2021/6/3
  */
-class FirstFragment : Fragment() {
-
+class FF1 : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        return inflater.inflate(R.layout.fg_1, container, false)
+    ): View? {
+        return inflater.inflate(R.layout.fg_1_1, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
-        val slideShow = view.findViewById<SlideShow>(R.id.fg_1_slideShow)
-        val fragments = ArrayList<Fragment>()
-        fragments.add(FF1())
-        fragments.add(FF2())
-        slideShow.setAdapter(fragments, requireActivity())
-
-        super.onViewCreated(view, savedInstanceState)
+        val recycler = view.findViewById<RecyclerView>(R.id.fg_1_1_recycler)
+        recycler.adapter = RecyclerAdapter()
+        recycler.layoutManager = LinearLayoutManager(context)
     }
 }

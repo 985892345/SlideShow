@@ -25,6 +25,7 @@ import com.ndhzs.slideshow.viewpager2.adapter.BaseImgAdapter
 import com.ndhzs.slideshow.viewpager2.adapter.BaseRecyclerAdapter
 import com.ndhzs.slideshow.viewpager2.pagecallback.BasePageChangeCallBack
 import com.ndhzs.slideshow.viewpager2.transformer.BaseMultipleTransformer
+import kotlin.math.abs
 
 /**
  * **WARNING：** 目前还未实现自动滑动！
@@ -151,6 +152,23 @@ class SlideShow : CardView {
         return mViewPager2
     }
 
+    fun setAllViewPager2Setting(vp: (viewPager2: ViewPager2) -> Unit): SlideShow {
+        vp.invoke(mViewPager2)
+        return this
+    }
+
+    /**
+     * 得到是否设置了 Adapter
+     */
+    fun getHasBeenSetAdapter(): Boolean {
+        return mViewPager2.adapter != null
+    }
+
+    fun setOffscreenPageLimit(@ViewPager2.OffscreenPageLimit limit: Int): SlideShow {
+        mViewPager2.offscreenPageLimit = limit
+        return this
+    }
+
     /**
      * 用于设置图片加载的 Adapter
      *
@@ -183,7 +201,7 @@ class SlideShow : CardView {
      */
     fun <T> setAdapter(owner: LifecycleOwner, datas: MutableLiveData<List<T>>, imgAdapter: BaseImgAdapter<T>): SlideShow {
         datas.observe(owner) {
-            if (mViewPager2.adapter != null) {
+            if (getHasBeenSetAdapter()) {
                 imgAdapter.refreshData(it)
             }else {
                 setAdapter(it, imgAdapter)
@@ -828,22 +846,54 @@ class SlideShow : CardView {
         mAnimator.start()
     }
 
+    private var mInitialX = 0
+    private var mInitialY = 0
+    private var mPreX = 0
+    private var mPreY = 0
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        if (mViewPager2.isUserInputEnabled) {
-            requestDisallowInterceptTouchEvent(true)
+        val x = ev.x.toInt()
+        val y = ev.y.toInt()
+        return if (mViewPager2.isUserInputEnabled) {
             when (ev.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    mInitialX = x
+                    mInitialY = y
                     stop()
                     if (this::mAnimator.isInitialized) {
                         mAnimator.cancel()
                     }
                 }
+                MotionEvent.ACTION_MOVE -> {
+                    if (getOrientation() == ViewPager2.ORIENTATION_HORIZONTAL) {
+                        val isLeft = !canScrollHorizontally(-1)
+                        val isRight = !canScrollHorizontally(1)
+                        if (abs(y - mInitialY) > abs(x - mInitialX) + 5) {
+                            return false
+                        }
+                        if (isLeft && x < mPreX || isRight && x > mPreX || !isLeft && !isRight) {
+                            parent.requestDisallowInterceptTouchEvent(true)
+                        }
+                    }else {
+                        val isTop = !canScrollHorizontally(-1)
+                        val isBottom = !canScrollHorizontally(1)
+                        if (abs(x - mInitialX) > abs(y - mInitialY) + 5) {
+                            return false
+                        }
+                        if (isTop && y < mPreY || isBottom && y > mPreY || !isTop && !isBottom) {
+                            parent.requestDisallowInterceptTouchEvent(true)
+                        }
+                    }
+                    mPreX = x
+                    mPreY = y
+                }
                 MotionEvent.ACTION_UP -> {
                     start()
                 }
             }
+            super.dispatchTouchEvent(ev)
+        }else {
+            false
         }
-        return super.dispatchTouchEvent(ev)
     }
 
     override fun onAttachedToWindow() {
