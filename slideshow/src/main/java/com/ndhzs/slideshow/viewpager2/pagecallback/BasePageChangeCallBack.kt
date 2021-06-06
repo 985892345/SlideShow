@@ -10,7 +10,6 @@ import androidx.viewpager2.widget.ViewPager2
  */
 internal class BasePageChangeCallBack(
         private val viewPager2: ViewPager2,
-        private val positionChangeCallback: ((position: Int) -> Unit)
 ) : ViewPager2.OnPageChangeCallback() {
 
     fun setPageChangeCallBack(callBack: ViewPager2.OnPageChangeCallback) {
@@ -79,7 +78,6 @@ internal class BasePageChangeCallBack(
             realPosition -= 2
         }
         if (isCallback) {
-            positionChangeCallback.invoke(realPosition)
             mCallBack?.onPageSelected(realPosition)
         }
     }

@@ -4,15 +4,17 @@ import android.animation.TimeInterpolator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import androidx.cardview.widget.CardView
 import androidx.core.animation.addListener
+import androidx.core.view.NestedScrollingParent2
+import androidx.core.view.NestedScrollingParentHelper
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.*
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -85,7 +87,7 @@ import kotlin.math.abs
  * @email 2767465918@qq.com
  * @data 2021/5/26
  */
-class SlideShow : CardView {
+class SlideShow : CardView, NestedScrollingParent2 {
 
     private val mAttrs: SlideShowAttrs
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
@@ -160,13 +162,29 @@ class SlideShow : CardView {
     /**
      * 得到是否设置了 Adapter
      */
-    fun getHasBeenSetAdapter(): Boolean {
+    fun hasBeenSetAdapter(): Boolean {
         return mViewPager2.adapter != null
     }
 
     fun setOffscreenPageLimit(@ViewPager2.OffscreenPageLimit limit: Int): SlideShow {
         mViewPager2.offscreenPageLimit = limit
         return this
+    }
+
+    fun getIsLeft(): Boolean {
+        return !getChildAt(0).canScrollHorizontally(-1)
+    }
+
+    fun getIsRight(): Boolean {
+        return !getChildAt(0).canScrollHorizontally(1)
+    }
+
+    fun getIsTop(): Boolean {
+        return !getChildAt(0).canScrollVertically(-1)
+    }
+
+    fun getIsBottom(): Boolean {
+        return !getChildAt(0).canScrollVertically(-1)
     }
 
     /**
@@ -185,26 +203,6 @@ class SlideShow : CardView {
             mPageChangeCallback.openCirculateEnabled(mImgRealItemCount)
             if (mIsAutoSlideEnabled) { // 在延迟加载 adapter 后，ViewPager2 仍然会显示，但 onAttachedToWindow 已经被调用，所以要在这里调用开始
                 start()
-            }
-        }
-        return this
-    }
-
-    /**
-     * 用于设置图片加载的 Adapter
-     *
-     * **NOTICE：** 如果你想使一个页面能看到相邻的图片边缘，请设置 app:slide_adjacentPageInterval
-     *
-     * **NOTICE：** 使用该方法可能意为着你需要自动滑动，请使用 [setAutoSlideEnabled]
-     *
-     * @param owner 如果该 View 在 Fragment 下，请传入 Fragment；在 Activity 下，请传入 Activity
-     */
-    fun <T> setAdapter(owner: LifecycleOwner, datas: MutableLiveData<List<T>>, imgAdapter: BaseImgAdapter<T>): SlideShow {
-        datas.observe(owner) {
-            if (getHasBeenSetAdapter()) {
-                imgAdapter.refreshData(it)
-            }else {
-                setAdapter(it, imgAdapter)
             }
         }
         return this
@@ -237,29 +235,6 @@ class SlideShow : CardView {
             }
         }
         return setAdapter(datas, adapter)
-    }
-
-    fun <T> setAdapter(
-        fragment: LifecycleOwner,
-        datas: MutableLiveData<List<T>>,
-        onBindImageView:
-            (data: T,
-             imageView: ShapeableImageView,
-             holder: BaseImgAdapter.BaseImgViewHolder,
-             position: Int
-        ) -> Unit
-    ): SlideShow {
-        val adapter = object : BaseImgAdapter<T>() {
-            override fun onBindImageView(
-                data: T,
-                imageView: ShapeableImageView,
-                holder: BaseImgViewHolder,
-                position: Int
-            ) {
-                onBindImageView.invoke(data, imageView, holder, position)
-            }
-        }
-        return setAdapter(fragment, datas, adapter)
     }
 
     /**
@@ -648,7 +623,9 @@ class SlideShow : CardView {
      * @see [setStartItem]
      */
     fun setCurrentItem(item: Int, smoothScroll: Boolean = true): SlideShow {
-        mPrePosition = item
+         if (mViewPager2.isFakeDragging) {
+             mViewPager2.beginFakeDrag()
+         }
         mViewPager2.setCurrentItem(
                 if (mIsCirculateEnabled) item + 2 else item,
                 smoothScroll)
@@ -673,12 +650,25 @@ class SlideShow : CardView {
     }
 
     /**
-     * 设置是否允许用户滑动，也可认为为是否拦截滑动事件
+     * 设置是否允许用户滑动
      *
      * 设置了 false 后你将会在 SlideShow 的父 View 的 onTouchEvent 收到事件
      */
-    fun setUserInputEnabled(enabled: Boolean): SlideShow {
-        mViewPager2.isUserInputEnabled = enabled
+    fun setUserInputEnabled(userInputEnabled: Boolean): SlideShow {
+        mViewPager2.isUserInputEnabled = userInputEnabled
+        mIsUserInputEnabled = userInputEnabled
+        return this
+    }
+
+    fun getUserInputEnabled(): Boolean {
+        return mIsUserInputEnabled
+    }
+
+    /**
+     * 设置是否开启同方向的嵌套滑动处理
+     */
+    fun setOpenNestedScroll(isOpenNestedScroll: Boolean): SlideShow {
+        mIsOpenNestedScroll = isOpenNestedScroll
         return this
     }
 
@@ -704,30 +694,40 @@ class SlideShow : CardView {
         if (mIsAutoSlideEnabled) {
             mIsSliding = false
             mRunnableManger.remove(mAutoSlideRunnable)
+            if (this::mAnimator.isInitialized) {
+                mAnimator.cancel()
+            }
         }
     }
 
+    private val mParentHelper by lazy {
+        NestedScrollingParentHelper(this)
+    }
     private val mRunnableManger = RunnableManger(this)
     private val mViewPager2 = ViewPager2(context)
-    private val mPageChangeCallback = BasePageChangeCallBack(mViewPager2) {
-        mPrePosition = it
+    private var mIsUserInputEnabled = true
+    private val mPageChangeCallback = BasePageChangeCallBack(mViewPager2)
+    private val mPageTransformers by lazy {
+        val transformer = BaseMultipleTransformer()
+        mViewPager2.setPageTransformer(transformer)
+        transformer
     }
-    private val mPageTransformers = BaseMultipleTransformer()
     private var mImgRealItemCount = 1
     private var mIsAutoSlideEnabled = false
-    private var mIsCirculateEnabled = false
     private var mIsSliding = false
     private var mDelayTime = 4000L
     private var mAutoSlideTime = 1000L
     private lateinit var mInterpolator: TimeInterpolator
-    private var mPrePosition = 0
-    private val mAutoSlideRunnable = object : Runnable {
-        override fun run() {
-            mPrePosition = (++mPrePosition) % mImgRealItemCount
-            fakeDrag(1, mAutoSlideTime, mInterpolator)
-            postDelayed(this, mDelayTime)
+    private var i = 0
+    private val mAutoSlideRunnable by lazy {
+        object : Runnable {
+            override fun run() {
+                fakeDrag(1, mAutoSlideTime, mInterpolator)
+                postDelayed(this, mDelayTime)
+            }
         }
     }
+
 
     private fun init() {
         cardElevation = 0F
@@ -743,7 +743,6 @@ class SlideShow : CardView {
                 ViewGroup.LayoutParams.MATCH_PARENT
         )
         mViewPager2.registerOnPageChangeCallback(mPageChangeCallback)
-        mViewPager2.setPageTransformer(mPageTransformers)
         mViewPager2.orientation = mAttrs.orientation
         mViewPager2.setBackgroundColor(0x00000000)
         mViewPager2.getChildAt(0).setBackgroundColor(0x00000000)
@@ -846,54 +845,35 @@ class SlideShow : CardView {
         mAnimator.start()
     }
 
-    private var mInitialX = 0
+    private var mInitialX =0
     private var mInitialY = 0
-    private var mPreX = 0
-    private var mPreY = 0
+    private var mIsCirculateEnabled = false
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        val x = ev.x.toInt()
-        val y = ev.y.toInt()
-        return if (mViewPager2.isUserInputEnabled) {
-            when (ev.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    mInitialX = x
-                    mInitialY = y
-                    stop()
-                    if (this::mAnimator.isInitialized) {
-                        mAnimator.cancel()
+        if (mIsUserInputEnabled) {
+            val x = ev.x.toInt()
+            val y = ev.y.toInt()
+            if (mViewPager2.adapter is BaseImgAdapter<*>) {
+                when (ev.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        mInitialX = x
+                        mInitialY = y
+                        stop()
                     }
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    if (getOrientation() == ViewPager2.ORIENTATION_HORIZONTAL) {
-                        val isLeft = !canScrollHorizontally(-1)
-                        val isRight = !canScrollHorizontally(1)
-                        if (mViewPager2.adapter is BaseImgAdapter<*> && abs(y - mInitialY) > abs(x - mInitialX) + 5) {
-                            return false
-                        }
-                        if (isLeft && x < mPreX || isRight && x > mPreX || !isLeft && !isRight) {
-                            parent.requestDisallowInterceptTouchEvent(true)
-                        }
-                    }else {
-                        val isTop = !canScrollHorizontally(-1)
-                        val isBottom = !canScrollHorizontally(1)
-                        if (mViewPager2.adapter is BaseImgAdapter<*> && abs(x - mInitialX) > abs(y - mInitialY) + 5) {
-                            return false
-                        }
-                        if (isTop && y < mPreY || isBottom && y > mPreY || !isTop && !isBottom) {
-                            parent.requestDisallowInterceptTouchEvent(true)
+                    MotionEvent.ACTION_MOVE -> {
+                        if (abs(y - mInitialY) < abs(x - mInitialX)) {
+                            requestDisallowInterceptTouchEvent(true)
                         }
                     }
-                    mPreX = x
-                    mPreY = y
-                }
-                MotionEvent.ACTION_UP -> {
-                    start()
+                    MotionEvent.ACTION_UP -> {
+                        start()
+                    }
+                    MotionEvent.ACTION_CANCEL -> {
+                        start()
+                    }
                 }
             }
-            super.dispatchTouchEvent(ev)
-        }else {
-            false
         }
+        return super.dispatchTouchEvent(ev)
     }
 
     override fun onAttachedToWindow() {
@@ -905,8 +885,52 @@ class SlideShow : CardView {
         super.onDetachedFromWindow()
         stop()
         mRunnableManger.destroy()
-        if (this::mAnimator.isInitialized) {
-            mAnimator.cancel()
+    }
+
+    private var mIsOpenNestedScroll = false
+    override fun onStartNestedScroll(child: View, target: View, axes: Int, type: Int): Boolean {
+        if (!mIsOpenNestedScroll)
+            return false
+        if (target == mViewPager2.getChildAt(0)) {
+            return false
         }
+        if (type == ViewCompat.TYPE_TOUCH) {
+            if (getOrientation() == ViewPager2.ORIENTATION_HORIZONTAL && axes == ViewCompat.SCROLL_AXIS_HORIZONTAL
+                || getOrientation() == ViewPager2.ORIENTATION_VERTICAL && axes == ViewCompat.SCROLL_AXIS_VERTICAL
+            ) {
+                return true
+            }
+        }
+        return false
+    }
+
+    override fun onNestedScrollAccepted(child: View, target: View, axes: Int, type: Int) {
+        mParentHelper.onNestedScrollAccepted(child, target, axes, type)
+        mViewPager2.beginFakeDrag()
+    }
+
+    override fun onStopNestedScroll(target: View, type: Int) {
+        mParentHelper.onStopNestedScroll(target, type)
+        mViewPager2.endFakeDrag()
+    }
+
+    override fun onNestedScroll(
+        target: View,
+        dxConsumed: Int,
+        dyConsumed: Int,
+        dxUnconsumed: Int,
+        dyUnconsumed: Int,
+        type: Int
+    ) {
+        if (type == ViewCompat.TYPE_TOUCH) {
+            if (getOrientation() == ViewPager2.ORIENTATION_HORIZONTAL) {
+                mViewPager2.fakeDragBy(-dxUnconsumed.toFloat())
+            }else {
+                mViewPager2.fakeDragBy(-dyUnconsumed.toFloat())
+            }
+        }
+    }
+
+    override fun onNestedPreScroll(target: View, dx: Int, dy: Int, consumed: IntArray, type: Int) {
     }
 }
