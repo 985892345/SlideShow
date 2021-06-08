@@ -1,5 +1,6 @@
 package com.ndhzs.slideshow.viewpager2.pagecallback
 
+import android.util.Log
 import androidx.viewpager2.widget.ViewPager2
 
 /**
@@ -85,7 +86,7 @@ internal class BasePageChangeCallBack(
     override fun onPageScrollStateChanged(state: Int) {
         when (state) {
             ViewPager2.SCROLL_STATE_IDLE -> {
-                if (mItemCount != 1) {
+                if (mIsCirculate) {
                     if (mPositionFloat <= 1) {
                         viewPager2.setCurrentItem(mPositionFloat.toInt() + mItemCount - 4, false)
                     }else if (mPositionFloat >= mItemCount - 2) {
@@ -94,10 +95,16 @@ internal class BasePageChangeCallBack(
                 }
             }
             ViewPager2.SCROLL_STATE_DRAGGING -> {
-
+                Log.d("123","(BasePageChangeCallBack.kt:98)-->> this = ${viewPager2.parent}")
             }
             ViewPager2.SCROLL_STATE_SETTLING -> {
-
+                if (mIsCirculate) {
+                    if (mPositionFloat <= 1) {
+                        viewPager2.setCurrentItem(mPositionFloat.toInt() + mItemCount - 4, false)
+                    }else if (mPositionFloat >= mItemCount - 2) {
+                        viewPager2.setCurrentItem(mPositionFloat.toInt() - (mItemCount - 4), false)
+                    }
+                }
             }
         }
         mCallBack?.onPageScrollStateChanged(state)

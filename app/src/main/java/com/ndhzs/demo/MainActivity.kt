@@ -25,7 +25,6 @@ class MainActivity : AppCompatActivity() {
         val colorList = listOf(0xFFFF9800.toInt(), 0xFF616161.toInt(), 0xFFC8C8C8.toInt())
 
         mSlideShow.setTransformer(ScaleInTransformer()) // 设置移动动画
-                .setAutoSlideEnabled(true)
                 .setDelayTime(5000)
                 .openCirculateEnabled()
                 .setTimeInterpolator(AccelerateDecelerateInterpolator())

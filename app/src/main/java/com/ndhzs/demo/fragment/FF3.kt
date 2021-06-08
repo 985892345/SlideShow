@@ -13,7 +13,7 @@ import com.ndhzs.demo.R
  * @email 2767465918@qq.com
  * @data 2021/5/30
  */
-class ThirdFragment : Fragment() {
+class FF3 : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

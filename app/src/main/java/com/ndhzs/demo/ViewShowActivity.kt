@@ -2,10 +2,12 @@ package com.ndhzs.demo
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import android.widget.Button
 import androidx.fragment.app.Fragment
-import com.ndhzs.demo.fragment.FirstFragment
-import com.ndhzs.demo.fragment.SecondFragment
-import com.ndhzs.demo.fragment.ThirdFragment
+import com.ndhzs.demo.fragment.FF1
+import com.ndhzs.demo.fragment.FF2
+import com.ndhzs.demo.fragment.FF3
 import com.ndhzs.slideshow.SlideShow
 
 class ViewShowActivity : AppCompatActivity() {
@@ -13,13 +15,30 @@ class ViewShowActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_viewshow)
 
-        val viewShow = findViewById<SlideShow>(R.id.viewpager_slideShow)
+        val slideShow = findViewById<SlideShow>(R.id.viewpager_slideShow)
 
         val fragments = ArrayList<Fragment>()
-        fragments.add(FirstFragment())
-        fragments.add(SecondFragment())
-        fragments.add(ThirdFragment())
+        fragments.add(FF1())
+        fragments.add(FF2())
+        fragments.add(FF3())
 
-        viewShow.setAdapter(fragments, this)
+        slideShow
+            .setAdapter(this, fragments)
+            .setOffscreenPageLimit(1)
+            .setUserInputEnabled(true)
+            .setOpenNestedScroll(true)
+        Log.d("123","(ViewShowActivity.kt:30)-->> this = $slideShow")
+
+        findViewById<Button>(R.id.btn_1).setOnClickListener {
+            slideShow.setCurrentItem(0)
+        }
+
+        findViewById<Button>(R.id.btn_2).setOnClickListener {
+            slideShow.setCurrentItem(1)
+        }
+
+        findViewById<Button>(R.id.btn_3).setOnClickListener {
+            slideShow.setCurrentItem(2)
+        }
     }
 }
