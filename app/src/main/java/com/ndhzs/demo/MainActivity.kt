@@ -3,6 +3,7 @@ package com.ndhzs.demo
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Button
 import android.widget.Toast
@@ -21,7 +22,6 @@ class MainActivity : AppCompatActivity() {
 
         mSlideShow = findViewById(R.id.slideShow)
 
-        val list = MutableLiveData<List<Int>>()
         val colorList = listOf(0xFFFF9800.toInt(), 0xFF616161.toInt(), 0xFFC8C8C8.toInt())
 
         mSlideShow.setTransformer(ScaleInTransformer()) // 设置移动动画
@@ -39,9 +39,6 @@ class MainActivity : AppCompatActivity() {
         mSlideShow.setPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
             }
-
-            override fun onPageSelected(position: Int) {
-            }
         })
 
         findViewById<Button>(R.id.button).setOnClickListener {
@@ -52,13 +49,13 @@ class MainActivity : AppCompatActivity() {
         /*
         * 下面是演示刷新
         * */
-        mSlideShow.postDelayed({
-            Toast.makeText(this, "开始更新", Toast.LENGTH_SHORT).show()
-            mSlideShow.notifyImgDataChange(listOf(0xFF009688.toInt(), 0xFFC8C8C8.toInt(), 0xFFFF9800.toInt()))
-
-//            mSlideShow.notifyImageViewRefresh(0, Refresh.Condition.COVERED) { imageView, holder, position ->
-//                imageView.setBackgroundColor()
-//            }
-        }, 5000)
+//        mSlideShow.postDelayed({
+//            Toast.makeText(this, "开始更新", Toast.LENGTH_SHORT).show()
+//            mSlideShow.notifyImgDataChange(listOf(0xFF009688.toInt(), 0xFFC8C8C8.toInt(), 0xFFFF9800.toInt()))
+//
+////            mSlideShow.notifyImageViewRefresh(0, Refresh.Condition.COVERED) { imageView, holder, position ->
+////                imageView.setBackgroundColor()
+////            }
+//        }, 5000)
     }
 }

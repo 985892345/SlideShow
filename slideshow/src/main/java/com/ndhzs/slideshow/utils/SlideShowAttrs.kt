@@ -3,8 +3,11 @@ package com.ndhzs.slideshow.utils
 import android.content.Context
 import android.util.AttributeSet
 import android.view.ViewGroup
+import androidx.annotation.ColorInt
+import androidx.annotation.Px
 import androidx.viewpager2.widget.ViewPager2
 import com.ndhzs.slideshow.R
+import com.ndhzs.slideshow.myinterface.IIndicator
 
 /**
  * .....
@@ -15,43 +18,49 @@ import com.ndhzs.slideshow.R
 class SlideShowAttrs private constructor(){
 
     companion object {
-        const val Library_name = "SlideShow"
+        internal const val Library_name = "SlideShow"
     }
 
     var imgWidth = ViewGroup.LayoutParams.MATCH_PARENT
+        internal set
     var imgHeight = ViewGroup.LayoutParams.MATCH_PARENT
-
+        internal set
     var imgDefaultColor = 0xFFFAFAFA.toInt()
+        internal set
 
-    var imgMargin = 0
+    private var imgMargin = 0
     var imgMarginHorizontal = 0
+        internal set
     var imgMarginVertical = 0
-
+        internal set
     var adjacentPageInterval = -1
+        internal set
     var outPageInterval = -1
+        internal set
 
-    var imgRadius = 0F
+    private var imgRadius = 0F
     var imgLeftTopRadius = 0F
+        internal set
     var imgRightTopRadius = 0F
+        internal set
     var imgLeftBottomRadius = 0F
+        internal set
     var imgRightBottomRadius = 0F
+        internal set
 
+    @ViewPager2.Orientation
     var orientation = ViewPager2.ORIENTATION_HORIZONTAL
+        internal set
 
     /**
      * 该值还需进行一次转换才是相邻页面边距值
      */
-    var pageInterval = 0
+    internal var pageInterval = 0
 
-    var isShowIndicators = true
-    var indicatorStyle = Indicators.Style.NORMAL
-    var indicatorGravity = Indicators.Gravity.BOTTOM_CENTER
+    lateinit var mIndicatorsAttrs: IndicatorsAttrs
+        internal set
 
-    var indicatorRadius = 20F
-    var indicatorColor = 0xFFFAFAFA.toInt()
-    var indicatorBannerColor = 0x66A5A5A5
-
-    fun initialize(context: Context, attrs: AttributeSet) {
+    internal fun initialize(context: Context, attrs: AttributeSet) {
         val ty = context.obtainStyledAttributes(attrs, R.styleable.SlideShow)
 
         imgWidth = ty.getLayoutDimension(R.styleable.SlideShow_slide_imgWight, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -77,17 +86,15 @@ class SlideShowAttrs private constructor(){
 
 //        pageInterval = ty.getDimension(R.styleable.SlideShow_slide_pageInterval, pageInterval)
 
-        isShowIndicators = ty.getBoolean(R.styleable.SlideShow_slide_isShowIndicators, isShowIndicators)
-        indicatorGravity = ty.getInt(R.styleable.SlideShow_slide_indicatorsGravity, indicatorGravity)
-        indicatorStyle = ty.getInt(R.styleable.SlideShow_slide_indicatorsStyle, indicatorStyle)
-        indicatorRadius = ty.getDimension(R.styleable.SlideShow_slide_indicatorsRadius, indicatorRadius)
-        indicatorColor = ty.getColor(R.styleable.SlideShow_slide_indicatorsColor, indicatorColor)
-        indicatorBannerColor = ty.getColor(R.styleable.SlideShow_slide_indicatorsBannerColor, indicatorBannerColor)
+        // 以下为指示器的属性
+        mIndicatorsAttrs = IndicatorsAttrs.Builder().build()
+        mIndicatorsAttrs.initialize(ty)
+
         ty.recycle()
         setAttrs()
     }
 
-    fun setAttrs() {
+    internal fun setAttrs() {
         if (imgMargin != 0) {
             imgMarginHorizontal = imgMargin
             imgMarginVertical = imgMargin
@@ -147,11 +154,6 @@ class SlideShowAttrs private constructor(){
             imgRightTopRadius = imgRadius
             imgLeftBottomRadius = imgRadius
             imgRightBottomRadius = imgRadius
-        }
-        if (isShowIndicators) {
-            if (Indicators.isError(indicatorGravity)) {
-                throw IllegalAccessException("Your $Library_name of indicatorGravity is error!")
-            }
         }
     }
 
@@ -265,7 +267,16 @@ class SlideShowAttrs private constructor(){
             return this
         }
 
+        /**
+         * 设置指示器
+         */
+        fun setIndicators(indicatorsAttrs: IndicatorsAttrs): Builder {
+            mAttrs.mIndicatorsAttrs = indicatorsAttrs
+            return this
+        }
+
         fun build(): SlideShowAttrs {
+            mAttrs.setAttrs()
             return mAttrs
         }
     }

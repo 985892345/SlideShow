@@ -34,7 +34,6 @@ class FF2 : Fragment() {
             .setAdapter(requireActivity(), fragments)
             .setOffscreenPageLimit(1)
             .setOpenNestedScroll(true)
-        Log.d("123","(FF2.kt:37)-->> this = $slideShow")
 
         super.onViewCreated(view, savedInstanceState)
     }

@@ -27,7 +27,6 @@ class ViewShowActivity : AppCompatActivity() {
             .setOffscreenPageLimit(1)
             .setUserInputEnabled(true)
             .setOpenNestedScroll(true)
-        Log.d("123","(ViewShowActivity.kt:30)-->> this = $slideShow")
 
         findViewById<Button>(R.id.btn_1).setOnClickListener {
             slideShow.setCurrentItem(0)

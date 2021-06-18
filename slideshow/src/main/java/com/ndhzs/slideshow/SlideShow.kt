@@ -19,6 +19,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.imageview.ShapeableImageView
+import com.ndhzs.slideshow.layout.AbstractIndicatorsView
+import com.ndhzs.slideshow.layout.view.CommonIndicators
+import com.ndhzs.slideshow.myinterface.IIndicator
 import com.ndhzs.slideshow.myinterface.OnImgRefreshListener
 import com.ndhzs.slideshow.myinterface.OnRefreshListener
 import com.ndhzs.slideshow.utils.*
@@ -30,8 +33,6 @@ import com.ndhzs.slideshow.viewpager2.transformer.BaseMultipleTransformer
 import kotlin.math.abs
 
 /**
- * **WARNING：** 目前还未实现自动滑动！
- *
  * 该控件参考了第三方库：Banner (https://github.com/youth5201314/banner)，在此表示感谢！
  *
  * 里面内置了 transformer（页面移动动画）的默认实现类，
@@ -205,6 +206,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
                 start()
             }
         }
+        afterSetAdapter()
         return this
     }
 
@@ -243,18 +245,10 @@ class SlideShow : CardView, NestedScrollingParent2 {
      * 该方法简写了创建 FragmentStateAdapter 的过程，传入数据后会自动帮你设置 FragmentStateAdapter
      */
     fun setAdapter(fragmentActivity: FragmentActivity, fragments: List<Fragment>): SlideShow {
-        if (mIsAutoSlideEnabled) {
-            throw IllegalAccessException(
-                    "Your ${SlideShowAttrs.Library_name}#setAdapter()、setAutoSlideEnabled(): " +
-                            "The adapter does not support automatic sliding!")
-        }
-        if (mIsCirculateEnabled) {
-            throw IllegalAccessException(
-                    "Your ${SlideShowAttrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
-                            "The adapter does not support circular presentation!")
-        }
+        throwAdapterError()
         val adapter = object : BaseFragmentStateAdapter(fragmentActivity, fragments) {}
         mViewPager2.adapter = adapter
+        afterSetAdapter()
         return this
     }
 
@@ -262,17 +256,9 @@ class SlideShow : CardView, NestedScrollingParent2 {
      * 用于设置 FragmentStateAdapter
      */
     fun setAdapter(fragmentAdapter: FragmentStateAdapter): SlideShow {
-        if (mIsAutoSlideEnabled) {
-            throw IllegalAccessException(
-                    "Your ${SlideShowAttrs.Library_name}#setAdapter()、setAutoSlideEnabled(): " +
-                            "The adapter does not support automatic sliding!")
-        }
-        if (mIsCirculateEnabled) {
-            throw IllegalAccessException(
-                    "Your ${SlideShowAttrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
-                            "The adapter does not support circular presentation!")
-        }
+        throwAdapterError()
         mViewPager2.adapter = fragmentAdapter
+        afterSetAdapter()
         return this
     }
 
@@ -283,17 +269,9 @@ class SlideShow : CardView, NestedScrollingParent2 {
      */
     @Deprecated("不建议使用自己的 adapter", ReplaceWith("使用 BaseRecyclerAdapter 代替"))
     fun setAdapter(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>): SlideShow {
-        if (mIsAutoSlideEnabled) {
-            throw IllegalAccessException(
-                    "Your ${SlideShowAttrs.Library_name}#setAdapter()、setAutoSlideEnabled(): " +
-                            "The adapter does not support automatic sliding!")
-        }
-        if (mIsCirculateEnabled) {
-            throw IllegalAccessException(
-                    "Your ${SlideShowAttrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
-                            "The adapter does not support circular presentation!")
-        }
+        throwAdapterError()
         mViewPager2.adapter = adapter
+        afterSetAdapter()
         return this
     }
 
@@ -303,18 +281,33 @@ class SlideShow : CardView, NestedScrollingParent2 {
      * 使用该 adapter 后可以调用 [notifyItemRefresh] 方法进行特殊刷新
      */
     fun setAdapter(adapter: BaseRecyclerAdapter<out RecyclerView.ViewHolder>): SlideShow {
+        throwAdapterError()
+        mViewPager2.adapter = adapter
+        afterSetAdapter()
+        return this
+    }
+
+    private fun throwAdapterError() {
         if (mIsAutoSlideEnabled) {
             throw IllegalAccessException(
-                    "Your ${SlideShowAttrs.Library_name}#setAdapter()、setAutoSlideEnabled(): " +
-                            "The adapter does not support automatic sliding!")
+                "Your ${SlideShowAttrs.Library_name}#setAdapter()、setAutoSlideEnabled(): " +
+                        "The adapter does not support automatic sliding!")
         }
         if (mIsCirculateEnabled) {
             throw IllegalAccessException(
-                    "Your ${SlideShowAttrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
-                            "The adapter does not support circular presentation!")
+                "Your ${SlideShowAttrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
+                        "The adapter does not support circular presentation!")
         }
-        mViewPager2.adapter = adapter
-        return this
+    }
+
+    private fun afterSetAdapter() {
+        if (this::mIndicators.isInitialized) {
+            val adapter = mViewPager2.adapter!!
+            mIndicators.setAmount(
+                if (mIsCirculateEnabled) adapter.itemCount - 4
+                else adapter.itemCount
+            )
+        }
     }
 
     /**
@@ -505,55 +498,44 @@ class SlideShow : CardView, NestedScrollingParent2 {
     }
 
     /**
-     * 设置指示器的横幅背景颜色
+     * 设置自己的指示器
      */
-    fun setIndicatorsBannerColor(color: Int): SlideShow {
-        mAttrs.indicatorBannerColor = color
+    fun setYourIndicators(yourIndicators: IIndicator): SlideShow {
+        if (mAttrs.mIndicatorsAttrs.indicatorStyle != Indicators.Style.SELF_VIEW ||
+            mAttrs.mIndicatorsAttrs.indicatorStyle != Indicators.Style.SELF_VIEW_ELSEWHERE) {
+            throw IllegalAccessException(
+                "Your ${SlideShowAttrs.Library_name}#setSelfIndicators(): " +
+                        "You must set the style to \"self_view\" or \"self_view_elsewhere\" before using your own indicators!")
+        }
+        if (isAttachedToWindow) {
+            throw IllegalAccessException(
+                "Your ${SlideShowAttrs.Library_name}#setSelfIndicators(): " +
+                        "You cannot set the indicators after the SlideShow has been attached to window!")
+        }
+        if (this::mIndicators.isInitialized) {
+            throw IllegalAccessException(
+                "Your ${SlideShowAttrs.Library_name}#setSelfIndicators(): " +
+                        "You have set the indicators!")
+        }
+        mIndicators = yourIndicators
+        loadIndicators()
         return this
     }
 
     /**
-     * 设置指示器的圆点颜色
+     * 得到指示器外部的位置（整个横幅）
      */
-    fun setIndicatorsColor(color: Int): SlideShow {
-        mAttrs.indicatorColor = color
-        return this
+    @Indicators.OuterGravity
+    fun getIndicatorsOuterGravity(): Int {
+        return mAttrs.mIndicatorsAttrs.indicatorOuterGravity
     }
 
     /**
-     * 设置指示器的圆点半径
+     * 得到指示器内部的位置（小圆点）
      */
-    fun setIndicatorsRadius(radius: Float): SlideShow {
-        mAttrs.indicatorRadius = radius
-        return this
-    }
-
-    /**
-     * 设置指示器的位置
-     *
-     * @param gravity 数据来自 [Indicators]
-     */
-    fun setIndicatorsGravity(@Indicators.Gravity gravity: Int): SlideShow {
-        mAttrs.indicatorGravity = gravity
-        return this
-    }
-
-    /**
-     * 得到指示器的位置
-     */
-    @Indicators.Gravity
-    fun getIndicatorsGravity(): Int {
-        return mAttrs.indicatorGravity
-    }
-
-    /**
-     * 设置指示器的样式
-     *
-     * @see style 数据来自 [Indicators]
-     */
-    fun setIndicatorsStyle(@Indicators.Style style: Int): SlideShow {
-        mAttrs.indicatorStyle = style
-        return this
+    @Indicators.InnerGravity
+    fun getIndicatorsInnerGravity(): Int {
+        return mAttrs.mIndicatorsAttrs.indicatorInnerGravity
     }
 
     /**
@@ -561,14 +543,24 @@ class SlideShow : CardView, NestedScrollingParent2 {
      */
     @Indicators.Style
     fun getIndicatorsStyle(): Int {
-        return mAttrs.indicatorStyle
+        return mAttrs.mIndicatorsAttrs.indicatorStyle
+    }
+
+    /**
+     * 改变指示器的圆点数量
+     */
+    fun changeIndicatorsAmount(amount: Int) {
+        mIndicators.changeAmount(amount)
     }
 
     /**
      * 设置是否显示指示器
      */
     fun setShowIndicators(boolean: Boolean): SlideShow {
-        mAttrs.isShowIndicators = boolean
+        mAttrs.mIndicatorsAttrs.isShowIndicators = boolean
+        if (this::mIndicators.isInitialized) {
+            mIndicators.setShowIndicators(boolean)
+        }
         return this
     }
 
@@ -623,9 +615,6 @@ class SlideShow : CardView, NestedScrollingParent2 {
      * @see [setStartItem]
      */
     fun setCurrentItem(item: Int, smoothScroll: Boolean = true): SlideShow {
-         if (mViewPager2.isFakeDragging) {
-             mViewPager2.endFakeDrag()
-         }
         mViewPager2.setCurrentItem(
                 if (mIsCirculateEnabled) item + 2 else item,
                 smoothScroll)
@@ -674,6 +663,8 @@ class SlideShow : CardView, NestedScrollingParent2 {
 
     /**
      * 用于开启自动滑动
+     *
+     * **NOTE：** 使用时可以不用手动调用，在视图被添加到窗口时会自动滑动
      */
     fun start() {
         if (mIsAutoSlideEnabled) {
@@ -694,8 +685,8 @@ class SlideShow : CardView, NestedScrollingParent2 {
         if (mIsAutoSlideEnabled) {
             mIsSliding = false
             mRunnableManger.remove(mAutoSlideRunnable)
-            if (this::mAnimator.isInitialized) {
-                mAnimator.cancel()
+            if (mFakeDragAnimator != null) {
+                mFakeDragAnimator!!.cancel()
             }
         }
     }
@@ -718,7 +709,6 @@ class SlideShow : CardView, NestedScrollingParent2 {
     private var mDelayTime = 4000L
     private var mAutoSlideTime = 1000L
     private lateinit var mInterpolator: TimeInterpolator
-    private var i = 0
     private val mAutoSlideRunnable by lazy {
         object : Runnable {
             override fun run() {
@@ -728,17 +718,14 @@ class SlideShow : CardView, NestedScrollingParent2 {
         }
     }
 
-
     private fun init() {
         cardElevation = 0F
         initViewPager2()
-        mRunnableManger.post {
-            setCurrentItem(finalItem, false)
-        }
+        initIndicators()
     }
 
     private fun initViewPager2() {
-        mViewPager2.layoutParams = LayoutParams(
+        val lp = LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
         )
@@ -746,7 +733,39 @@ class SlideShow : CardView, NestedScrollingParent2 {
         mViewPager2.orientation = mAttrs.orientation
         mViewPager2.setBackgroundColor(0x00000000)
         mViewPager2.getChildAt(0).setBackgroundColor(0x00000000)
-        attachViewToParent(mViewPager2, 0, mViewPager2.layoutParams)
+        attachViewToParent(mViewPager2, -1, lp)
+        mRunnableManger.post {
+            setCurrentItem(finalItem, false)
+        }
+    }
+
+    private lateinit var mIndicators: IIndicator
+    private fun initIndicators() {
+        val style = mAttrs.mIndicatorsAttrs.indicatorStyle
+        if (style != Indicators.Style.NO_SHOW ||
+            style != Indicators.Style.SELF_VIEW ||
+            style != Indicators.Style.SELF_VIEW_ELSEWHERE) {
+            mIndicators = when (style) {
+                Indicators.Style.NORMAL -> CommonIndicators(context)
+                else -> CommonIndicators(context)
+            }
+            loadIndicators()
+        }
+    }
+
+    private fun loadIndicators() {
+        val view = mIndicators.getIndicatorView()
+        val lp = mIndicators.setIndicatorsOuterGravity(mAttrs.mIndicatorsAttrs.indicatorOuterGravity)
+        attachViewToParent(view, -1, lp)
+        mIndicators.setIndicatorsInnerGravity(mAttrs.mIndicatorsAttrs.indicatorInnerGravity)
+        mIndicators.setIndicatorsBackgroundColor(mAttrs.mIndicatorsAttrs.indicatorBannerColor)
+        mIndicators.setShowIndicators(mAttrs.mIndicatorsAttrs.isShowIndicators)
+        val adapter = mViewPager2.adapter
+        if (adapter != null) {
+            mIndicators.setAmount(adapter.itemCount)
+        }
+
+        mPageChangeCallback.setIndicators(mIndicators)
     }
 
     /**
@@ -810,7 +829,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
     }
 
     private var mPreFakeDrag = 0F
-    private lateinit var mAnimator:  ValueAnimator
+    private var mFakeDragAnimator:  ValueAnimator? = null
     private fun fakeDrag(diffPosition: Int, duration: Long, interpolator: TimeInterpolator = LinearInterpolator()) {
         mPreFakeDrag = 0F
         val childView = mViewPager2.getChildAt(0)
@@ -819,14 +838,14 @@ class SlideShow : CardView, NestedScrollingParent2 {
         }else {
             mViewPager2.height - childView.paddingTop - childView.paddingBottom
         }
-        mAnimator = ValueAnimator.ofFloat(0F, -diffPosition.toFloat())
-        mAnimator.addUpdateListener {
+        mFakeDragAnimator = ValueAnimator.ofFloat(0F, -diffPosition.toFloat())
+        mFakeDragAnimator!!.addUpdateListener {
             val nowFakeDrag = it.animatedValue as Float
             val differentOffsetPixel = (nowFakeDrag - mPreFakeDrag) * pixelDistance
             mViewPager2.fakeDragBy(differentOffsetPixel)
             mPreFakeDrag = nowFakeDrag
         }
-        mAnimator.addListener(
+        mFakeDragAnimator!!.addListener(
                 onStart = {
                     mViewPager2.beginFakeDrag()
                     mViewPager2.isUserInputEnabled = false
@@ -834,15 +853,17 @@ class SlideShow : CardView, NestedScrollingParent2 {
                 onEnd = {
                     mViewPager2.endFakeDrag()
                     mViewPager2.isUserInputEnabled = true
+                    mFakeDragAnimator = null
                 },
                 onCancel = {
                     mViewPager2.endFakeDrag()
                     mViewPager2.isUserInputEnabled = true
+                    mFakeDragAnimator = null
                 }
         )
-        mAnimator.interpolator = interpolator
-        mAnimator.duration = duration
-        mAnimator.start()
+        mFakeDragAnimator!!.interpolator = interpolator
+        mFakeDragAnimator!!.duration = duration
+        mFakeDragAnimator!!.start()
     }
 
     private var mInitialX = 0
@@ -857,10 +878,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
                     MotionEvent.ACTION_DOWN -> {
                         stop()
                     }
-                    MotionEvent.ACTION_UP -> {
-                        start()
-                    }
-                    MotionEvent.ACTION_CANCEL -> {
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                         start()
                     }
                 }
@@ -939,7 +957,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
      * 的 Down 开启的，s2 是由 s3 的 Down 开启的），然后 s1 和 s2 的 onInterceptTouchEvent 就被
      * s3 取消，在 s3 的 onInterceptTouchEvent 调用 Up 时，只有 s2 的 onStopNestedScroll 被调用，
      * s1 的 onStopNestedScroll 必须由 s2 才能调用，但 s2 的 onInterceptTouchEvent 被取消，所以
-     * s1 的 onStopNestedScroll 不会被调用
+     * s1 的 onStopNestedScroll 不会被调用，于是就需要手动取消
      */
     override fun onStopNestedScroll(target: View, type: Int) {
         mParentHelper.onStopNestedScroll(target, type)

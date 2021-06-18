@@ -1,7 +1,8 @@
 package com.ndhzs.slideshow.viewpager2.pagecallback
 
-import android.util.Log
 import androidx.viewpager2.widget.ViewPager2
+import com.ndhzs.slideshow.myinterface.IIndicator
+import com.ndhzs.slideshow.utils.Indicators
 
 /**
  * .....
@@ -10,7 +11,7 @@ import androidx.viewpager2.widget.ViewPager2
  * @data 2021/5/28
  */
 internal class BasePageChangeCallBack(
-        private val viewPager2: ViewPager2,
+    private val viewPager2: ViewPager2,
 ) : ViewPager2.OnPageChangeCallback() {
 
     fun setPageChangeCallBack(callBack: ViewPager2.OnPageChangeCallback) {
@@ -30,6 +31,11 @@ internal class BasePageChangeCallBack(
         }
     }
 
+    fun setIndicators(indicators: IIndicator) {
+        mIndicators = indicators
+    }
+
+    private var mIndicators: IIndicator? = null
     private var mCallBack: ViewPager2.OnPageChangeCallback? = null
     private var mPositionFloat = 0F
     private var mIsCirculate = false
@@ -56,6 +62,7 @@ internal class BasePageChangeCallBack(
             realPosition -= 2
         }
         if (isCallback) {
+            mIndicators?.onPageScrolled(realPosition, positionOffset, positionOffsetPixels)
             mCallBack?.onPageScrolled(
                     realPosition,
                     positionOffset,
@@ -79,6 +86,7 @@ internal class BasePageChangeCallBack(
             realPosition -= 2
         }
         if (isCallback) {
+            mIndicators?.onPageSelected(realPosition)
             mCallBack?.onPageSelected(realPosition)
         }
     }
@@ -95,7 +103,6 @@ internal class BasePageChangeCallBack(
                 }
             }
             ViewPager2.SCROLL_STATE_DRAGGING -> {
-                Log.d("123","(BasePageChangeCallBack.kt:98)-->> this = ${viewPager2.parent}")
             }
             ViewPager2.SCROLL_STATE_SETTLING -> {
                 if (mIsCirculate) {
@@ -107,6 +114,7 @@ internal class BasePageChangeCallBack(
                 }
             }
         }
+        mIndicators?.onPageScrollStateChanged(state)
         mCallBack?.onPageScrollStateChanged(state)
     }
 }

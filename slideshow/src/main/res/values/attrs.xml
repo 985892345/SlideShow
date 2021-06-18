@@ -58,19 +58,27 @@
         <!--指示器横幅颜色-->
         <attr name="slide_indicatorsBannerColor" format="color"/>
 
-        <attr name="slide_indicatorsStyle" format="enum">
-            <enum name="null_view" value="0"/>
-            <enum name="normal" value="1"/>
+        <attr name="slide_indicatorsStyle">
+            <enum name="no_show" value="-1"/>
+            <enum name="self_view" value="0"/>
+            <enum name="self_view_elsewhere" value="1"/>
+            <enum name="normal" value="2"/>
         </attr>
 
-        <attr name="slide_indicatorsGravity">
-            <flag name="top" value="0x30" />
-            <flag name="bottom" value="0x50" />
-            <flag name="left" value="0x03" />
-            <flag name="right" value="0x05" />
-            <flag name="center" value="0x11" />
-            <flag name="center_vertical" value="0x10" />
-            <flag name="center_horizontal" value="0x01" />
+        <attr name="slide_indicatorsOuterGravity">
+            <flag name="top" value="00001" />
+            <flag name="bottom" value="00010" />
+            <flag name="left" value="00100" />
+            <flag name="right" value="01000" />
+            <flag name="vertical_center" value="01100" />
+            <flag name="horizontal_center" value="00011" />
         </attr>
+
+        <attr name="slide_indicatorsInnerGravity">
+            <flag name="front" value="001" />
+            <flag name="back" value="010" />
+            <flag name="center" value="011" />
+        </attr>
+
     </declare-styleable>
 </resources>

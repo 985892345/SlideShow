@@ -23,7 +23,9 @@
         app:slide_adjacentPageInterval="16dp"
         app:slide_imgHeight="400dp"
         app:slide_imgRadius="20dp"
-        app:slide_outPageInterval="40dp" />
+        app:slide_outPageInterval="40dp"
+        app:slide_indicatorsStyle="normal"
+        app:slide_indicatorsBannerColor="@color/test"/>
 
     <Button
         android:id="@+id/button"
