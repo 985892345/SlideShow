@@ -8,7 +8,8 @@ import androidx.viewpager2.widget.ViewPager2.ScrollState
 import com.ndhzs.slideshow.utils.Indicators
 
 /**
- * .....
+ * 如果你想实现自己的指示器，建议继承于 AbstractIndicatorsView 抽象类，此类省略了绘制全部轨迹的过程，
+ * 可快速通过一个区间的轨迹绘制而重复于全部轨迹
  * @author 985892345
  * @email 2767465918@qq.com
  * @data 2021/6/15
@@ -78,11 +79,13 @@ interface IIndicator {
                 Gravity.CENTER_HORIZONTAL
             )
             // 为了过 when 的检查，永远不会被调用
-            else -> FrameLayout.LayoutParams( // never
-                300,
-                300,
-                Gravity.CENTER
-            )
+            else -> {
+                FrameLayout.LayoutParams( // never
+                    300,
+                    300,
+                    Gravity.CENTER
+                )
+            }
         }
     }
 

@@ -12,37 +12,119 @@ import android.widget.FrameLayout
 import androidx.viewpager2.widget.ViewPager2
 import com.ndhzs.slideshow.myinterface.IIndicator
 import com.ndhzs.slideshow.utils.Indicators
+import com.ndhzs.slideshow.utils.IndicatorsAttrs
 import com.ndhzs.slideshow.utils.SlideShowUtils
 
 /**
- * .....
+ * 如果你想实现自己的指示器，可以继承于该抽象类
+ *
+ * 继承后，你只需要实现 [onDrawMovePath] 方法即可，该方法可以实现一个区间的轨迹绘制而实现全部轨迹的绘制
  * @author 985892345
  * @email 2767465918@qq.com
  * @data 2021/5/28
  */
-abstract class AbstractIndicatorsView(context: Context) : View(context), IIndicator {
+abstract class AbstractIndicatorsView(
+    context: Context,
+) : View(context), IIndicator {
 
     /**
-     * 设置为 wrap_content 时的宽度值
+     * 设置为 wrap_content 时的厚度值
      */
-    protected var wrapWidth = SlideShowUtils.dpToPx(50)
+    var wrapWidth = WRAP_WIDTH
+        private set
+
+    /**
+     * 圆点颜色
+     */
+    var circleColor = CIRCLE_COLOR
+        private set
 
     /**
      * 圆点的半径值
      */
-    protected var circleRadius = SlideShowUtils.dpToPx(5)
+    var circleRadius = CIRCLE_RADIUS
+        private set
 
     /**
      * 两个圆点间的距离值
      */
-    protected var intervalMargin = SlideShowUtils.dpToPx(30)
+    var intervalMargin = INTERVAL_MARGIN
+        private set
+
+    /**
+     * 小圆点背景的颜色
+     */
+    var backgroundCircleColor = BACKGROUND_CIRCLE_COLOR
+        private set
+
+    /**
+     * 设置指示器属性
+     */
+    internal fun setIndicatorsAttrs(attrs: IndicatorsAttrs) {
+        indicatorsAttrs = attrs
+        wrapWidth = attrs.indicatorWrapWidth
+        circleColor = attrs.indicatorCircleColor
+        circleRadius = attrs.indicatorCircleRadius
+        intervalMargin = attrs.intervalMargin
+        backgroundCircleColor = attrs.indicatorBackgroundCircleColor
+    }
+
+    companion object {
+
+        /**
+         * 指示器横幅最小边的宽度默认值
+         */
+        val WRAP_WIDTH = SlideShowUtils.dpToPx(30)
+
+        /**
+         * 指示器圆点颜色默认值
+         */
+        const val CIRCLE_COLOR = 0xFFFAFAFA.toInt()
+
+        /**
+         * 指示器圆点半径大小默认值
+         */
+        val CIRCLE_RADIUS = SlideShowUtils.dpToPx(3)
+
+        /**
+         * 指示器两个圆点间的距离默认值
+         */
+        val INTERVAL_MARGIN = SlideShowUtils.dpToPx(18)
+
+        /**
+         * 指示器横幅背景颜色默认值
+         */
+        const val BACKGROUND_COLOR = 0x00000000
+
+        /**
+         * 指示器小圆点背景颜色默认值
+         */
+        const val BACKGROUND_CIRCLE_COLOR = 0x8E8E8E8E.toInt()
+    }
+
+    private lateinit var indicatorsAttrs: IndicatorsAttrs
 
     private var amount = 0
     private var frontMargin = 0F
 
+    /**
+     * 圆点位置
+     */
     private var position = 0
+
+    /**
+     * 圆点上一次停留时的位置
+     */
     private var idlePosition = 0
+
+    /**
+     * 圆点的位置（带小数）
+     */
     private var positionFloat = 0F
+
+    /**
+     * 用于 [onDrawMovePath] 中，是该点的像素偏离值，只会在 -intervalMargin 到 +intervalMargin 之间
+     */
     private var offsetPixels = 0F
 
     @Indicators.OuterGravity
@@ -57,7 +139,7 @@ abstract class AbstractIndicatorsView(context: Context) : View(context), IIndica
 
     override fun setAmount(amount: Int) {
         this.amount = amount
-        post {
+        post { // 写在这里是为了在调用 changeAmount() 后能修改 frontMargin 值
             judgeStyle(
                 horizontal = {
                     when (innerGravity) {
@@ -100,7 +182,6 @@ abstract class AbstractIndicatorsView(context: Context) : View(context), IIndica
 
     override fun setIndicatorsInnerGravity(gravity: Int) {
         innerGravity = gravity
-
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
@@ -110,10 +191,10 @@ abstract class AbstractIndicatorsView(context: Context) : View(context), IIndica
     override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
         this.position = position
         positionFloat = position + positionOffset
-        offsetPixels = (
-                if (position >= idlePosition) positionFloat - idlePosition
-                else positionFloat - idlePosition
-                ) * intervalMargin
+        val offset =
+            if (position >= idlePosition || positionFloat == 0F) positionOffset
+            else positionOffset - 1 // 当向左滑动时，positionOffset 是从 0.99999 -> 0 的，所以要减一改为 0 -> 0.99999
+        offsetPixels = offset * intervalMargin
         invalidate()
     }
 
@@ -148,7 +229,7 @@ abstract class AbstractIndicatorsView(context: Context) : View(context), IIndica
     private val mMatrix = Matrix()
     private val mBackgroundCirclePaint by lazy {
         val paint = Paint()
-        paint.color = getBackgroundCircleColor()
+        paint.color = backgroundCircleColor
         paint.style = Paint.Style.FILL
         paint.isAntiAlias = true
         paint
@@ -192,7 +273,7 @@ abstract class AbstractIndicatorsView(context: Context) : View(context), IIndica
 
     private val mMovePathPaint by lazy {
         val paint = Paint()
-        paint.color = getMovePathColor()
+        paint.color = circleColor
         paint.style = Paint.Style.FILL
         paint.isAntiAlias = true
         paint
@@ -200,15 +281,16 @@ abstract class AbstractIndicatorsView(context: Context) : View(context), IIndica
     private fun drawMovePath(canvas: Canvas) {
         mPath.reset()
         onDrawMovePath(mPath, circleRadius, offsetPixels, intervalMargin)
+        val p = if (position >= idlePosition || positionFloat == 0F) position else position + 1
         judgeStyle(
             horizontal = {
-                mMatrix.setTranslate(frontMargin + idlePosition * intervalMargin, wrapWidth / 2)
+                mMatrix.setTranslate(frontMargin + p * intervalMargin, wrapWidth / 2)
                 mPath.transform(mMatrix)
                 canvas.drawPath(mPath, mMovePathPaint)
             },
             vertical = {
-                mMatrix.setTranslate(wrapWidth / 2, frontMargin + idlePosition * intervalMargin)
-                mMatrix.postRotate(-90F)
+                mMatrix.setTranslate(wrapWidth / 2, frontMargin + p * intervalMargin)
+                mMatrix.postRotate(90F, wrapWidth / 2, frontMargin + p * intervalMargin)
                 mPath.transform(mMatrix)
                 canvas.drawPath(mPath, mMovePathPaint)
             }
@@ -244,13 +326,14 @@ abstract class AbstractIndicatorsView(context: Context) : View(context), IIndica
     }
 
     /**
-     * 用于在移动时绘制图形，请自己实现 path 的绘制
+     * 用于在移动时绘制图形，请自己实现 path 的绘制，只需绘制一个区间的轨迹
      *
      * **NOTE：**
      *
-     * 1、你只需要使用 offsetPixels 来绘制从 -intervalMargin 到 +intervalMargin 之间对应的 path 即可
+     * 1、你只需要使用 offsetPixels 的值来绘制从 -intervalMargin 到 +intervalMargin 之间对应的 path 即可
      *
-     * 2、参考系是水平的，坐标为 (-intervalMargin, 0) <---> (0, 0) <---> (+intervalMargin, 0)
+     * 2、参考系是水平的，坐标为 (-intervalMargin, 0) <---> (0, 0) <---> (+intervalMargin, 0)，
+     *     在绘图时会对 path 自动进行旋转或移动来展示全部的圆点动画
      *
      * @param offsetPixels 值只会在 -intervalMargin 到 +intervalMargin 之间
      * @param intervalMargin 两个圆点间的距离值
@@ -259,16 +342,6 @@ abstract class AbstractIndicatorsView(context: Context) : View(context), IIndica
         path: Path,
         radius: Float,
         offsetPixels: Float,
-        intervalMargin: Float
+        intervalMargin: Float,
     )
-
-    /**
-     * 用于得到背景小圆点的颜色
-     */
-    abstract fun getBackgroundCircleColor(): Int
-
-    /**
-     * 用于得到移动的图形的颜色
-     */
-    abstract fun getMovePathColor(): Int
 }

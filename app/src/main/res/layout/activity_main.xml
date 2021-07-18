@@ -21,11 +21,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:slide_adjacentPageInterval="16dp"
-        app:slide_imgHeight="400dp"
+        app:slide_viewHeight="400dp"
         app:slide_imgRadius="20dp"
         app:slide_outPageInterval="40dp"
-        app:slide_indicatorsStyle="normal"
-        app:slide_indicatorsBannerColor="@color/test"/>
+        app:indicators_circleRadius="6dp"
+        app:indicators_intervalMargin="24dp"
+        app:indicators_style="zoom"
+        app:indicators_outerGravity="left"
+        app:indicators_backgroundColor="@color/test"/>
 
     <Button
         android:id="@+id/button"

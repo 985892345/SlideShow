@@ -18,9 +18,9 @@ abstract class BaseRecyclerAdapter<VH : RecyclerView.ViewHolder> : RecyclerView.
     /**
      * 调用 SlideView#notifyRefresh 后，因为 notifyItemChanged 传入了 payload，所以该方法会被调用
      */
-    @Deprecated("利用接口刷新在该方法中实现! 重写时请注意!", ReplaceWith(""))
+    @Deprecated("利用接口刷新在该方法中实现，重写时请注意!")
     override fun onBindViewHolder(holder: VH, position: Int, payloads: MutableList<Any>) {
-        if (array.contains(position)) {
+        if (array.indexOfKey(position) >= 0) {
             val conditionWithListener = array.get(position)
             when (conditionWithListener.condition) {
                 Refresh.Condition.COEXIST -> {
@@ -49,7 +49,7 @@ abstract class BaseRecyclerAdapter<VH : RecyclerView.ViewHolder> : RecyclerView.
     /**
      * **WARNING：** 请不要自己调用
      */
-    fun setRefreshListener(
+    internal fun setRefreshListener(
         position: Int,
         @Refresh.Condition
         condition: Int,

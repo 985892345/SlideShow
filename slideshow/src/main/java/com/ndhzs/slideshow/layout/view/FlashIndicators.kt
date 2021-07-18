@@ -8,18 +8,17 @@ import com.ndhzs.slideshow.layout.AbstractIndicatorsView
  * .....
  * @author 985892345
  * @email 2767465918@qq.com
- * @data 2021/6/15
+ * @data 2021/7/16
  */
-class CommonIndicators(
-    context: Context,
-) : AbstractIndicatorsView(context) {
-
+class FlashIndicators(
+    context: Context
+) : AbstractIndicatorsView(context)  {
     override fun onDrawMovePath(
         path: Path,
         radius: Float,
         offsetPixels: Float,
-        intervalMargin: Float
+        intervalMargin: Float,
     ) {
-        path.addCircle(offsetPixels, 0F, radius, Path.Direction.CCW)
+        path.addCircle(0F, 0F, radius, Path.Direction.CCW)
     }
 }

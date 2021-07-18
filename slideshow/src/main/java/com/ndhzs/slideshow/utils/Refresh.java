@@ -21,7 +21,8 @@ public class Refresh {
     public @interface Condition {
 
         /**
-         * 1、将 OnRefreshListener 接口中的处理覆盖之前 onBindViewHolder 中的处理
+         * 1、将 OnRefreshListener 接口中的处理与之前 onBindViewHolder 中的处理共存，
+         * 调用循序为 onBindViewHolder 先调用
          * <p/>
          * 2、实现原理为调用 notifyItemChanged(position, payload)，该方法会调用
          *  onBindViewHolder(holder: VH, position: Int, payloads: MutableList<Any>)
@@ -36,8 +37,7 @@ public class Refresh {
         int COEXIST = 0;
 
         /**
-         * 1、将 OnRefreshListener 接口中的处理与之前 onBindViewHolder 中的处理共存，
-         * 调用循序为 onBindViewHolder 先调用
+         * 1、将 OnRefreshListener 接口中的处理覆盖之前 onBindViewHolder 中的处理
          * <p/>
          * 2、实现原理为调用 notifyItemChanged(position, payload)，该方法会调用
          *  onBindViewHolder(holder: VH, position: Int, payloads: MutableList<Any>)

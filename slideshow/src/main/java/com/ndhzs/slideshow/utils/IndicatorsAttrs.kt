@@ -1,7 +1,10 @@
 package com.ndhzs.slideshow.utils
 
 import android.content.res.TypedArray
+import androidx.annotation.ColorInt
+import androidx.annotation.Px
 import com.ndhzs.slideshow.R
+import com.ndhzs.slideshow.layout.AbstractIndicatorsView
 
 /**
  * .....
@@ -23,21 +26,30 @@ class IndicatorsAttrs private constructor() {
     var indicatorInnerGravity = Indicators.InnerGravity.CENTER
         internal set
 
-    var indicatorRadius = 20F
+    var indicatorCircleRadius = AbstractIndicatorsView.CIRCLE_RADIUS
         internal set
-    var indicatorColor = 0xFFFAFAFA.toInt()
+    var indicatorCircleColor = AbstractIndicatorsView.CIRCLE_COLOR
         internal set
-    var indicatorBannerColor = 0x00000000
+    var indicatorBackgroundCircleColor = AbstractIndicatorsView.BACKGROUND_CIRCLE_COLOR
+        internal set
+    var indicatorBackgroundColor = AbstractIndicatorsView.BACKGROUND_COLOR
+        internal set
+    var indicatorWrapWidth = AbstractIndicatorsView.WRAP_WIDTH
+        internal set
+    var intervalMargin = AbstractIndicatorsView.INTERVAL_MARGIN
         internal set
 
     internal fun initialize(ty: TypedArray) {
-        isShowIndicators = ty.getBoolean(R.styleable.SlideShow_slide_isShowIndicators, isShowIndicators)
-        indicatorStyle = ty.getInt(R.styleable.SlideShow_slide_indicatorsStyle, indicatorStyle)
-        indicatorOuterGravity = ty.getInt(R.styleable.SlideShow_slide_indicatorsOuterGravity, indicatorOuterGravity)
-        indicatorInnerGravity = ty.getInt(R.styleable.SlideShow_slide_indicatorsOuterGravity, indicatorInnerGravity)
-        indicatorRadius = ty.getDimension(R.styleable.SlideShow_slide_indicatorsRadius, indicatorRadius)
-        indicatorColor = ty.getColor(R.styleable.SlideShow_slide_indicatorsColor, indicatorColor)
-        indicatorBannerColor = ty.getColor(R.styleable.SlideShow_slide_indicatorsBannerColor, indicatorBannerColor)
+        isShowIndicators = ty.getBoolean(R.styleable.SlideShow_Indicators_isShow, isShowIndicators)
+        indicatorStyle = ty.getInt(R.styleable.SlideShow_indicators_style, indicatorStyle)
+        indicatorOuterGravity = ty.getInt(R.styleable.SlideShow_indicators_outerGravity, indicatorOuterGravity)
+        indicatorInnerGravity = ty.getInt(R.styleable.SlideShow_indicators_innerGravity, indicatorInnerGravity)
+        indicatorCircleRadius = ty.getDimension(R.styleable.SlideShow_indicators_circleRadius, indicatorCircleRadius)
+        indicatorCircleColor = ty.getColor(R.styleable.SlideShow_indicators_circleColor, indicatorCircleColor)
+        indicatorBackgroundCircleColor = ty.getColor(R.styleable.SlideShow_indicators_backgroundCircleColor, indicatorBackgroundCircleColor)
+        indicatorBackgroundColor = ty.getColor(R.styleable.SlideShow_indicators_backgroundColor, indicatorBackgroundColor)
+        indicatorWrapWidth = ty.getDimension(R.styleable.SlideShow_indicators_wrapWidth, indicatorWrapWidth)
+        intervalMargin = ty.getDimension(R.styleable.SlideShow_indicators_intervalMargin, intervalMargin)
         setAttrs()
     }
 
@@ -49,26 +61,12 @@ class IndicatorsAttrs private constructor() {
         private val mAttrs = IndicatorsAttrs()
 
         /**
-         * 设置指示器的横幅背景颜色
+         * 设置指示器的样式
+         *
+         * @see style 数据来自 [Indicators.Style]
          */
-        fun setIndicatorsBannerColor(color: Int): Builder {
-            mAttrs.indicatorBannerColor = color
-            return this
-        }
-
-        /**
-         * 设置指示器的圆点颜色
-         */
-        fun setIndicatorsColor(color: Int): Builder {
-            mAttrs.indicatorColor = color
-            return this
-        }
-
-        /**
-         * 设置指示器的圆点半径
-         */
-        fun setIndicatorsRadius(radius: Float): Builder {
-            mAttrs.indicatorRadius = radius
+        fun setIndicatorsStyle(@Indicators.Style style: Int): Builder {
+            mAttrs.indicatorStyle = style
             return this
         }
 
@@ -88,17 +86,55 @@ class IndicatorsAttrs private constructor() {
          * @param gravity 数据来自 [Indicators.InnerGravity]
          */
         fun setIndicatorsInnerGravity(@Indicators.InnerGravity gravity: Int): Builder {
-            mAttrs.indicatorOuterGravity = gravity
+            mAttrs.indicatorInnerGravity = gravity
             return this
         }
 
         /**
-         * 设置指示器的样式
-         *
-         * @see style 数据来自 [Indicators.Style]
+         * 设置指示器的圆点半径
          */
-        fun setIndicatorsStyle(@Indicators.Style style: Int): Builder {
-            mAttrs.indicatorStyle = style
+        fun setIndicatorsCircleRadius(@Px radius: Float): Builder {
+            mAttrs.indicatorCircleRadius = radius
+            return this
+        }
+
+        /**
+         * 设置指示器的圆点颜色
+         */
+        fun setIndicatorsCircleColor(@ColorInt color: Int): Builder {
+            mAttrs.indicatorCircleColor = color
+            return this
+        }
+
+        /**
+         * 设置指示器的圆点的背景颜色
+         */
+        fun setIndicatorsBackgroundCircleColor(@ColorInt color: Int): Builder {
+            mAttrs.indicatorBackgroundCircleColor = color
+            return this
+        }
+
+        /**
+         * 设置指示器的横幅背景颜色
+         */
+        fun setIndicatorsBackgroundColor(@ColorInt color: Int): Builder {
+            mAttrs.indicatorBackgroundColor = color
+            return this
+        }
+
+        /**
+         * 设置指示器横幅最小边的宽度
+         */
+        fun setIndicatorWrapWidth(@Px indicatorWrapWidth: Float): Builder {
+            mAttrs.indicatorWrapWidth = indicatorWrapWidth
+            return this
+        }
+
+        /**
+         * 设置指示器两个圆点间的距离值
+         */
+        fun setIntervalMargin(@Px interval: Float): Builder {
+            mAttrs.intervalMargin = interval
             return this
         }
 

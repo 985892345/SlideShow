@@ -13,8 +13,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:slide_imgWight="160dp"
-        app:slide_imgHeight="240dp"
+        app:slide_viewWidth="160dp"
+        app:slide_viewHeight="240dp"
         app:slide_adjacentPageInterval="40dp"
         app:slide_imgRadius="20dp"/>
 

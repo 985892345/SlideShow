@@ -8,15 +8,17 @@ import android.content.res.Resources
  * @email 2767465918@qq.com
  * @data 2021/6/17
  */
-internal object SlideShowUtils {
+internal class SlideShowUtils {
 
-    fun dpToPx(dp: Int): Float {
-        val scale = Resources.getSystem().displayMetrics.density
-        return dp * scale
-    }
+    companion object {
+        fun dpToPx(dp: Int): Float {
+            val scale = Resources.getSystem().displayMetrics.density
+            return dp * scale
+        }
 
-    fun dpToPx(dp: Float): Float {
-        val scale = Resources.getSystem().displayMetrics.density
-        return dp * scale
+        fun dpToPx(dp: Float): Float {
+            val scale = Resources.getSystem().displayMetrics.density
+            return dp * scale
+        }
     }
 }
