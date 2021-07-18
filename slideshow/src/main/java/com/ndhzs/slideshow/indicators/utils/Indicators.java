@@ -1,10 +1,10 @@
-package com.ndhzs.slideshow.utils;
+package com.ndhzs.slideshow.indicators.utils;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.RestrictTo;
 import java.lang.annotation.Retention;
 import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX;
-import static com.ndhzs.slideshow.utils.Indicators.Style.*;
+import static com.ndhzs.slideshow.indicators.utils.Indicators.Style.*;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
@@ -24,7 +24,7 @@ public class Indicators {
             EXTEND_ABSTRACT_INDICATORS,
             NORMAL,
             ZOOM,
-            WATER_DROP,
+            //WATER_DROP,
             FLASH,
     })
     public @interface Style {
@@ -54,10 +54,10 @@ public class Indicators {
          */
         int ZOOM = 3;
 
-        /**
-         * 一个带有水滴动画的指示器
-         */
-        int WATER_DROP = 4;
+//        /**
+//         * 一个带有水滴动画的指示器
+//         */
+//        int WATER_DROP = 4;
 
         /**
          * 一个无动画的指示器，直接闪现过去

@@ -5,7 +5,7 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.Px
 import androidx.viewpager2.widget.ViewPager2.ScrollState
-import com.ndhzs.slideshow.utils.Indicators
+import com.ndhzs.slideshow.indicators.utils.Indicators
 
 /**
  * 如果你想实现自己的指示器，建议继承于 AbstractIndicatorsView 抽象类，此类省略了绘制全部轨迹的过程，

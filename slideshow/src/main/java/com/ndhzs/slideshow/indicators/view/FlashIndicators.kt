@@ -1,8 +1,8 @@
-package com.ndhzs.slideshow.layout.view
+package com.ndhzs.slideshow.indicators.view
 
 import android.content.Context
 import android.graphics.Path
-import com.ndhzs.slideshow.layout.AbstractIndicatorsView
+import com.ndhzs.slideshow.indicators.AbstractIndicatorsView
 
 /**
  * .....

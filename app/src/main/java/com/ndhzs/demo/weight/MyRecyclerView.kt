@@ -19,11 +19,11 @@ class MyRecyclerView(context: Context, attrs: AttributeSet?)
 
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
-                Log.d("123","(MyRecyclerView.kt:21)-->> TOUCH_SLOP = ${ViewConfiguration.get(context).scaledTouchSlop}")
-                Log.d("123","(MyRecyclerView.kt:21)-->> Recycler_ Down    state = $scrollState")
+//                Log.d("123","(MyRecyclerView.kt:21)-->> TOUCH_SLOP = ${ViewConfiguration.get(context).scaledTouchSlop}")
+//                Log.d("123","(MyRecyclerView.kt:21)-->> Recycler_ Down    state = $scrollState")
             }
             MotionEvent.ACTION_MOVE -> {
-                Log.d("123","(MyRecyclerView.kt:24)-->> Recycler_Move   x = ${ev.x.toInt()}   y = ${ev.y.toInt()}   state = $scrollState")
+//                Log.d("123","(MyRecyclerView.kt:24)-->> Recycler_Move   x = ${ev.x.toInt()}   y = ${ev.y.toInt()}   state = $scrollState")
             }
         }
 
@@ -34,10 +34,10 @@ class MyRecyclerView(context: Context, attrs: AttributeSet?)
 
         when (e.action) {
             MotionEvent.ACTION_DOWN -> {
-                Log.d("123","(MyRecyclerView.kt:38)-->> I_Recycler_Down")
+//                Log.d("123","(MyRecyclerView.kt:38)-->> I_Recycler_Down")
             }
             MotionEvent.ACTION_MOVE -> {
-                Log.d("123","(MyRecyclerView.kt:41)-->> I_Recycler_Move")
+//                Log.d("123","(MyRecyclerView.kt:41)-->> I_Recycler_Move")
             }
         }
 

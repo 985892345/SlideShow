@@ -26,8 +26,7 @@
         app:slide_outPageInterval="40dp"
         app:indicators_circleRadius="6dp"
         app:indicators_intervalMargin="24dp"
-        app:indicators_style="zoom"
-        app:indicators_outerGravity="left"
+        app:indicators_style="normal"
         app:indicators_backgroundColor="@color/test"/>
 
     <Button

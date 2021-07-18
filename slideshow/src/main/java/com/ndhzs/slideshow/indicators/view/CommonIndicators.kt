@@ -1,27 +1,25 @@
-package com.ndhzs.slideshow.layout.view
+package com.ndhzs.slideshow.indicators.view
 
 import android.content.Context
 import android.graphics.Path
-import android.util.Log
-import androidx.annotation.FloatRange
-import com.ndhzs.slideshow.layout.AbstractIndicatorsView
-import kotlin.math.*
+import com.ndhzs.slideshow.indicators.AbstractIndicatorsView
 
 /**
  * .....
  * @author 985892345
  * @email 2767465918@qq.com
- * @data 2021/6/19
+ * @data 2021/6/15
  */
-class WaterDropIndicators(
-    context: Context
+class CommonIndicators(
+    context: Context,
 ) : AbstractIndicatorsView(context) {
 
     override fun onDrawMovePath(
         path: Path,
         radius: Float,
         offsetPixels: Float,
-        intervalMargin: Float,
+        intervalMargin: Float
     ) {
+        path.addCircle(offsetPixels, 0F, radius, Path.Direction.CCW)
     }
 }

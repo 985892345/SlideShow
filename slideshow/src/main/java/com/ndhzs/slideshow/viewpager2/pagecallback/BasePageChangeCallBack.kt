@@ -15,73 +15,23 @@ internal class BasePageChangeCallBack(
 ) : ViewPager2.OnPageChangeCallback() {
 
     companion object {
+
         /**
-         * 开启循环后，两边会多出4块，且是重复的
-         * **WARNING：** [mItemCount] 在以下图中为 7                        mItemCount - 3  mItemCount - 2  mItemCount - 1
-         * ------------    ------------    ------------    ------------    ------------    ------------    ------------
-         * |          |    |          |    |          |    |          |    |          |    |          |    |          |
-         * |          |    |          |    |     0    |    |     1    |    |     2    |    |          |    |          |
-         * |     b    |    |     c    |    |     a    |    |     b    |    |     c    |    |     a    |    |     b    |
-         * |     0    |    |     1    |    |     2    |    |     3    |    |     4    |    |     5    |    |     6    |
-         * |          |    |          |    |          |    |          |    |          |    |          |    |          |
-         * ------------    ------------    ------------    ------------    ------------    ------------    ------------
-         *                                 |------------------------------------------|
-         *                                                 FalsePosition
-         * |----------------------------------------------------------------------------------------------------------|
-         *                                                  RealPosition
+         * 由 position 取余而得到的显示的数据位置
          */
-        fun getRealPosition(isCirculate: Boolean, falsePosition: Int): Int {
+        fun getFalsePosition(isCirculate: Boolean, realPosition: Int, dataSize: Int): Int {
             return if (isCirculate) {
-                falsePosition + 2
-            }else falsePosition
-        }
-
-        fun getFalsePosition(isCirculate: Boolean, realPosition: Int, realAmount: Int): Int {
-            return if (isCirculate) {
-                if (realPosition <= 1) {
-                    realPosition + realAmount - 6
-                }else if (realPosition >= realAmount - 2) {
-                    realPosition - realAmount + 2
-                }else realPosition - 2
+                realPosition % dataSize
             }else realPosition
         }
 
-        fun getFalseAmount(isCirculate: Boolean, realAmount: Int): Int {
-            return if (isCirculate) {
-                realAmount - 4
-            }else realAmount
-        }
-
-        fun getRealAmount(isCirculate: Boolean, falsePosition: Int): Int {
-            return if (isCirculate) {
-                falsePosition + 4
-            }else falsePosition
-        }
-
-        fun getAllRealPositionArray(isCirculate: Boolean, falsePosition: Int, realAmount: Int): IntArray {
-            return if (isCirculate) {
-                if (falsePosition <= 1) {
-                    intArrayOf(falsePosition + 2, falsePosition + realAmount - 2)
-                }else if (falsePosition >= realAmount - 6)  {
-                    intArrayOf(falsePosition - realAmount + 6, falsePosition + 2)
-                }else {
-                    intArrayOf(falsePosition + 2)
-                }
-            }else {
-                intArrayOf(falsePosition)
-            }
-        }
-
-        fun getAnotherRealPosition(isCirculate: Boolean, realPosition: Int, realAmount: Int): Int {
-            return if (isCirculate) {
-                if (realPosition <= 3) {
-                    realPosition + realAmount - 4
-                }else if (realPosition >= realAmount - 4) {
-                    realPosition - realAmount + 4
-                }else {
-                    realPosition
-                }
-            }else realPosition
+        /**
+         * 得到该回到的居中的位置
+         */
+        fun getBackPosition(currentItem: Int, itemCount: Int, dataSize: Int): Int {
+            val dataPosition = currentItem % dataSize
+            val centerPosition = itemCount / 2
+            return centerPosition + (dataPosition - centerPosition % dataSize)
         }
     }
 
@@ -93,11 +43,11 @@ internal class BasePageChangeCallBack(
         mCallBack = null
     }
 
-    fun openCirculateEnabled(itemCount: Int) {
+    fun openCirculateEnabled(dataSize: Int) {
         if (!mIsCirculate) {
-            if (itemCount > 1) {
+            if (dataSize > 1) {
                 mIsCirculate = true
-                mItemCount = itemCount + 4
+                mDataSize = dataSize
             }
         }
     }
@@ -110,68 +60,25 @@ internal class BasePageChangeCallBack(
     private var mCallBack: ViewPager2.OnPageChangeCallback? = null
     private var mPositionFloat = 0F
     private var mIsCirculate = false
-    private var mItemCount = 1
+    private var mDataSize = 1
+    private var mIdlePosition = -1
 
     override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+        if (mIdlePosition == -1) mIdlePosition = position
         mPositionFloat = position + positionOffset
         pageScrolledCallback(position, positionOffset, positionOffsetPixels)
     }
 
-    /**
-     * 开启循环后，两边会多出4块，且是重复的
-     * **WARNING：** [mItemCount] 在以下图中为 7                        mItemCount - 3  mItemCount - 2  mItemCount - 1
-     * ------------    ------------    ------------    ------------    ------------    ------------    ------------
-     * |          |    |          |    |          |    |          |    |          |    |          |    |          |
-     * |          |    |          |    |     0    |    |     1    |    |     2    |    |          |    |          |
-     * |     b    |    |     c    |    |     a    |    |     b    |    |     c    |    |     a    |    |     b    |
-     * |     0    |    |     1    |    |     2    |    |     3    |    |     4    |    |     5    |    |     6    |
-     * |          |    |          |    |          |    |          |    |          |    |          |    |          |
-     * ------------    ------------    ------------    ------------    ------------    ------------    ------------
-     *                                 |------------------------------------------|
-     *                                                 FalsePosition
-     * |----------------------------------------------------------------------------------------------------------|
-     *                                                  RealPosition
-     */
     private fun pageScrolledCallback(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
         if (mIsCirculate) {
-            if (mPositionFloat in 0.95F..1.05F) {
-                viewPager2.setCurrentItem(
-                    getAnotherRealPosition(mIsCirculate, 1, mItemCount),false
-                )
-            }else if (mPositionFloat in mItemCount - 3 + 0.95F..mItemCount - 2 + 0.05F) {
-                viewPager2.setCurrentItem(
-                    getAnotherRealPosition(mIsCirculate, mItemCount - 2, mItemCount), false
-                )
-            }else if (mPositionFloat in 0.001F..0.1F) {
-                viewPager2.setCurrentItem(
-                    getAnotherRealPosition(mIsCirculate, 0, mItemCount),false
-                )
-            }else if (mPositionFloat in mItemCount - 2 + 0.9F..mItemCount - 5 + 0.999F) {
-                viewPager2.setCurrentItem(
-                    getAnotherRealPosition(mIsCirculate, mItemCount - 1, mItemCount), false
-                )
-            }
-            if (mPositionFloat < 2 || mPositionFloat > mItemCount - 3) {
-                if (mPositionFloat < 2) {
-                    mIndicators?.onPageScrolled(
-                        getFalsePosition(mIsCirculate, 2, mItemCount),
-                        0F, 0)
-                    mCallBack?.onPageScrolled(
-                        getFalsePosition(mIsCirculate, 2, mItemCount),
-                        0F, 0)
-                }
-                if (mPositionFloat > mItemCount - 3) {
-                    mIndicators?.onPageScrolled(
-                        getFalsePosition(mIsCirculate, mItemCount - 3, mItemCount),
-                        0F, 0)
-                    mCallBack?.onPageScrolled(
-                        getFalsePosition(mIsCirculate, mItemCount - 3, mItemCount),
-                        0F, 0)
-                }
+            if (mPositionFloat % mDataSize > mDataSize - 1) {// 当划出边界时
+                val pf = (1 - positionOffset) * (mDataSize - 1)// 这里可以表示从右边界到左边界(或相反)经过的值
+                mIndicators?.onPageScrolled(pf.toInt(), pf - pf.toInt(), positionOffsetPixels)
+                mCallBack?.onPageScrolled(pf.toInt(), pf - pf.toInt(), positionOffsetPixels)
                 return
             }
         }
-        val falsePosition = getFalsePosition(mIsCirculate, position, mItemCount)
+        val falsePosition = getFalsePosition(mIsCirculate, position, mDataSize)
         mIndicators?.onPageScrolled(
             falsePosition,
             positionOffset,
@@ -187,12 +94,24 @@ internal class BasePageChangeCallBack(
     }
 
     private fun pageSelected(position: Int) {
-        val falsePosition = getFalsePosition(mIsCirculate, position, mItemCount)
+        val falsePosition = getFalsePosition(mIsCirculate, position, mDataSize)
         mIndicators?.onPageSelected(falsePosition)
         mCallBack?.onPageSelected(falsePosition)
     }
 
     override fun onPageScrollStateChanged(state: Int) {
+        if (state == ViewPager2.SCROLL_STATE_IDLE) {
+            mIdlePosition = mPositionFloat.toInt()
+            /*
+            * 开启循环后，vp 一来就处于中间位置，且左右两边划到边界时需要划很久，只要一旦停下来就快速又移到中间位置
+            * */
+            if (mIsCirculate) {
+                viewPager2.setCurrentItem(
+                    getBackPosition(viewPager2.currentItem, viewPager2.adapter!!.itemCount, mDataSize),
+                    false
+                )
+            }
+        }
         mIndicators?.onPageScrollStateChanged(state)
         mCallBack?.onPageScrollStateChanged(state)
     }

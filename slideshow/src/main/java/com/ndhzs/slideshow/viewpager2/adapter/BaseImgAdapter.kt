@@ -2,11 +2,12 @@ package com.ndhzs.slideshow.viewpager2.adapter
 
 import android.util.SparseArray
 import android.widget.ImageView
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.ndhzs.slideshow.myinterface.OnImgRefreshListener
 import com.ndhzs.slideshow.utils.SlideShowAttrs
-import com.ndhzs.slideshow.utils.Refresh
+import com.ndhzs.slideshow.indicators.utils.Refresh
 import com.ndhzs.slideshow.viewpager2.pagecallback.BasePageChangeCallBack
 
 /**
@@ -17,10 +18,11 @@ import com.ndhzs.slideshow.viewpager2.pagecallback.BasePageChangeCallBack
  */
 abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(ShapeableImageView::class.java) {
 
-    private lateinit var oldData: List<T>
     private val datas = ArrayList<T>()
     private val array = SparseArray<ConditionWithListener>()
     private var mIsCirculate = false
+    private var size = 0
+    private lateinit var mViewPager2: ViewPager2
 
     override fun onConfigureView(view: ShapeableImageView, viewType: Int) {
         view.scaleType = ImageView.ScaleType.CENTER_CROP
@@ -50,7 +52,7 @@ abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(Shapeable
             val conditionWithListener = array[falsePosition]
             when (conditionWithListener.condition) {
                 Refresh.Condition.COEXIST -> {
-                    onBindImageView(oldData[falsePosition], view, holder, falsePosition)
+                    onBindImageView(datas[falsePosition], view, holder, falsePosition)
                     conditionWithListener.l.onRefresh(view, holder, falsePosition)
                 }
                 Refresh.Condition.COVERED -> {
@@ -68,39 +70,26 @@ abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(Shapeable
                 }
             }
         }else if (payloads.isEmpty()) {
-            onBindImageView(oldData[falsePosition], view, holder, falsePosition)
+            onBindImageView(datas[falsePosition], view, holder, falsePosition)
         }
     }
 
     /**
-     * **WARNING：** 请不要重写
+     * **WARNING：** 可以调用，但禁止重写!
      */
-    @Deprecated("可以调用，但禁止重写! ")
     override fun getItemCount(): Int {
-        return datas.size
+        return size
     }
 
     /**
      * **WARNING：** 请不要自己调用
      */
     @Deprecated("禁止自己调用! ")
-    internal fun initialize(datas: List<T>, attrs: SlideShowAttrs) {
-        this.oldData = datas
+    internal fun initialize(datas: List<T>, viewPager2: ViewPager2, attrs: SlideShowAttrs) {
         this.datas.addAll(datas)
+        size = datas.size
         initializeAttrs(attrs)
-    }
-
-    /**
-     * 在修改了外部数组后可以调用该方法来刷新
-     */
-    fun refreshData() {
-        this.datas.clear()
-        this.datas.addAll(oldData)
-        if (mIsCirculate) {
-            mIsCirculate = false
-            openCirculateEnabled()
-        }
-        notifyDataSetChanged()
+        mViewPager2 = viewPager2
     }
 
     /**
@@ -108,9 +97,9 @@ abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(Shapeable
      */
     @Deprecated("禁止自己调用! ")
     internal fun refreshData(datas: List<T>) {
-        this.oldData = datas
         this.datas.clear()
         this.datas.addAll(datas)
+        size = datas.size
         if (mIsCirculate) {
             mIsCirculate = false
             openCirculateEnabled()
@@ -126,15 +115,7 @@ abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(Shapeable
         if (!mIsCirculate) {
             if (datas.size > 1) {
                 mIsCirculate = true
-                val size = datas.size
-                val newList = ArrayList<T>()
-                newList.add(datas[size - 2])
-                newList.add(datas[size - 1])
-                newList.addAll(datas)
-                newList.add(datas[0])
-                newList.add(datas[1])
-                datas.clear()
-                datas.addAll(newList)
+                size = if (datas.size <= 13) 39 else datas.size * 3
             }
         }
     }
@@ -147,8 +128,11 @@ abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(Shapeable
                               condition: Int,
                               l: OnImgRefreshListener) {
         array.put(falsePosition, ConditionWithListener(condition, l))
-        BasePageChangeCallBack.getAllRealPositionArray(mIsCirculate, falsePosition, datas.size).forEach {
-            notifyItemChanged(it, BaseRecyclerAdapter.ITEM_REFRESH)
+        val currentItem = mViewPager2.currentItem
+        val dataSize = datas.size
+        val p = currentItem - (currentItem % dataSize - falsePosition)
+        repeat(5) {
+            notifyItemChanged(p - 2 * dataSize + it * dataSize, BaseRecyclerAdapter.ITEM_REFRESH)
         }
     }
 

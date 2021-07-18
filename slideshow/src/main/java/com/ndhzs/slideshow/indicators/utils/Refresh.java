@@ -1,10 +1,10 @@
-package com.ndhzs.slideshow.utils;
+package com.ndhzs.slideshow.indicators.utils;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.RestrictTo;
 import java.lang.annotation.Retention;
 import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX;
-import static com.ndhzs.slideshow.utils.Refresh.Condition.*;
+import static com.ndhzs.slideshow.indicators.utils.Refresh.Condition.*;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**

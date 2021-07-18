@@ -3,7 +3,7 @@ package com.ndhzs.slideshow.viewpager2.adapter
 import android.util.SparseArray
 import androidx.recyclerview.widget.RecyclerView
 import com.ndhzs.slideshow.myinterface.OnRefreshListener
-import com.ndhzs.slideshow.utils.Refresh
+import com.ndhzs.slideshow.indicators.utils.Refresh
 
 /**
  * .....

@@ -16,6 +16,8 @@
         app:slide_viewWidth="160dp"
         app:slide_viewHeight="240dp"
         app:slide_adjacentPageInterval="40dp"
-        app:slide_imgRadius="20dp"/>
+        app:slide_imgRadius="20dp"
+        app:indicators_style="normal"
+        app:indicators_circleColor="@color/black"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

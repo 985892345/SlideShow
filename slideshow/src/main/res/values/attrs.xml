@@ -78,7 +78,7 @@
             <!--一个带有放大动画指示器-->
             <enum name="zoom" value="3"/>
             <!--一个带有水滴动画的指示器-->
-            <enum name="water_drop" value="4"/>
+            <!--<enum name="water_drop" value="4"/>-->
             <!--一个无动画的指示器，直接闪现过去-->
             <enum name="flash" value="5"/>
         </attr>

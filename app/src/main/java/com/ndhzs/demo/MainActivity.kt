@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.viewpager2.widget.ViewPager2
 import com.ndhzs.slideshow.SlideShow
+import com.ndhzs.slideshow.indicators.utils.Refresh
 import com.ndhzs.slideshow.viewpager2.transformer.*
 
 class MainActivity : AppCompatActivity() {
@@ -25,13 +26,12 @@ class MainActivity : AppCompatActivity() {
         val colorList = listOf(0xFFFF9800.toInt(), 0xFF616161.toInt(), 0xFFC8C8C8.toInt())
 
         mSlideShow.setTransformer(ScaleInTransformer()) // 设置移动动画
-                .setDelayTime(5000)
-                .openCirculateEnabled()
-                .setTimeInterpolator(AccelerateDecelerateInterpolator())
-                .setStartItem(1) // 设置起始位置
-                .setAdapter(colorList) {
-                    data, imageView, holder, position ->
-                    imageView.setBackgroundColor(data)
+            .setDelayTime(3000)
+            .openCirculateEnabled()
+            .setTimeInterpolator(AccelerateDecelerateInterpolator())
+            .setStartItem(1) // 设置起始位置
+            .setAdapter(colorList) { data, imageView, holder, position ->
+                imageView.setBackgroundColor(data)
         }
         /*
         * 进行滑动监听
@@ -51,11 +51,11 @@ class MainActivity : AppCompatActivity() {
         * */
 //        mSlideShow.postDelayed({
 //            Toast.makeText(this, "开始更新", Toast.LENGTH_SHORT).show()
-//            mSlideShow.notifyImgDataChange(listOf(0xFF009688.toInt(), 0xFFC8C8C8.toInt(), 0xFFFF9800.toInt()))
+//            //mSlideShow.notifyImgDataChange(listOf(0xFF009688.toInt(), 0xFFC8C8C8.toInt(), 0xFFFF9800.toInt()))
 //
 ////            mSlideShow.notifyImageViewRefresh(0, Refresh.Condition.COVERED) { imageView, holder, position ->
-////                imageView.setBackgroundColor()
+////                imageView.setBackgroundColor(0xFF009688.toInt())
 ////            }
-//        }, 5000)
+//        }, 3000)
     }
 }

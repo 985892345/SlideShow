@@ -1,10 +1,9 @@
-package com.ndhzs.slideshow.layout.view
+package com.ndhzs.slideshow.indicators.view
 
 import android.content.Context
 import android.graphics.Path
-import android.util.Log
 import androidx.annotation.FloatRange
-import com.ndhzs.slideshow.layout.AbstractIndicatorsView
+import com.ndhzs.slideshow.indicators.AbstractIndicatorsView
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sin

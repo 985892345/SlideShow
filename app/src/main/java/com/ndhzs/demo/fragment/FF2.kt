@@ -31,9 +31,9 @@ class FF2 : Fragment() {
         fragments.add(FF21())
         fragments.add(FF22())
         slideShow
-            .setAdapter(requireActivity(), fragments)
             .setOffscreenPageLimit(1)
             .setOpenNestedScroll(true)
+            .setAdapter(requireActivity(), fragments)
 
         super.onViewCreated(view, savedInstanceState)
     }

@@ -7,6 +7,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.Px
 import androidx.viewpager2.widget.ViewPager2
 import com.ndhzs.slideshow.R
+import com.ndhzs.slideshow.indicators.utils.IndicatorsAttrs
 
 /**
  * .....

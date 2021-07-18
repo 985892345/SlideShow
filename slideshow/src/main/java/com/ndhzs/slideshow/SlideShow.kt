@@ -19,11 +19,13 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.imageview.ShapeableImageView
-import com.ndhzs.slideshow.layout.AbstractIndicatorsView
-import com.ndhzs.slideshow.layout.view.CommonIndicators
-import com.ndhzs.slideshow.layout.view.FlashIndicators
-import com.ndhzs.slideshow.layout.view.WaterDropIndicators
-import com.ndhzs.slideshow.layout.view.ZoomIndicators
+import com.ndhzs.slideshow.indicators.AbstractIndicatorsView
+import com.ndhzs.slideshow.indicators.utils.Indicators
+import com.ndhzs.slideshow.indicators.utils.Refresh
+import com.ndhzs.slideshow.indicators.view.CommonIndicators
+import com.ndhzs.slideshow.indicators.view.FlashIndicators
+import com.ndhzs.slideshow.indicators.view.WaterDropIndicators
+import com.ndhzs.slideshow.indicators.view.ZoomIndicators
 import com.ndhzs.slideshow.myinterface.IIndicator
 import com.ndhzs.slideshow.myinterface.OnImgRefreshListener
 import com.ndhzs.slideshow.myinterface.OnRefreshListener
@@ -198,19 +200,20 @@ class SlideShow : CardView, NestedScrollingParent2 {
      *
      * **NOTICE：** 使用该方法可能意为着你需要自动滑动，请使用 [setAutoSlideEnabled]
      */
-    fun <T> setAdapter(datas: List<T>, imgAdapter: BaseImgAdapter<T>): SlideShow {
-        imgAdapter.initialize(datas, mAttrs)
+    fun <T> setAdapter(datas: List<T>, imgAdapter: BaseImgAdapter<T>) {
+        imgAdapter.initialize(datas, mViewPager2, mAttrs)
         mViewPager2.adapter = imgAdapter
-        mImgRealItemCount = datas.size
-        if (mIsCirculateEnabled && mImgRealItemCount > 1) {
+        mImgDataSize = datas.size
+        if (mIsCirculateEnabled && mImgDataSize > 1) {
             imgAdapter.openCirculateEnabled()
-            mPageChangeCallback.openCirculateEnabled(mImgRealItemCount)
+            mPageChangeCallback.openCirculateEnabled(mImgDataSize)
+            if (finalItem == -1) finalItem = 0
+            finalItem = BasePageChangeCallBack.getBackPosition(finalItem, imgAdapter.itemCount, mImgDataSize)
             if (mIsAutoSlideEnabled) { // 在延迟加载 adapter 后，ViewPager2 仍然会显示，但 onAttachedToWindow 已经被调用，所以要在这里调用开始
                 start()
             }
         }
         afterSetAdapter()
-        return this
     }
 
     /**
@@ -228,7 +231,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
              holder: BaseViewAdapter<ShapeableImageView>.BaseViewHolder,
              position: Int
             ) -> Unit
-    ): SlideShow {
+    ) {
         val adapter = object : BaseImgAdapter<T>() {
             override fun onBindImageView(
                     data: T,
@@ -239,17 +242,16 @@ class SlideShow : CardView, NestedScrollingParent2 {
                 onBindImageView.invoke(data, imageView, holder, position)
             }
         }
-        return setAdapter(datas, adapter)
+        setAdapter(datas, adapter)
     }
 
     /**
      * 用于设置自己的 View 的 Adapter
      */
-    fun <V: View> setAdapter(viewAdapter: BaseViewAdapter<V>): SlideShow {
+    fun <V: View> setAdapter(viewAdapter: BaseViewAdapter<V>) {
         throwAdapterLoadError()
         viewAdapter.initializeAttrs(mAttrs)
         afterSetAdapter()
-        return this
     }
 
     /**
@@ -264,7 +266,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
             position: Int,
             payloads: MutableList<Any>
         ) -> Unit
-    ): SlideShow {
+    ) {
         val adapter = object : BaseViewAdapter<V>(viewClass) {
             override fun getItemCount(): Int {
                 return getItemCount.invoke()
@@ -280,7 +282,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
             }
 
         }
-        return setAdapter(adapter)
+        setAdapter(adapter)
     }
 
     /**
@@ -288,22 +290,20 @@ class SlideShow : CardView, NestedScrollingParent2 {
      *
      * 该方法简写了创建 FragmentStateAdapter 的过程，传入数据后会自动帮你设置 FragmentStateAdapter
      */
-    fun setAdapter(fragmentActivity: FragmentActivity, fragments: List<Fragment>): SlideShow {
+    fun setAdapter(fragmentActivity: FragmentActivity, fragments: List<Fragment>) {
         throwAdapterLoadError()
         val adapter = object : BaseFragmentStateAdapter(fragmentActivity, fragments) {}
         mViewPager2.adapter = adapter
         afterSetAdapter()
-        return this
     }
 
     /**
      * 用于设置 FragmentStateAdapter
      */
-    fun setAdapter(fragmentAdapter: FragmentStateAdapter): SlideShow {
+    fun setAdapter(fragmentAdapter: FragmentStateAdapter) {
         throwAdapterLoadError()
         mViewPager2.adapter = fragmentAdapter
         afterSetAdapter()
-        return this
     }
 
     /**
@@ -312,11 +312,10 @@ class SlideShow : CardView, NestedScrollingParent2 {
      * 不推荐使用自己的 adapter，建议使用 BaseRecyclerAdapter，用法一样，但可以调用 [notifyItemRefresh] 方法进行特殊刷新
      */
     @Deprecated("不建议使用自己的 adapter", ReplaceWith("使用 BaseRecyclerAdapter 代替"))
-    fun setAdapter(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>): SlideShow {
+    fun setAdapter(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>) {
         throwAdapterLoadError()
         mViewPager2.adapter = adapter
         afterSetAdapter()
-        return this
     }
 
     /**
@@ -324,11 +323,10 @@ class SlideShow : CardView, NestedScrollingParent2 {
      *
      * 使用该 adapter 后可以调用 [notifyItemRefresh] 方法进行特殊刷新
      */
-    fun setAdapter(adapter: BaseRecyclerAdapter<out RecyclerView.ViewHolder>): SlideShow {
+    fun setAdapter(adapter: BaseRecyclerAdapter<out RecyclerView.ViewHolder>) {
         throwAdapterLoadError()
         mViewPager2.adapter = adapter
         afterSetAdapter()
-        return this
     }
 
     private fun throwAdapterLoadError() {
@@ -347,9 +345,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
     private fun afterSetAdapter() {
         if (this::mIndicators.isInitialized) {
             val adapter = mViewPager2.adapter!!
-            mIndicators.setAmount(
-                BasePageChangeCallBack.getFalseAmount(mIsCirculateEnabled, adapter.itemCount)
-            )
+            mIndicators.setAmount(if (adapter !is BaseImgAdapter<*>) adapter.itemCount else mImgDataSize)
         }
     }
 
@@ -400,10 +396,6 @@ class SlideShow : CardView, NestedScrollingParent2 {
      */
     fun notifyDataSetChanged() {
         val adapter = mViewPager2.adapter
-        if (adapter is BaseImgAdapter<*>) {
-            adapter.refreshData()
-            return
-        }
         adapter!!.notifyDataSetChanged()
     }
 
@@ -458,14 +450,14 @@ class SlideShow : CardView, NestedScrollingParent2 {
      */
     fun setAutoSlideEnabled(enabled: Boolean): SlideShow {
         if (enabled) {
-            val adapter = mViewPager2.adapter
-            if (adapter != null) {
-                if (adapter !is BaseImgAdapter<*>) {
-                    throw IllegalAccessException(
-                            "Your ${SlideShowAttrs.Library_name}#setAutoSlideEnabled(): " +
-                                    "The adapter does not support automatic sliding!")
-                }
-            }
+//            val adapter = mViewPager2.adapter
+//            if (adapter != null) {
+//                if (adapter !is BaseImgAdapter<*>) {
+//                    throw IllegalAccessException(
+//                            "Your ${SlideShowAttrs.Library_name}#setAutoSlideEnabled(): " +
+//                                    "The adapter does not support automatic sliding!")
+//                }
+//            }
             openCirculateEnabled()
         }else {
             stop()
@@ -493,23 +485,22 @@ class SlideShow : CardView, NestedScrollingParent2 {
             return this
         }
 
-        val adapter = mViewPager2.adapter
-        if (adapter != null) { // 等于 null 时交给 adapter 设置
-            if (adapter is BaseImgAdapter<*>) {
-                if (mImgRealItemCount > 1) {
-                    adapter.openCirculateEnabled()
-                    mPageChangeCallback.openCirculateEnabled(mImgRealItemCount)
-                }else {
-                    mIsCirculateEnabled = false
-                }
-            }else {
-                throw IllegalAccessException(
-                        "Your ${SlideShowAttrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
-                                "The adapter does not support circular presentation!")
-            }
-        }
+//        val adapter = mViewPager2.adapter
+//        if (adapter != null) { // 等于 null 时交给 adapter 设置
+//            if (adapter is BaseImgAdapter<*>) {
+//                if (mImgRealItemCount > 1) {
+//                    adapter.openCirculateEnabled()
+//                    mPageChangeCallback.openCirculateEnabled(mImgRealItemCount)
+//                }else {
+//                    mIsCirculateEnabled = false
+//                }
+//            }else {
+//                throw IllegalAccessException(
+//                        "Your ${SlideShowAttrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
+//                                "The adapter does not support circular presentation!")
+//            }
+//        }
         mIsCirculateEnabled = true
-        finalItem = 0
         return this
     }
 
@@ -669,7 +660,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
         finalItem = item
         return this
     }
-    private var finalItem = 0
+    private var finalItem = -1
 
     /**
      * 与 ViewPager2#setCurrentItem 相同，默认有动画
@@ -682,9 +673,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
         if (mViewPager2.isFakeDragging) {
             mViewPager2.endFakeDrag()
         }
-        mViewPager2.setCurrentItem(
-                BasePageChangeCallBack.getRealPosition(mIsCirculateEnabled, item),
-                smoothScroll)
+        mViewPager2.setCurrentItem(item, smoothScroll)
         return this
     }
 
@@ -735,7 +724,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
      */
     fun start() {
         if (mIsAutoSlideEnabled) {
-            if (!mIsSliding && mImgRealItemCount != 1) {
+            if (!mIsSliding && mImgDataSize != 1) {
                 mIsSliding = true
                 mRunnableManger.postDelay(mDelayTime, mAutoSlideRunnable)
                 if (!this::mInterpolator.isInitialized) {
@@ -770,7 +759,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
         mViewPager2.setPageTransformer(transformer)
         transformer
     }
-    private var mImgRealItemCount = 1
+    private var mImgDataSize = 1
     private var mIsAutoSlideEnabled = false
     private var mIsSliding = false
     private var mDelayTime = 4000L
@@ -802,6 +791,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
         mViewPager2.getChildAt(0).setBackgroundColor(0x00000000)
         attachViewToParent(mViewPager2, -1, lp)
         mRunnableManger.post {
+            if (finalItem == -1) finalItem = 0
             setCurrentItem(finalItem, false)
         }
     }
@@ -813,13 +803,13 @@ class SlideShow : CardView, NestedScrollingParent2 {
      */
     private fun initIndicators() {
         val style = mAttrs.mIndicatorsAttrs.indicatorStyle
-        if (style != Indicators.Style.NO_SHOW ||
-            style != Indicators.Style.SELF_VIEW ||
+        if (style != Indicators.Style.NO_SHOW &&
+            style != Indicators.Style.SELF_VIEW &&
             style != Indicators.Style.EXTEND_ABSTRACT_INDICATORS) {
             val indicators = when (style) {
                 Indicators.Style.NORMAL -> CommonIndicators(context)
                 Indicators.Style.ZOOM -> ZoomIndicators(context)
-                Indicators.Style.WATER_DROP -> WaterDropIndicators(context)
+                //Indicators.Style.WATER_DROP -> WaterDropIndicators(context)
                 Indicators.Style.FLASH -> FlashIndicators(context)
                 else -> CommonIndicators(context)
             }

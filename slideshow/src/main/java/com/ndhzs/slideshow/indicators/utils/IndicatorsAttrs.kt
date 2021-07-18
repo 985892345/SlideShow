@@ -1,10 +1,10 @@
-package com.ndhzs.slideshow.utils
+package com.ndhzs.slideshow.indicators.utils
 
 import android.content.res.TypedArray
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
 import com.ndhzs.slideshow.R
-import com.ndhzs.slideshow.layout.AbstractIndicatorsView
+import com.ndhzs.slideshow.indicators.AbstractIndicatorsView
 
 /**
  * .....

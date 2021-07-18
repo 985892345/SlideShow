@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.ndhzs.demo.fragment.FF1
 import com.ndhzs.demo.fragment.FF2
@@ -23,10 +24,9 @@ class ViewShowActivity : AppCompatActivity() {
         fragments.add(FF3())
 
         slideShow
-            .setAdapter(this, fragments)
-            .setOffscreenPageLimit(1)
             .setUserInputEnabled(true)
             .setOpenNestedScroll(true)
+            .setAdapter(this, fragments)
 
         findViewById<Button>(R.id.btn_1).setOnClickListener {
             slideShow.setCurrentItem(0)

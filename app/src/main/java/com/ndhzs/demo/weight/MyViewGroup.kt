@@ -17,13 +17,13 @@ class MyViewGroup(context: Context, attrs: AttributeSet?) : FrameLayout(context,
 
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
-                Log.d("123","(MyViewGroup.kt:20)-->> Down")
+//                Log.d("123","(MyViewGroup.kt:20)-->> Down")
             }
             MotionEvent.ACTION_MOVE -> {
-                Log.d("123","(MyViewGroup.kt:23)-->> Move")
+                //Log.d("123","(MyViewGroup.kt:23)-->> Move")
             }
             MotionEvent.ACTION_UP -> {
-                Log.d("123","(MyViewGroup.kt:26)-->> Up")
+               // Log.d("123","(MyViewGroup.kt:26)-->> Up")
             }
         }
 
@@ -34,13 +34,13 @@ class MyViewGroup(context: Context, attrs: AttributeSet?) : FrameLayout(context,
 
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
-                Log.d("123","(MyViewGroup.kt:37)-->> Down")
+                //Log.d("123","(MyViewGroup.kt:37)-->> Down")
             }
             MotionEvent.ACTION_MOVE -> {
-                Log.d("123","(MyViewGroup.kt:40)-->> Move")
+                //Log.d("123","(MyViewGroup.kt:40)-->> Move")
             }
             MotionEvent.ACTION_UP ->{
-                Log.d("123","(MyViewGroup.kt:43)-->> Up")
+                //Log.d("123","(MyViewGroup.kt:43)-->> Up")
             }
         }
         return true
