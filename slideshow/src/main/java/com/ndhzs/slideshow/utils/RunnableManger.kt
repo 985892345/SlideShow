@@ -12,47 +12,27 @@ import androidx.collection.ArrayMap
  */
 class RunnableManger(private val view: View) {
 
-    private val map = ArrayMap<Runnable, Runnable>()
+    private val hashSet = HashSet<Runnable>()
 
-    @Synchronized
     fun post(runnable: Runnable) {
-        val run = Runnable {
-            runnable.run()
-            map.remove(runnable)
-        }
-        val lastRun = map[runnable]
-        if (lastRun != null) {
-            view.removeCallbacks(lastRun)
-        }
-        map[runnable] = run
-        view.post(run)
+        hashSet.add(runnable)
+        view.post(runnable)
     }
 
-    @Synchronized
-    fun postDelay(delayMillis: Long, runnable: Runnable) {
-        val run = Runnable {
-            runnable.run()
-            map.remove(runnable)
-        }
-        val lastRun = map[runnable]
-        if (lastRun != null) {
-            view.removeCallbacks(lastRun)
-        }
-        map[runnable] = run
-        view.postDelayed(run, delayMillis)
+    fun postDelayed(delayMillis: Long, runnable: Runnable) {
+        hashSet.add(runnable)
+        view.postDelayed(runnable, delayMillis)
     }
 
-    @Synchronized
     fun remove(runnable: Runnable): Boolean {
-        val run = map.remove(runnable)
-        view.removeCallbacks(run)
-        return run != null
+        view.removeCallbacks(runnable)
+        return hashSet.remove(runnable)
     }
 
     fun destroy() {
-        map.forEach {
-            view.removeCallbacks(it.value)
+        hashSet.forEach {
+            view.removeCallbacks(it)
         }
-        map.clear()
+        hashSet.clear()
     }
 }
