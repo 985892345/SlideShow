@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
         mSlideShow.setTransformer(ScaleInTransformer()) // 设置移动动画
             .setDelayTime(3000)
             .openCirculateEnabled()
+            .setAutoSlideEnabled(true)
             .setTimeInterpolator(AccelerateDecelerateInterpolator())
             .setStartItem(1) // 设置起始位置
             .setAdapter(colorList) { data, imageView, holder, position ->

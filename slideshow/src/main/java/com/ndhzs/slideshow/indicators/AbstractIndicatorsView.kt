@@ -280,7 +280,7 @@ abstract class AbstractIndicatorsView(
     private fun drawMovePath(canvas: Canvas) {
         mPath.reset()
         onDrawMovePath(mPath, circleRadius, offsetPixels, intervalMargin)
-        val p = if (position >= idlePosition) position else position + 1
+        val p = if (position >= idlePosition || positionFloat == 0F) position else position + 1
         judgeStyle(
             horizontal = {
                 mMatrix.setTranslate(frontMargin + p * intervalMargin, wrapWidth / 2)
