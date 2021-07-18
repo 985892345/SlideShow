@@ -14,24 +14,35 @@ class RunnableManger(private val view: View) {
 
     private val map = ArrayMap<Runnable, Runnable>()
 
+    @Synchronized
     fun post(runnable: Runnable) {
         val run = Runnable {
             runnable.run()
             map.remove(runnable)
         }
+        val lastRun = map[runnable]
+        if (lastRun != null) {
+            view.removeCallbacks(lastRun)
+        }
         map[runnable] = run
         view.post(run)
     }
 
+    @Synchronized
     fun postDelay(delayMillis: Long, runnable: Runnable) {
         val run = Runnable {
             runnable.run()
             map.remove(runnable)
         }
+        val lastRun = map[runnable]
+        if (lastRun != null) {
+            view.removeCallbacks(lastRun)
+        }
         map[runnable] = run
         view.postDelayed(run, delayMillis)
     }
 
+    @Synchronized
     fun remove(runnable: Runnable): Boolean {
         val run = map.remove(runnable)
         view.removeCallbacks(run)
