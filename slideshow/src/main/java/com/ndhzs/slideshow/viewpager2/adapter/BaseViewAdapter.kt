@@ -14,9 +14,17 @@ import com.ndhzs.slideshow.utils.SlideShowAttrs
  * @email 2767465918@qq.com
  * @data 2021/7/16
  */
-abstract class BaseViewAdapter<V: View>(
-    private val viewClass: Class<V>
-) : RecyclerView.Adapter<BaseViewAdapter<V>.BaseViewHolder>() {
+abstract class BaseViewAdapter<V: View>: RecyclerView.Adapter<BaseViewAdapter<V>.BaseViewHolder> {
+
+    private lateinit var view: V
+    constructor(view: V): super() {
+        this.view = view
+    }
+
+    private lateinit var viewClass: Class<V>
+    constructor(viewClass: Class<V>): super() {
+        this.viewClass = viewClass
+    }
 
     protected lateinit var attrs: SlideShowAttrs
 
@@ -29,7 +37,14 @@ abstract class BaseViewAdapter<V: View>(
         viewType: Int,
     ): BaseViewHolder {
         parent.setBackgroundColor(0x00000000)
-        return BaseViewHolder(ViewLayout(parent.context, viewClass, viewType))
+        return BaseViewHolder(
+            ViewLayout(
+                parent.context,
+                if (this::view.isInitialized) view
+                else viewClass.getConstructor(Context::class.java).newInstance(parent.context),
+                viewType
+            )
+        )
     }
 
     /**
@@ -75,9 +90,8 @@ abstract class BaseViewAdapter<V: View>(
         val view = itemView.getChildAt(0) as V
     }
 
-    inner class ViewLayout(context: Context, viewClass: Class<V>, viewType: Int) : FrameLayout(context) {
+    inner class ViewLayout(context: Context, view: V, viewType: Int) : FrameLayout(context) {
         init {
-            val view = viewClass.getConstructor(Context::class.java).newInstance(context)
             val lp = LayoutParams(attrs.viewWidth, attrs.viewHeight)
             lp.gravity = Gravity.CENTER
             lp.leftMargin = attrs.viewMarginHorizontal
