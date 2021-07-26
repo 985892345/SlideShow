@@ -1,4 +1,4 @@
-package com.ndhzs.demo.adapter
+package com.ndhzs.slideshowdemo.adapter
 
 import android.util.SparseArray
 import android.view.LayoutInflater

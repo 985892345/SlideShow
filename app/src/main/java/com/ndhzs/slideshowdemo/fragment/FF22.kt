@@ -1,7 +1,6 @@
-package com.ndhzs.demo.fragment
+package com.ndhzs.slideshowdemo.fragment
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,8 +8,8 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.ndhzs.demo.R
-import com.ndhzs.demo.adapter.BaseSimplifyRecyclerAdapter
+import com.ndhzs.slideshowdemo.R
+import com.ndhzs.slideshowdemo.adapter.BaseSimplifyRecyclerAdapter
 import com.ndhzs.slideshow.SlideShow
 import com.ndhzs.slideshow.viewpager2.transformer.AlphaPageTransformer
 import com.ndhzs.slideshow.viewpager2.transformer.ScaleInTransformer

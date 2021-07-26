@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/test2">
 
-    <com.ndhzs.demo.weight.MyRecyclerView
+    <com.ndhzs.slideshowdemo.weight.MyRecyclerView
         android:id="@+id/fg_1_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

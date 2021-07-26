@@ -116,14 +116,14 @@ class SlideShowAttrs private constructor(){
         }else if (adjacentPageInterval != -1 && outPageInterval == -1) { // 这种情况下只有当宽度不为 match_parent 时才允许设置相邻边距
             if (orientation == ViewPager2.ORIENTATION_HORIZONTAL) {
                 if (viewWidth == ViewGroup.LayoutParams.MATCH_PARENT) {
-                    throw IllegalAccessException(
+                    throw RuntimeException(
                             "Your $Library_name: " +
                                     "When slide_imgWidth is match_parent, " +
                                     "you must set slide_outPageInterval after setting the slide_adjacentPageInterval!")
                 }
             }else {
                 if (viewHeight == ViewGroup.LayoutParams.MATCH_PARENT) {
-                    throw IllegalAccessException(
+                    throw RuntimeException(
                             "Your $Library_name: " +
                                     "When slide_imgHeight is match_parent, " +
                                     "you must set slide_outPageInterval after setting the slide_adjacentPageInterval!")
@@ -136,7 +136,7 @@ class SlideShowAttrs private constructor(){
                     viewMarginHorizontal = adjacentPageInterval / 2
                     pageInterval = outPageInterval - viewMarginHorizontal
                     if (pageInterval < 0) {
-                        throw IllegalAccessException(
+                        throw RuntimeException(
                                 "Your $Library_name: " +
                                         "slide_outPageInterval must > slide_adjacentPageInterval / 2 !")
                     }
@@ -148,7 +148,7 @@ class SlideShowAttrs private constructor(){
                     viewMarginVertical = adjacentPageInterval / 2
                     pageInterval = outPageInterval - viewMarginVertical
                     if (pageInterval < 0) {
-                        throw IllegalAccessException(
+                        throw RuntimeException(
                                 "Your $Library_name: " +
                                         "slide_outPageInterval must > slide_adjacentPageInterval / 2 !")
                     }
@@ -204,7 +204,7 @@ class SlideShowAttrs private constructor(){
          */
         fun setViewWidth(@Px pixel: Int): Builder {
             if (pixel < -2) {
-                throw IllegalAccessException(
+                throw RuntimeException(
                     "Your $Library_name#setViewWidth(): The pixel is < -2")
             }
             mAttrs.viewWidth = pixel
@@ -216,7 +216,7 @@ class SlideShowAttrs private constructor(){
          */
         fun setViewHeight(@Px pixel: Int): Builder {
             if (pixel < -2) {
-                throw IllegalAccessException(
+                throw RuntimeException(
                     "Your $Library_name#setViewHeight(): The pixel is < -2")
             }
             mAttrs.viewHeight = pixel
@@ -268,7 +268,7 @@ class SlideShowAttrs private constructor(){
             mAttrs.outPageInterval = outPageInterval
             mAttrs.pageInterval = outPageInterval - adjacentPageInterval / 2
             if (mAttrs.pageInterval < 0) {
-                throw IllegalAccessException(
+                throw RuntimeException(
                     "Your $Library_name#setPageInterval(): " +
                             "outPageInterval must > adjacentPageInterval / 2 !")
             }

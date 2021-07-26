@@ -115,7 +115,7 @@ abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(Shapeable
         if (!mIsCirculate) {
             if (datas.size > 1) {
                 mIsCirculate = true
-                size = if (datas.size <= 13) 39 else datas.size * 3
+                size = if (datas.size <= 10) 30 else datas.size * 3
             }
         }
     }
@@ -131,7 +131,7 @@ abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(Shapeable
         val currentItem = mViewPager2.currentItem
         val dataSize = datas.size
         val p = currentItem - (currentItem % dataSize - falsePosition)
-        repeat(5) {
+        repeat(5) { // 只刷新当前页面附近相同的图片，因为其他的没有被加载
             notifyItemChanged(p - 2 * dataSize + it * dataSize, BaseRecyclerAdapter.ITEM_REFRESH)
         }
     }

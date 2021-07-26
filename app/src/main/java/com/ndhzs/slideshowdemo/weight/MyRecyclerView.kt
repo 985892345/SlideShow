@@ -1,10 +1,8 @@
-package com.ndhzs.demo.weight
+package com.ndhzs.slideshowdemo.weight
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
-import android.view.ViewConfiguration
 import androidx.recyclerview.widget.RecyclerView
 
 /**

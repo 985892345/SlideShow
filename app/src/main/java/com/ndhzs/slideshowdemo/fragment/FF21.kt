@@ -1,11 +1,11 @@
-package com.ndhzs.demo.fragment
+package com.ndhzs.slideshowdemo.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.ndhzs.demo.R
+import com.ndhzs.slideshowdemo.R
 
 /**
  * .....

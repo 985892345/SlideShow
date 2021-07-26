@@ -1,4 +1,4 @@
-package com.ndhzs.demo
+package com.ndhzs.slideshowdemo
 
 import org.junit.Test
 

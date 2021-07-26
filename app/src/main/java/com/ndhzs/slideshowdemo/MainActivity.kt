@@ -1,16 +1,12 @@
-package com.ndhzs.demo
+package com.ndhzs.slideshowdemo
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Button
-import android.widget.Toast
-import androidx.lifecycle.MutableLiveData
 import androidx.viewpager2.widget.ViewPager2
 import com.ndhzs.slideshow.SlideShow
-import com.ndhzs.slideshow.indicators.utils.Refresh
 import com.ndhzs.slideshow.viewpager2.transformer.*
 
 class MainActivity : AppCompatActivity() {

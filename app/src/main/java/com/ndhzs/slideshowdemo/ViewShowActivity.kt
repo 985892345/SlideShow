@@ -1,14 +1,12 @@
-package com.ndhzs.demo
+package com.ndhzs.slideshowdemo
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.ndhzs.demo.fragment.FF1
-import com.ndhzs.demo.fragment.FF2
-import com.ndhzs.demo.fragment.FF3
+import com.ndhzs.slideshowdemo.fragment.FF1
+import com.ndhzs.slideshowdemo.fragment.FF2
+import com.ndhzs.slideshowdemo.fragment.FF3
 import com.ndhzs.slideshow.SlideShow
 
 class ViewShowActivity : AppCompatActivity() {

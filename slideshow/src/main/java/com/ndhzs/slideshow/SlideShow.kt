@@ -332,12 +332,12 @@ class SlideShow : CardView, NestedScrollingParent2 {
 
     private fun throwAdapterLoadError() {
         if (mIsAutoSlideEnabled) {
-            throw IllegalAccessException(
+            throw RuntimeException(
                 "Your ${SlideShowAttrs.Library_name}#setAdapter()、setAutoSlideEnabled(): " +
                         "The adapter does not support automatic sliding!")
         }
         if (mIsCirculateEnabled) {
-            throw IllegalAccessException(
+            throw RuntimeException(
                 "Your ${SlideShowAttrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
                         "The adapter does not support circular presentation!")
         }
@@ -364,7 +364,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
         if (adapter is BaseImgAdapter<*>) {
             adapter.setImgRefreshListener(position, condition, l)
         }else {
-            throw IllegalAccessException(
+            throw RuntimeException(
                     "Your ${SlideShowAttrs.Library_name}#notifyImageViewRefresh(): " +
                             "The adapter is not BaseImgAdapter, so you can't use function of notifyImageViewRefresh!")
         }
@@ -384,7 +384,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
         if (adapter is BaseRecyclerAdapter) {
             adapter.setRefreshListener(position, condition, l)
         }else {
-            throw IllegalAccessException(
+            throw RuntimeException(
                     "Your ${SlideShowAttrs.Library_name}#notifyRefresh(): " +
                             "The adapter is not BaseRecyclerAdapter, so you can't use function of notifyRefresh!")
         }
@@ -410,7 +410,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
         if (adapter is BaseImgAdapter<*>) {
             adapter.refreshData(data as List<Nothing>)
         }else {
-            throw IllegalAccessException(
+            throw RuntimeException(
                 "Your ${SlideShowAttrs.Library_name}#notifyImgDataChange(): " +
                         "The adapter is not BaseImgAdapter, so you can't use function of notifyImgDataChange!")
         }
@@ -435,7 +435,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
      *
      * 只会在 [Refresh.Condition.COEXIST]、[Refresh.Condition.COVERED] 时调用才有用
      */
-    fun clearImgRefreshListener() {
+    fun clearRefreshListener() {
         val adapter = mViewPager2.adapter
         if (adapter is BaseImgAdapter<*>) {
             adapter.clearImgRefreshListener()
@@ -537,17 +537,17 @@ class SlideShow : CardView, NestedScrollingParent2 {
      */
     fun setYourIndicators(yourIndicators: IIndicator): SlideShow {
         if (mAttrs.mIndicatorsAttrs.indicatorStyle != Indicators.Style.SELF_VIEW) {
-            throw IllegalAccessException(
+            throw RuntimeException(
                 "Your ${SlideShowAttrs.Library_name}#setYourIndicators(): " +
                         "You must set the style to \"self_view\" or \"self_view_elsewhere\" before using your own indicators!")
         }
         if (isAttachedToWindow) {
-            throw IllegalAccessException(
+            throw RuntimeException(
                 "Your ${SlideShowAttrs.Library_name}#setYourIndicators(): " +
                         "You cannot set the indicators after the SlideShow has been attached to window!")
         }
         if (this::mIndicators.isInitialized) {
-            throw IllegalAccessException(
+            throw RuntimeException(
                 "Your ${SlideShowAttrs.Library_name}#setYourIndicators(): " +
                         "You have set the indicators!")
         }
@@ -558,17 +558,17 @@ class SlideShow : CardView, NestedScrollingParent2 {
 
     fun setYourIndicators(yourIndicators: AbstractIndicatorsView): SlideShow {
         if (mAttrs.mIndicatorsAttrs.indicatorStyle != Indicators.Style.EXTEND_ABSTRACT_INDICATORS) {
-            throw IllegalAccessException(
+            throw RuntimeException(
                 "Your ${SlideShowAttrs.Library_name}#setYourIndicators(): " +
                         "You must set the style to \"extend_abstract_indicators\" before using your own indicators!")
         }
         if (isAttachedToWindow) {
-            throw IllegalAccessException(
+            throw RuntimeException(
                 "Your ${SlideShowAttrs.Library_name}#setYourIndicators(): " +
                         "You cannot set the indicators after the SlideShow has been attached to window!")
         }
         if (this::mIndicators.isInitialized) {
-            throw IllegalAccessException(
+            throw RuntimeException(
                 "Your ${SlideShowAttrs.Library_name}#setYourIndicators(): " +
                         "You have set the indicators!")
         }
@@ -894,7 +894,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
         var isError = false
         val itemCount = mViewPager2.adapter!!.itemCount
         if (mIsCirculateEnabled) {
-            if (position !in 0 until itemCount - 4) {
+            if (position !in 0 until mImgDataSize) {
                 isError = true
             }
         }else {
@@ -905,7 +905,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
         if (isError) {
             throw IndexOutOfBoundsException(
                     "Your ${SlideShowAttrs.Library_name}#slowlySlide(): " +
-                            "The $positionMessage is < 0 or >= itemCount")
+                            "The $positionMessage is < 0 or >= ViewPager2#itemCount")
         }
     }
 
