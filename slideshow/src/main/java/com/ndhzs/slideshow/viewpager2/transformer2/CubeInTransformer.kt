@@ -17,7 +17,6 @@
 package com.ndhzs.slideshow.viewpager2.transformer2
 
 import android.view.View
-import com.ndhzs.slideshow.viewpager2.transformer2.ABaseTransformer
 
 open class CubeInTransformer : ABaseTransformer() {
 

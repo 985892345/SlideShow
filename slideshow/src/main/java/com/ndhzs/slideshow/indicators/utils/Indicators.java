@@ -22,9 +22,9 @@ public class Indicators {
             NO_SHOW,
             SELF_VIEW,
             EXTEND_ABSTRACT_INDICATORS,
-            NORMAL,
+            MOVE,
             ZOOM,
-            //WATER_DROP,
+            WATER_DROP,
             FLASH,
     })
     public @interface Style {
@@ -47,17 +47,17 @@ public class Indicators {
         /**
          * 一个简单的平滑指示器
          */
-        int NORMAL = 2;
+        int MOVE = 2;
 
         /**
          * 一个带有放大动画指示器
          */
         int ZOOM = 3;
 
-//        /**
-//         * 一个带有水滴动画的指示器
-//         */
-//        int WATER_DROP = 4;
+        /**
+         * 一个带有水滴动画的指示器
+         */
+        int WATER_DROP = 4;
 
         /**
          * 一个无动画的指示器，直接闪现过去

@@ -14,17 +14,7 @@ import com.ndhzs.slideshow.utils.SlideShowAttrs
  * @email 2767465918@qq.com
  * @data 2021/7/16
  */
-abstract class BaseViewAdapter<V: View>: RecyclerView.Adapter<BaseViewAdapter<V>.BaseViewHolder> {
-
-    private lateinit var view: V
-    constructor(view: V): super() {
-        this.view = view
-    }
-
-    private lateinit var viewClass: Class<V>
-    constructor(viewClass: Class<V>): super() {
-        this.viewClass = viewClass
-    }
+abstract class BaseViewAdapter<V: View>: RecyclerView.Adapter<BaseViewAdapter<V>.BaseViewHolder>() {
 
     protected lateinit var attrs: SlideShowAttrs
 
@@ -34,17 +24,17 @@ abstract class BaseViewAdapter<V: View>: RecyclerView.Adapter<BaseViewAdapter<V>
     @Deprecated("禁止重写! ")
     override fun onCreateViewHolder(
         parent: ViewGroup,
-        viewType: Int,
+        viewType: Int
     ): BaseViewHolder {
-        parent.setBackgroundColor(0x00000000)
-        return BaseViewHolder(
+        parent.setBackgroundColor(attrs.backgroundColor)
+        val holder = BaseViewHolder(
             ViewLayout(
                 parent.context,
-                if (this::view.isInitialized) view
-                else viewClass.getConstructor(Context::class.java).newInstance(parent.context),
-                viewType
+                getNewView(parent.context)
             )
         )
+        create(holder)
+        return holder
     }
 
     /**
@@ -67,7 +57,7 @@ abstract class BaseViewAdapter<V: View>: RecyclerView.Adapter<BaseViewAdapter<V>
     override fun onBindViewHolder(
         holder: BaseViewHolder,
         position: Int,
-        payloads: MutableList<Any>,
+        payloads: MutableList<Any>
     ) {
         onBindViewHolder(holder.view, holder, position, payloads)
     }
@@ -79,18 +69,22 @@ abstract class BaseViewAdapter<V: View>: RecyclerView.Adapter<BaseViewAdapter<V>
         this.attrs = attrs
     }
 
-    abstract fun onBindViewHolder(view: V, holder: BaseViewHolder, position: Int, payloads: MutableList<Any>)
+    /**
+     * 该方法用于在 onCreateViewHolder 调用时生成新的 view 对象
+     */
+    abstract fun getNewView(context: Context): V
 
     /**
-     * 该方法用于在 onCreateViewHolder 调用时配置自己 view 的一些属性
+     * 是指 ViewHolder 刚被创建时, 此时用于进行一些只需进行一次的操作, 如: 设置点击监听、设置用于 item 整个生命周期的对象
      */
-    open fun onConfigureView(view: V, viewType: Int) {}
+    abstract fun create(holder: BaseViewHolder)
+    abstract fun onBindViewHolder(view: V, holder: BaseViewHolder, position: Int, payloads: MutableList<Any>)
 
     inner class BaseViewHolder(itemView: ViewGroup) : RecyclerView.ViewHolder(itemView) {
         val view = itemView.getChildAt(0) as V
     }
 
-    inner class ViewLayout(context: Context, view: V, viewType: Int) : FrameLayout(context) {
+    inner class ViewLayout(context: Context, view: V) : FrameLayout(context) {
         init {
             val lp = LayoutParams(attrs.viewWidth, attrs.viewHeight)
             lp.gravity = Gravity.CENTER
@@ -98,7 +92,6 @@ abstract class BaseViewAdapter<V: View>: RecyclerView.Adapter<BaseViewAdapter<V>
             lp.topMargin = attrs.viewMarginVertical
             lp.rightMargin = attrs.viewMarginHorizontal
             lp.bottomMargin = attrs.viewMarginVertical
-            onConfigureView(view, viewType)
             val lpFl = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -107,5 +100,13 @@ abstract class BaseViewAdapter<V: View>: RecyclerView.Adapter<BaseViewAdapter<V>
             attachViewToParent(view, -1, lp)
             setBackgroundColor(0x00000000)
         }
+    }
+
+    companion object {
+
+        /**
+         * 表示刷新 item
+         */
+        internal const val ITEM_REFRESH = 0
     }
 }

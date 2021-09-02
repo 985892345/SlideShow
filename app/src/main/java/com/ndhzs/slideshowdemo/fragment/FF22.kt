@@ -44,9 +44,12 @@ class FF22 : Fragment() {
                         .setStartItem(1) // 设置起始位置
                         .setDelayTime(5000) // 设置自动滚动时间，但目前还没有实现自动滚动
                         .setTimeInterpolator(AccelerateDecelerateInterpolator())
-                        .setAdapter(colorList) { data, imageView, _, _ ->
-                            imageView.setBackgroundColor(data)
-                        }
+                        .setImgAdapter(colorList,
+                            create = {},
+                            refactor = { data, imageView, _, _ ->
+                                imageView.setBackgroundColor(data)
+                            }
+                        )
                 })
             .onBindView(R.layout.item_recycler_other, OtherViewHolder::class.java,
                 { position -> position > 0 },

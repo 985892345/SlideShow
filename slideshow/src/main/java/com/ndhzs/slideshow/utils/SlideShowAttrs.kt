@@ -4,9 +4,9 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.ViewGroup
 import androidx.annotation.ColorInt
-import androidx.annotation.Px
 import androidx.viewpager2.widget.ViewPager2
 import com.ndhzs.slideshow.R
+import com.ndhzs.slideshow.SlideShow
 import com.ndhzs.slideshow.indicators.utils.IndicatorsAttrs
 
 /**
@@ -18,14 +18,16 @@ import com.ndhzs.slideshow.indicators.utils.IndicatorsAttrs
 class SlideShowAttrs private constructor(){
 
     companion object {
-        internal const val Library_name = "SlideShow"
+        internal val Lib_name = SlideShow::class.java.simpleName
     }
 
     var viewWidth = ViewGroup.LayoutParams.MATCH_PARENT
         internal set
     var viewHeight = ViewGroup.LayoutParams.MATCH_PARENT
         internal set
-    var imgDefaultColor = 0xFFFAFAFA.toInt()
+    var imgDefaultColor = 0x00000000
+        internal set
+    var backgroundColor = 0x00000000
         internal set
 
     private var viewMargin = 0
@@ -75,24 +77,22 @@ class SlideShowAttrs private constructor(){
         viewHeight = ty.getLayoutDimension(R.styleable.SlideShow_slide_viewHeight, viewHeight)
 
         imgDefaultColor = ty.getColor(R.styleable.SlideShow_slide_imgDefaultColor, imgDefaultColor)
+        backgroundColor = ty.getColor(R.styleable.SlideShow_slide_backgroundColor, backgroundColor)
 
-        viewMargin = ty.getDimension(R.styleable.SlideShow_slide_viewMargin, 0F).toInt()
-        viewMarginHorizontal = ty.getDimension(R.styleable.SlideShow_slide_viewMarginHorizontal, 0F).toInt()
-        viewMarginVertical = ty.getDimension(R.styleable.SlideShow_slide_viewMarginVertical, 0F).toInt()
-
+        viewMargin = ty.getDimensionPixelSize(R.styleable.SlideShow_slide_viewMargin, viewMargin)
+        viewMarginHorizontal = ty.getDimensionPixelSize(R.styleable.SlideShow_slide_viewMarginHorizontal, viewMarginHorizontal)
+        viewMarginVertical = ty.getDimensionPixelSize(R.styleable.SlideShow_slide_viewMarginVertical, viewMarginVertical)
 
         orientation = ty.getInt(R.styleable.SlideShow_slide_orientation, orientation)
 
-        adjacentPageInterval = ty.getDimension(R.styleable.SlideShow_slide_adjacentPageInterval, -1F).toInt()
-        outPageInterval = ty.getDimension(R.styleable.SlideShow_slide_outPageInterval, -1F).toInt()
+        adjacentPageInterval = ty.getDimensionPixelSize(R.styleable.SlideShow_slide_adjacentPageInterval, adjacentPageInterval)
+        outPageInterval = ty.getDimensionPixelSize(R.styleable.SlideShow_slide_outPageInterval, outPageInterval)
 
-        imgRadius = ty.getDimension(R.styleable.SlideShow_slide_imgRadius, 0F)
+        imgRadius = ty.getDimension(R.styleable.SlideShow_slide_imgRadius, imgRadius)
         imgLeftTopRadius = ty.getDimension(R.styleable.SlideShow_slide_imgLeftTopRadius, imgLeftTopRadius)
         imgRightTopRadius = ty.getDimension(R.styleable.SlideShow_slide_imgRightTopRadius, imgRightTopRadius)
         imgLeftBottomRadius = ty.getDimension(R.styleable.SlideShow_slide_imgLeftBottomRadius, imgLeftBottomRadius)
         imgRightBottomRadius = ty.getDimension(R.styleable.SlideShow_slide_imgRightBottomRadius, imgRightBottomRadius)
-
-//        pageInterval = ty.getDimension(R.styleable.SlideShow_slide_pageInterval, pageInterval)
 
         // 以下为指示器的属性
         mIndicatorsAttrs = IndicatorsAttrs.Builder().build()
@@ -117,14 +117,14 @@ class SlideShowAttrs private constructor(){
             if (orientation == ViewPager2.ORIENTATION_HORIZONTAL) {
                 if (viewWidth == ViewGroup.LayoutParams.MATCH_PARENT) {
                     throw RuntimeException(
-                            "Your $Library_name: " +
+                            "Your $Lib_name: " +
                                     "When slide_imgWidth is match_parent, " +
                                     "you must set slide_outPageInterval after setting the slide_adjacentPageInterval!")
                 }
             }else {
                 if (viewHeight == ViewGroup.LayoutParams.MATCH_PARENT) {
                     throw RuntimeException(
-                            "Your $Library_name: " +
+                            "Your $Lib_name: " +
                                     "When slide_imgHeight is match_parent, " +
                                     "you must set slide_outPageInterval after setting the slide_adjacentPageInterval!")
                 }
@@ -137,7 +137,7 @@ class SlideShowAttrs private constructor(){
                     pageInterval = outPageInterval - viewMarginHorizontal
                     if (pageInterval < 0) {
                         throw RuntimeException(
-                                "Your $Library_name: " +
+                                "Your $Lib_name: " +
                                         "slide_outPageInterval must > slide_adjacentPageInterval / 2 !")
                     }
                 }else {
@@ -149,7 +149,7 @@ class SlideShowAttrs private constructor(){
                     pageInterval = outPageInterval - viewMarginVertical
                     if (pageInterval < 0) {
                         throw RuntimeException(
-                                "Your $Library_name: " +
+                                "Your $Lib_name: " +
                                         "slide_outPageInterval must > slide_adjacentPageInterval / 2 !")
                     }
                 }else {
@@ -172,7 +172,7 @@ class SlideShowAttrs private constructor(){
         /**
          * 使用自带的图片加载的 setAdapter 方法后可以调用，用于设置内部 ImageView 的圆角
          */
-        fun setImgRadius(@Px radius: Float): Builder {
+        fun setImgRadius(radius: Float): Builder {
             mAttrs.imgLeftTopRadius = radius
             mAttrs.imgRightTopRadius = radius
             mAttrs.imgLeftBottomRadius = radius
@@ -183,7 +183,7 @@ class SlideShowAttrs private constructor(){
         /**
          * 使用自带的图片加载的 setAdapter 方法后可以调用，用于设置内部 ImageView 的圆角
          */
-        fun setImgRadius(@Px leftTop: Float, @Px rightTop: Float, @Px leftBottom: Float, @Px rightBottom: Float): Builder {
+        fun setImgRadius(leftTop: Float, rightTop: Float, leftBottom: Float, rightBottom: Float): Builder {
             mAttrs.imgLeftTopRadius = leftTop
             mAttrs.imgRightTopRadius = rightTop
             mAttrs.imgLeftBottomRadius = leftBottom
@@ -200,12 +200,20 @@ class SlideShowAttrs private constructor(){
         }
 
         /**
+         * 设置背景颜色
+         */
+        fun setBackgroundColor(@ColorInt color: Int): Builder {
+            mAttrs.backgroundColor = color
+            return this
+        }
+
+        /**
          * -1 为 match_parent，-2 为 wrap_content
          */
-        fun setViewWidth(@Px pixel: Int): Builder {
+        fun setViewWidth(pixel: Int): Builder {
             if (pixel < -2) {
                 throw RuntimeException(
-                    "Your $Library_name#setViewWidth(): The pixel is < -2")
+                    "Your $Lib_name#setViewWidth(): The pixel is < -2")
             }
             mAttrs.viewWidth = pixel
             return this
@@ -214,16 +222,16 @@ class SlideShowAttrs private constructor(){
         /**
          * -1 为 match_parent，-2 为 wrap_content
          */
-        fun setViewHeight(@Px pixel: Int): Builder {
+        fun setViewHeight(pixel: Int): Builder {
             if (pixel < -2) {
                 throw RuntimeException(
-                    "Your $Library_name#setViewHeight(): The pixel is < -2")
+                    "Your $Lib_name#setViewHeight(): The pixel is < -2")
             }
             mAttrs.viewHeight = pixel
             return this
         }
 
-        fun setViewMargin(@Px viewMargin: Int): Builder {
+        fun setViewMargin(viewMargin: Int): Builder {
             mAttrs.viewMargin = viewMargin
             return this
         }
@@ -231,7 +239,7 @@ class SlideShowAttrs private constructor(){
         /**
          * **WARNING：** 如果在水平滑动时 viewWidth 不为 match_parent 或者设置了 slide_outPageInterval，设置 viewMarginHorizontal 将无效
          */
-        fun setViewMarginHorizontal(@Px viewMarginHorizontal: Int): Builder {
+        fun setViewMarginHorizontal(viewMarginHorizontal: Int): Builder {
             mAttrs.viewMarginHorizontal = viewMarginHorizontal
             return this
         }
@@ -239,7 +247,7 @@ class SlideShowAttrs private constructor(){
         /**
          * **WARNING：** 如果在垂直滑动时 viewHeight 不为 match_parent 或者设置了 slide_outPageInterval，设置 viewMarginVertical 将无效
          */
-        fun setViewMarginVertical(@Px viewMarginVertical: Int): Builder {
+        fun setViewMarginVertical(viewMarginVertical: Int): Builder {
             mAttrs.viewMarginVertical = viewMarginVertical
             return this
         }
@@ -263,13 +271,13 @@ class SlideShowAttrs private constructor(){
          * @param adjacentPageInterval 相邻页面间距
          * @param outPageInterval 内部页面于外部页面的边距
          */
-        fun setPageInterval(@Px adjacentPageInterval: Int, @Px outPageInterval: Int): Builder {
+        fun setPageInterval(adjacentPageInterval: Int, outPageInterval: Int): Builder {
             mAttrs.adjacentPageInterval = adjacentPageInterval
             mAttrs.outPageInterval = outPageInterval
             mAttrs.pageInterval = outPageInterval - adjacentPageInterval / 2
             if (mAttrs.pageInterval < 0) {
                 throw RuntimeException(
-                    "Your $Library_name#setPageInterval(): " +
+                    "Your $Lib_name#setPageInterval(): " +
                             "outPageInterval must > adjacentPageInterval / 2 !")
             }
             return this

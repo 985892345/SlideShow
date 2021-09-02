@@ -17,13 +17,15 @@ import kotlin.math.sin
 class ZoomIndicators(context: Context) : AbstractIndicatorsView(context) {
 
     override fun onDrawMovePath(
-        path: Path,
+        path1: Path,
+        path2: Path,
+        path3: Path,
         radius: Float,
         offsetPixels: Float,
-        intervalMargin: Float,
+        intervalMargin: Float
     ) {
         val zoomRadius = getZoomRadius(radius, abs(offsetPixels) / intervalMargin)
-        path.addCircle(offsetPixels, 0F, zoomRadius, Path.Direction.CCW)
+        path1.addCircle(offsetPixels, 0F, zoomRadius, Path.Direction.CCW)
     }
 
     private fun getZoomRadius(

@@ -24,7 +24,7 @@ class ViewShowActivity : AppCompatActivity() {
         slideShow
             .setUserInputEnabled(true)
             .setOpenNestedScroll(true)
-            .setAdapter(this, fragments)
+            .setFragmentAdapter(this, fragments)
 
         findViewById<Button>(R.id.btn_1).setOnClickListener {
             slideShow.setCurrentItem(0)

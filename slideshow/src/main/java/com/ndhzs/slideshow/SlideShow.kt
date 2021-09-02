@@ -4,7 +4,6 @@ import android.animation.TimeInterpolator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -23,7 +22,7 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.ndhzs.slideshow.indicators.AbstractIndicatorsView
 import com.ndhzs.slideshow.indicators.utils.Indicators
 import com.ndhzs.slideshow.indicators.utils.Refresh
-import com.ndhzs.slideshow.indicators.view.CommonIndicators
+import com.ndhzs.slideshow.indicators.view.MoveIndicators
 import com.ndhzs.slideshow.indicators.view.FlashIndicators
 import com.ndhzs.slideshow.indicators.view.WaterDropIndicators
 import com.ndhzs.slideshow.indicators.view.ZoomIndicators
@@ -37,59 +36,16 @@ import com.ndhzs.slideshow.viewpager2.adapter.BaseRecyclerAdapter
 import com.ndhzs.slideshow.viewpager2.adapter.BaseViewAdapter
 import com.ndhzs.slideshow.viewpager2.pagecallback.BasePageChangeCallBack
 import com.ndhzs.slideshow.viewpager2.transformer.BaseMultipleTransformer
+import java.lang.ClassCastException
 import kotlin.math.abs
 
 /**
+ * **NOTE:** 由于继承于 CardView, 如果你想修改背景颜色, 请使用属性 android:backgroundTine=..., 这是 CardView 的原因
+ *
  * 该控件参考了第三方库：Banner (https://github.com/youth5201314/banner)，在此表示感谢！
  *
  * 里面内置了 transformer（页面移动动画）的默认实现类，
- * 来自于 (https://github.com/youth5201314/banner) ，分别有：
- *
- * （因名字太长，只给出第一个单词）
- *
- * Alpha
- *
- * Depth
- *
- * MZScale
- *
- * Rotate
- *
- * Rotate
- *
- * Scale
- *
- * Zoom
- *
- * 还内置了许多动画，来自于 https://github.com/ToxicBakery/ViewPagerTransforms
- *
- * （因名字太长，只给出第一个单词）
- *
- * Accordion
- *
- * Background
- *
- * Cube
- *
- * Default
- *
- * Depth
- *
- * Drawer
- *
- * Flip
- *
- * Foreground
- *
- * Rotate
- *
- * Scale
- *
- * Stack
- *
- * Tablet
- *
- * Zoom
+ * 来自于 (https://github.com/youth5201314/banner)
  *
  * @author 985892345
  * @email 2767465918@qq.com
@@ -161,9 +117,31 @@ class SlideShow : CardView, NestedScrollingParent2 {
         return mViewPager2
     }
 
-    inline fun setAllViewPager2Setting(vp: (viewPager2: ViewPager2) -> Unit): SlideShow {
+    /**
+     * 虽然可以设置 ViewPager2，但建议最好不要在 ViewPager2 中设置一些东西
+     *
+     * **WARNING：** 传入 [setAutoSlideEnabled] 为 true 或调用 [openCirculateEnabled] 后，
+     * ViewPager2 的内部 item 位置会发生改变。如果此时你与 Toolbar 等进行联合将会出现位置问题。
+     *
+     * **NOTICE：** 可以使用 [setPageChangeCallback] 来进行联合，这个回调会返回你想要的 item 位置
+     *
+     * @see [setPageChangeCallback]
+     */
+    inline fun setViewPager2(vp: ViewPager2.() -> Unit): SlideShow {
         vp.invoke(getViewPager2())
         return this
+    }
+
+    /**
+     * 得到正确的 item 位置
+     *
+     * 如果你开启了循环或者自动滑动, 那么内部 ViewPager2 的 item 数量会发生变化, 该方法就是让你通过当前 item
+     * 的位置而得到你想得到的虚假位置
+     *
+     * **NOTE:** 在 [setPageChangeCallback] 和 refactor 里的 position 是自动处理过的， 所以可以不使用该方法
+     */
+    fun getRealPosition(nowPosition: Int): Int {
+        return BasePageChangeCallBack.getFalsePosition(mIsCirculateEnabled, nowPosition, mImgDataSize)
     }
 
     /**
@@ -191,17 +169,19 @@ class SlideShow : CardView, NestedScrollingParent2 {
     }
 
     fun getIsBottom(): Boolean {
-        return !getChildAt(0).canScrollVertically(-1)
+        return !getChildAt(0).canScrollVertically(1)
     }
 
     /**
      * 用于设置图片加载的 Adapter
      *
-     * **NOTICE：** 如果你想使一个页面能看到相邻的图片边缘，请设置 app:slide_adjacentPageInterval
+     * **NOTE：** 如果你想使一个页面能看到相邻的图片边缘，请设置 app:slide_adjacentPageInterval
      *
-     * **NOTICE：** 使用该方法可能意为着你需要自动滑动，请使用 [setAutoSlideEnabled]
+     * **NOTE：** 使用该方法可能意为着你需要自动滑动，请使用 [setAutoSlideEnabled]
+     *
+     * **NOTE：** 使用该方法可能意为着你需要循环滑动，请使用 [openCirculateEnabled]
      */
-    fun <T> setAdapter(datas: List<T>, imgAdapter: BaseImgAdapter<T>) {
+    fun <T> setImgAdapter(datas: List<T>, imgAdapter: BaseImgAdapter<T>) {
         imgAdapter.initialize(datas, mViewPager2, mAttrs)
         mViewPager2.adapter = imgAdapter
         mImgDataSize = datas.size
@@ -220,47 +200,60 @@ class SlideShow : CardView, NestedScrollingParent2 {
     /**
      * 用于设置图片加载的 Adapter（使用 Lambda 填写）
      *
-     * **NOTICE：** 如果你想使一个页面能看到相邻的图片边缘，请设置 app:slide_adjacentPageInterval
+     * **NOTE：** 如果你想使一个页面能看到相邻的图片边缘，请设置 app:slide_adjacentPageInterval
      *
-     * **NOTICE：** 使用该方法可能意为着你需要自动滑动，请使用 [setAutoSlideEnabled]
+     * **NOTE：** 使用该方法可能意为着你需要自动滑动，请使用 [setAutoSlideEnabled]
+     *
+     * **NOTE：** 使用该方法可能意为着你需要循环滑动，请使用 [openCirculateEnabled]
      */
-    fun <T> setAdapter(
+    fun <T> setImgAdapter(
         datas: List<T>,
-        onBindImageView:
+        create: (
+            holder: BaseViewAdapter<ShapeableImageView>.BaseViewHolder
+        ) -> Unit,
+        refactor:
             (data: T,
              imageView: ShapeableImageView,
              holder: BaseViewAdapter<ShapeableImageView>.BaseViewHolder,
              position: Int
-            ) -> Unit
+        ) -> Unit
     ) {
         val adapter = object : BaseImgAdapter<T>() {
-            override fun onBindImageView(
-                    data: T,
-                    imageView: ShapeableImageView,
-                    holder: BaseViewHolder,
-                    position: Int
+            override fun refactor(
+                data: T,
+                imageView: ShapeableImageView,
+                holder: BaseViewHolder,
+                position: Int
             ) {
-                onBindImageView.invoke(data, imageView, holder, position)
+                refactor.invoke(data, imageView, holder, position)
+            }
+
+            override fun create(holder: BaseViewHolder) {
+                create.invoke(holder)
             }
         }
-        setAdapter(datas, adapter)
+        setImgAdapter(datas, adapter)
     }
 
     /**
      * 用于设置自己的 View 的 Adapter
      */
-    fun <V: View> setAdapter(viewAdapter: BaseViewAdapter<V>) {
+    fun <V: View> setViewAdapter(viewAdapter: BaseViewAdapter<V>) {
         throwAdapterLoadError()
         viewAdapter.initializeAttrs(mAttrs)
+        mViewPager2.adapter = viewAdapter
         afterSetAdapter()
     }
 
     /**
      * 用于设置自己的 View 的 Adapter（使用 Lambda 填写）
+     *
+     * @param getNewView 该回调用于在 onCreateViewHolder 调用时生成新的 view 对象, 你可以在此时对 view 进行一些初始化.
      */
-    fun <V: View> setAdapter(
-        viewClass: Class<V>,
+    fun <V: View> setViewAdapter(
+        getNewView: (context: Context) -> V,
         getItemCount: () -> Int,
+        create: (holder: BaseViewAdapter<V>.BaseViewHolder) -> Unit,
         onBindViewHolder: (
             view: V,
             holder: BaseViewAdapter<V>.BaseViewHolder,
@@ -268,7 +261,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
             payloads: MutableList<Any>
         ) -> Unit
     ) {
-        val adapter = object : BaseViewAdapter<V>(viewClass) {
+        val adapter = object : BaseViewAdapter<V>() {
             override fun getItemCount(): Int {
                 return getItemCount.invoke()
             }
@@ -277,13 +270,20 @@ class SlideShow : CardView, NestedScrollingParent2 {
                 view: V,
                 holder: BaseViewHolder,
                 position: Int,
-                payloads: MutableList<Any>,
+                payloads: MutableList<Any>
             ) {
                 onBindViewHolder.invoke(view, holder, position, payloads)
             }
 
+            override fun getNewView(context: Context): V {
+                return getNewView(context)
+            }
+
+            override fun create(holder: BaseViewHolder) {
+                create.invoke(holder)
+            }
         }
-        setAdapter(adapter)
+        setViewAdapter(adapter)
     }
 
     /**
@@ -291,7 +291,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
      *
      * 该方法简写了创建 FragmentStateAdapter 的过程，传入数据后会自动帮你设置 FragmentStateAdapter
      */
-    fun setAdapter(fragmentActivity: FragmentActivity, fragments: List<Fragment>) {
+    fun setFragmentAdapter(fragmentActivity: FragmentActivity, fragments: List<Fragment>) {
         throwAdapterLoadError()
         val adapter = object : BaseFragmentStateAdapter(fragmentActivity, fragments) {}
         mViewPager2.adapter = adapter
@@ -301,7 +301,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
     /**
      * 用于设置 FragmentStateAdapter
      */
-    fun setAdapter(fragmentAdapter: FragmentStateAdapter) {
+    fun setFragmentAdapter(fragmentAdapter: FragmentStateAdapter) {
         throwAdapterLoadError()
         mViewPager2.adapter = fragmentAdapter
         afterSetAdapter()
@@ -313,7 +313,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
      * 不推荐使用自己的 adapter，建议使用 BaseRecyclerAdapter，用法一样，但可以调用 [notifyItemRefresh] 方法进行特殊刷新
      */
     @Deprecated("不建议使用自己的 adapter", ReplaceWith("使用 BaseRecyclerAdapter 代替"))
-    fun setAdapter(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>) {
+    fun setRecyclerAdapter(adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>) {
         throwAdapterLoadError()
         mViewPager2.adapter = adapter
         afterSetAdapter()
@@ -324,7 +324,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
      *
      * 使用该 adapter 后可以调用 [notifyItemRefresh] 方法进行特殊刷新
      */
-    fun setAdapter(adapter: BaseRecyclerAdapter<out RecyclerView.ViewHolder>) {
+    fun setRecyclerAdapter(adapter: BaseRecyclerAdapter<out RecyclerView.ViewHolder>) {
         throwAdapterLoadError()
         mViewPager2.adapter = adapter
         afterSetAdapter()
@@ -333,31 +333,33 @@ class SlideShow : CardView, NestedScrollingParent2 {
     private fun throwAdapterLoadError() {
         if (mIsAutoSlideEnabled) {
             throw RuntimeException(
-                "Your ${SlideShowAttrs.Library_name}#setAdapter()、setAutoSlideEnabled(): " +
+                "Your ${SlideShowAttrs.Lib_name}#setAdapter()、setAutoSlideEnabled(): " +
                         "The adapter does not support automatic sliding!")
         }
         if (mIsCirculateEnabled) {
             throw RuntimeException(
-                "Your ${SlideShowAttrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
+                "Your ${SlideShowAttrs.Lib_name}#setAdapter()、 openCirculateEnabled(): " +
                         "The adapter does not support circular presentation!")
         }
     }
 
     private fun afterSetAdapter() {
         if (this::mIndicators.isInitialized) {
-            val adapter = mViewPager2.adapter!!
-            mIndicators.setAmount(if (adapter !is BaseImgAdapter<*>) adapter.itemCount else mImgDataSize)
+            val adapter = mViewPager2.adapter
+            if (adapter != null) {
+                mIndicators.setAmount(if (adapter !is BaseImgAdapter<*>) adapter.itemCount else mImgDataSize)
+            }
         }
     }
 
     /**
      * 通知位置为 position 的 imageView 刷新
      *
-     * **NOTICE：** 该方法支持永久的更新，但实现原理是打上标记，在滑动回来时会重新调用，所以会出现重复调用，请注意该点
+     * **NOTICE：** 该方法支持永久的更新，但实现原理是打上标记，在滑动回来时会重新调用你传入的 [l]，所以会出现重复调用，请注意该点
      *
      * **WARNING：** 不建议进行延时操作
      *
-     * **WARNING：** 使用该方法的前提是 [setAdapter] 是 [BaseImgAdapter] 的实现类，否则将报错
+     * **WARNING：** 使用该方法的前提是 [setViewAdapter] 是 [BaseImgAdapter] 的实现类，否则将报错
      */
     fun notifyImageViewRefresh(position: Int, @Refresh.Condition condition: Int, l: OnImgRefreshListener) {
         val adapter = mViewPager2.adapter
@@ -365,7 +367,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
             adapter.setImgRefreshListener(position, condition, l)
         }else {
             throw RuntimeException(
-                    "Your ${SlideShowAttrs.Library_name}#notifyImageViewRefresh(): " +
+                    "Your ${SlideShowAttrs.Lib_name}#notifyImageViewRefresh(): " +
                             "The adapter is not BaseImgAdapter, so you can't use function of notifyImageViewRefresh!")
         }
     }
@@ -373,11 +375,11 @@ class SlideShow : CardView, NestedScrollingParent2 {
     /**
      * 通知位置为 position 的 holder 刷新
      *
-     * **NOTICE：** 该方法支持永久的更新，但实现原理是打上标记，在滑动回来时会重新调用，所以会出现重复调用，请注意该点
+     * **NOTICE：** 该方法支持永久的更新，但实现原理是打上标记，在滑动回来时会重新调用你传入的 [l]，所以会出现重复调用，请注意该点
      *
      * **WARNING：** 不建议进行延时操作
      *
-     * **WARNING：** 使用该方法的前提是 [setAdapter] 是 [BaseRecyclerAdapter] 的实现类，否则将报错
+     * **WARNING：** 使用该方法的前提是 [setViewAdapter] 是 [BaseRecyclerAdapter] 的实现类，否则将报错
      */
     fun notifyItemRefresh(position: Int, @Refresh.Condition condition: Int, l: OnRefreshListener) {
         val adapter = mViewPager2.adapter
@@ -385,7 +387,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
             adapter.setRefreshListener(position, condition, l)
         }else {
             throw RuntimeException(
-                    "Your ${SlideShowAttrs.Library_name}#notifyRefresh(): " +
+                    "Your ${SlideShowAttrs.Lib_name}#notifyRefresh(): " +
                             "The adapter is not BaseRecyclerAdapter, so you can't use function of notifyRefresh!")
         }
     }
@@ -393,25 +395,38 @@ class SlideShow : CardView, NestedScrollingParent2 {
     /**
      * 用于刷新全部
      *
-     * **NOTE：** 如果使用的 [BaseImgAdapter]，可以在修改了外部数据的情况下调用该方法进行刷新
+     * **NOTE：** 如果使用的 [BaseImgAdapter]，可以在**修改了外部数据**的情况下调用该方法进行刷新,
+     * 但推荐使用 [notifyImgDataChange] 方法
      */
     fun notifyDataSetChanged() {
         val adapter = mViewPager2.adapter
-        adapter!!.notifyDataSetChanged()
+        if (adapter is BaseImgAdapter<*>) {
+            adapter.myNotifyDataSetChanged()
+        }else {
+            adapter?.notifyDataSetChanged()
+        }
     }
 
     /**
      * 用于给设置了 [BaseImgAdapter] 的情况下传入新数据刷新
      *
-     * **WARNING：** 使用该方法的前提是 [setAdapter] 是 [BaseImgAdapter] 的实现类，否则将报错
+     * (由于泛型擦除原因, 无法检查你的泛型是否与 Adapter 中数据的泛型一致)
+     *
+     * **WARNING：** 使用该方法的前提是 [setImgAdapter] 是 [BaseImgAdapter] 的实现类，否则将报错
+     * @exception ClassCastException 传入的泛型类型不匹配
      */
     fun <T> notifyImgDataChange(data: List<T>) {
         val adapter = mViewPager2.adapter
         if (adapter is BaseImgAdapter<*>) {
-            adapter.refreshData(data as List<Nothing>)
+            try {
+                adapter.refreshData(data)
+            }catch (e: ClassCastException) {
+                throw ClassCastException("${SlideShowAttrs.Lib_name}#notifyImgDataChange(): " +
+                        "请检查你传入的泛型是否是刚调用 setImgAdapter() 中传入的泛型\n具体原因 -->> ${e.message}")
+            }
         }else {
             throw RuntimeException(
-                "Your ${SlideShowAttrs.Library_name}#notifyImgDataChange(): " +
+                "Your ${SlideShowAttrs.Lib_name}#notifyImgDataChange(): " +
                         "The adapter is not BaseImgAdapter, so you can't use function of notifyImgDataChange!")
         }
     }
@@ -451,14 +466,6 @@ class SlideShow : CardView, NestedScrollingParent2 {
      */
     fun setAutoSlideEnabled(enabled: Boolean): SlideShow {
         if (enabled) {
-//            val adapter = mViewPager2.adapter
-//            if (adapter != null) {
-//                if (adapter !is BaseImgAdapter<*>) {
-//                    throw IllegalAccessException(
-//                            "Your ${SlideShowAttrs.Library_name}#setAutoSlideEnabled(): " +
-//                                    "The adapter does not support automatic sliding!")
-//                }
-//            }
             openCirculateEnabled()
         }else {
             stop()
@@ -473,6 +480,8 @@ class SlideShow : CardView, NestedScrollingParent2 {
     }
 
     /**
+     * 开启循环轮播图
+     *
      * 开启自动滑动后该方法自动会被调用
      *
      * 调用该方法将会使 ViewPager2 的 item 位置发生变化，该变化不能取消
@@ -485,24 +494,15 @@ class SlideShow : CardView, NestedScrollingParent2 {
         if (mIsCirculateEnabled) {
             return this
         }
-
-//        val adapter = mViewPager2.adapter
-//        if (adapter != null) { // 等于 null 时交给 adapter 设置
-//            if (adapter is BaseImgAdapter<*>) {
-//                if (mImgRealItemCount > 1) {
-//                    adapter.openCirculateEnabled()
-//                    mPageChangeCallback.openCirculateEnabled(mImgRealItemCount)
-//                }else {
-//                    mIsCirculateEnabled = false
-//                }
-//            }else {
-//                throw IllegalAccessException(
-//                        "Your ${SlideShowAttrs.Library_name}#setAdapter()、 openCirculateEnabled(): " +
-//                                "The adapter does not support circular presentation!")
-//            }
-//        }
         mIsCirculateEnabled = true
         return this
+    }
+
+    /**
+     * 得到是否开启循环
+     */
+    fun getCirculateEnabled(): Boolean {
+        return mIsCirculateEnabled
     }
 
     /**
@@ -538,17 +538,17 @@ class SlideShow : CardView, NestedScrollingParent2 {
     fun setYourIndicators(yourIndicators: IIndicator): SlideShow {
         if (mAttrs.mIndicatorsAttrs.indicatorStyle != Indicators.Style.SELF_VIEW) {
             throw RuntimeException(
-                "Your ${SlideShowAttrs.Library_name}#setYourIndicators(): " +
+                "Your ${SlideShowAttrs.Lib_name}#setYourIndicators(): " +
                         "You must set the style to \"self_view\" or \"self_view_elsewhere\" before using your own indicators!")
         }
         if (isAttachedToWindow) {
             throw RuntimeException(
-                "Your ${SlideShowAttrs.Library_name}#setYourIndicators(): " +
+                "Your ${SlideShowAttrs.Lib_name}#setYourIndicators(): " +
                         "You cannot set the indicators after the SlideShow has been attached to window!")
         }
         if (this::mIndicators.isInitialized) {
             throw RuntimeException(
-                "Your ${SlideShowAttrs.Library_name}#setYourIndicators(): " +
+                "Your ${SlideShowAttrs.Lib_name}#setYourIndicators(): " +
                         "You have set the indicators!")
         }
         mIndicators = yourIndicators
@@ -559,17 +559,17 @@ class SlideShow : CardView, NestedScrollingParent2 {
     fun setYourIndicators(yourIndicators: AbstractIndicatorsView): SlideShow {
         if (mAttrs.mIndicatorsAttrs.indicatorStyle != Indicators.Style.EXTEND_ABSTRACT_INDICATORS) {
             throw RuntimeException(
-                "Your ${SlideShowAttrs.Library_name}#setYourIndicators(): " +
+                "Your ${SlideShowAttrs.Lib_name}#setYourIndicators(): " +
                         "You must set the style to \"extend_abstract_indicators\" before using your own indicators!")
         }
         if (isAttachedToWindow) {
             throw RuntimeException(
-                "Your ${SlideShowAttrs.Library_name}#setYourIndicators(): " +
+                "Your ${SlideShowAttrs.Lib_name}#setYourIndicators(): " +
                         "You cannot set the indicators after the SlideShow has been attached to window!")
         }
         if (this::mIndicators.isInitialized) {
             throw RuntimeException(
-                "Your ${SlideShowAttrs.Library_name}#setYourIndicators(): " +
+                "Your ${SlideShowAttrs.Lib_name}#setYourIndicators(): " +
                         "You have set the indicators!")
         }
         yourIndicators.setIndicatorsAttrs(mAttrs.mIndicatorsAttrs)
@@ -779,6 +779,7 @@ class SlideShow : CardView, NestedScrollingParent2 {
         cardElevation = 0F
         initViewPager2()
         initIndicators()
+        setCardBackgroundColor(0x00000000)
     }
 
     private fun initViewPager2() {
@@ -808,11 +809,11 @@ class SlideShow : CardView, NestedScrollingParent2 {
             style != Indicators.Style.SELF_VIEW &&
             style != Indicators.Style.EXTEND_ABSTRACT_INDICATORS) {
             val indicators = when (style) {
-                Indicators.Style.NORMAL -> CommonIndicators(context)
+                Indicators.Style.MOVE -> MoveIndicators(context)
                 Indicators.Style.ZOOM -> ZoomIndicators(context)
-                //Indicators.Style.WATER_DROP -> WaterDropIndicators(context)
+                Indicators.Style.WATER_DROP -> WaterDropIndicators(context)
                 Indicators.Style.FLASH -> FlashIndicators(context)
-                else -> CommonIndicators(context)
+                else -> WaterDropIndicators(context)
             }
             indicators.setIndicatorsAttrs(mAttrs.mIndicatorsAttrs)
             mIndicators = indicators
@@ -892,20 +893,23 @@ class SlideShow : CardView, NestedScrollingParent2 {
 
     private fun checkIsInItemCount(position: Int, positionMessage: String = "position") {
         var isError = false
-        val itemCount = mViewPager2.adapter!!.itemCount
-        if (mIsCirculateEnabled) {
-            if (position !in 0 until mImgDataSize) {
-                isError = true
+        val adapter = mViewPager2.adapter
+        if (adapter != null) {
+            val itemCount = adapter.itemCount
+            if (mIsCirculateEnabled) {
+                if (position !in 0 until mImgDataSize) {
+                    isError = true
+                }
+            } else {
+                if (position !in 0 until itemCount) {
+                    isError = true
+                }
             }
-        }else {
-            if (position !in 0 until itemCount) {
-                isError = true
-            }
-        }
-        if (isError) {
-            throw IndexOutOfBoundsException(
-                    "Your ${SlideShowAttrs.Library_name}#slowlySlide(): " +
+            if (isError) {
+                throw IndexOutOfBoundsException(
+                    "Your ${SlideShowAttrs.Lib_name}#slowlySlide(): " +
                             "The $positionMessage is < 0 or >= ViewPager2#itemCount")
+            }
         }
     }
 

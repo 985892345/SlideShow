@@ -1,13 +1,14 @@
 package com.ndhzs.slideshow.viewpager2.adapter
 
+import android.content.Context
 import android.util.SparseArray
 import android.widget.ImageView
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.ShapeAppearanceModel
+import com.ndhzs.slideshow.indicators.utils.Refresh
 import com.ndhzs.slideshow.myinterface.OnImgRefreshListener
 import com.ndhzs.slideshow.utils.SlideShowAttrs
-import com.ndhzs.slideshow.indicators.utils.Refresh
 import com.ndhzs.slideshow.viewpager2.pagecallback.BasePageChangeCallBack
 
 /**
@@ -16,16 +17,18 @@ import com.ndhzs.slideshow.viewpager2.pagecallback.BasePageChangeCallBack
  * @email 2767465918@qq.com
  * @data 2021/5/27
  */
-abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(ShapeableImageView::class.java) {
+abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>() {
 
+    private lateinit var outerData: List<T>
     private val datas = ArrayList<T>()
     private val array = SparseArray<ConditionWithListener>()
     private var mIsCirculate = false
     private var size = 0
     private lateinit var mViewPager2: ViewPager2
 
-    override fun onConfigureView(view: ShapeableImageView, viewType: Int) {
-        view.scaleType = ImageView.ScaleType.CENTER_CROP
+    override fun getNewView(context: Context): ShapeableImageView {
+        val view = ShapeableImageView(context)
+        view.scaleType = ImageView.ScaleType.CENTER_INSIDE
         view.shapeAppearanceModel = ShapeAppearanceModel.builder()
             .setTopLeftCornerSize(attrs.imgLeftTopRadius)
             .setTopRightCornerSize(attrs.imgRightTopRadius)
@@ -33,6 +36,7 @@ abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(Shapeable
             .setBottomRightCornerSize(attrs.imgRightBottomRadius)
             .build()
         view.setBackgroundColor(attrs.imgDefaultColor)
+        return view
     }
 
     /**
@@ -45,14 +49,14 @@ abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(Shapeable
         view: ShapeableImageView,
         holder: BaseViewHolder,
         position: Int,
-        payloads: MutableList<Any>,
+        payloads: MutableList<Any>
     ) {
         val falsePosition = BasePageChangeCallBack.getFalsePosition(mIsCirculate, position, datas.size)
         if (array.indexOfKey(falsePosition) >= 0) {
             val conditionWithListener = array[falsePosition]
             when (conditionWithListener.condition) {
                 Refresh.Condition.COEXIST -> {
-                    onBindImageView(datas[falsePosition], view, holder, falsePosition)
+                    refactor(datas[falsePosition], view, holder, falsePosition)
                     conditionWithListener.l.onRefresh(view, holder, falsePosition)
                 }
                 Refresh.Condition.COVERED -> {
@@ -60,7 +64,7 @@ abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(Shapeable
                 }
                 Refresh.Condition.ONLY_ONE -> {
                     payloads.forEach {
-                        if (it == BaseRecyclerAdapter.ITEM_REFRESH) {
+                        if (it == ITEM_REFRESH) {
                             array[falsePosition].l.onRefresh(view, holder, falsePosition)
                             if (array[falsePosition].condition == Refresh.Condition.ONLY_ONE) {
                                 array.remove(falsePosition)
@@ -70,7 +74,7 @@ abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(Shapeable
                 }
             }
         }else if (payloads.isEmpty()) {
-            onBindImageView(datas[falsePosition], view, holder, falsePosition)
+            refactor(datas[falsePosition], view, holder, falsePosition)
         }
     }
 
@@ -82,10 +86,18 @@ abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(Shapeable
     }
 
     /**
+     * 因为开启了循环, 所以在外面调用 notifyDataSetChanged 时要重新计算
+     */
+    internal fun myNotifyDataSetChanged() {
+        refreshData(outerData)
+    }
+
+    /**
      * **WARNING：** 请不要自己调用
      */
     @Deprecated("禁止自己调用! ")
     internal fun initialize(datas: List<T>, viewPager2: ViewPager2, attrs: SlideShowAttrs) {
+        outerData = datas
         this.datas.addAll(datas)
         size = datas.size
         initializeAttrs(attrs)
@@ -96,7 +108,8 @@ abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(Shapeable
      * **WARNING：** 请不要自己调用
      */
     @Deprecated("禁止自己调用! ")
-    internal fun refreshData(datas: List<T>) {
+    internal fun <E> refreshData(datas: List<E>) {
+        outerData = datas as List<T>
         this.datas.clear()
         this.datas.addAll(datas)
         size = datas.size
@@ -123,16 +136,18 @@ abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(Shapeable
     /**
      * **WARNING：** 请不要自己调用
      */
-    internal fun setImgRefreshListener(falsePosition: Int,
-                              @Refresh.Condition
-                              condition: Int,
-                              l: OnImgRefreshListener) {
+    internal fun setImgRefreshListener(
+        falsePosition: Int,
+        @Refresh.Condition
+        condition: Int,
+        l: OnImgRefreshListener
+    ) {
         array.put(falsePosition, ConditionWithListener(condition, l))
         val currentItem = mViewPager2.currentItem
         val dataSize = datas.size
         val p = currentItem - (currentItem % dataSize - falsePosition)
-        repeat(5) { // 只刷新当前页面附近相同的图片，因为其他的没有被加载
-            notifyItemChanged(p - 2 * dataSize + it * dataSize, BaseRecyclerAdapter.ITEM_REFRESH)
+        repeat(5) { // 只刷新当前页面附近相同的图片, 因为其他的没有被加载, 经计算, 5 是最合适的值
+            notifyItemChanged(p - 2 * dataSize + it * dataSize, ITEM_REFRESH)
         }
     }
 
@@ -144,7 +159,14 @@ abstract class BaseImgAdapter<T> : BaseViewAdapter<ShapeableImageView>(Shapeable
         return array.clear()
     }
 
-    abstract fun onBindImageView(data: T, imageView: ShapeableImageView, holder: BaseViewHolder, position: Int)
+    /**
+     * 用于设置当前 ImageView **每次进入屏幕**显示的数据(包括离开屏幕又回到屏幕)
+     *
+     * **WARNING:** **->> 请不要在此处创建任何新的对象 <<-**
+     * 比如：设置点击监听(会生成匿名内部类)、设置只需用于 item 整个生命周期的对象等其他需要创建对象的做法,
+     * ***->> 这些做法应写在 [create] 中 <<-***
+     */
+    abstract fun refactor(data: T, imageView: ShapeableImageView, holder: BaseViewHolder, position: Int)
 
     private class ConditionWithListener(
             val condition: Int,

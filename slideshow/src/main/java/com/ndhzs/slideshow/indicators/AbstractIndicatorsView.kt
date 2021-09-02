@@ -5,7 +5,6 @@ import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
@@ -16,7 +15,7 @@ import com.ndhzs.slideshow.indicators.utils.IndicatorsAttrs
 import com.ndhzs.slideshow.utils.SlideShowUtils
 
 /**
- * 如果你想实现自己的指示器，可以继承于该抽象类
+ * 如果你想实现自己的指示器, 可以继承于该抽象类, 实现该抽象类你只需绘制一段路径的圆点移动动画就能实现所有圆点间的移动动画
  *
  * 继承后，你只需要实现 [onDrawMovePath] 方法即可，该方法可以实现一个区间的轨迹绘制而实现全部轨迹的绘制
  * @author 985892345
@@ -84,12 +83,12 @@ abstract class AbstractIndicatorsView(
         /**
          * 指示器圆点半径大小默认值
          */
-        val CIRCLE_RADIUS = SlideShowUtils.dpToPx(3)
+        val CIRCLE_RADIUS = SlideShowUtils.dpToPx(6)
 
         /**
          * 指示器两个圆点间的距离默认值
          */
-        val INTERVAL_MARGIN = SlideShowUtils.dpToPx(18)
+        val INTERVAL_MARGIN = SlideShowUtils.dpToPx(32)
 
         /**
          * 指示器横幅背景颜色默认值
@@ -105,7 +104,7 @@ abstract class AbstractIndicatorsView(
     private lateinit var indicatorsAttrs: IndicatorsAttrs
 
     private var amount = 0
-    private var frontMargin = 0F
+    private var frontMargin = 0F // 指示器第一个小圆点距离左方/上方的距离
 
     /**
      * 圆点位置
@@ -192,7 +191,7 @@ abstract class AbstractIndicatorsView(
         positionFloat = position + positionOffset
         val offset =
             if (position >= idlePosition || positionFloat == 0F) positionOffset
-            else positionOffset - 1 // 当向左滑动时，positionOffset 是从 0.99999 -> 0 的，所以要减一改为 0 -> 0.99999
+            else positionOffset - 1 // 当向左滑动时，positionOffset 是从 0.99999 -> 0 的，所以要减一改为 0 -> -0.99999
         offsetPixels = offset * intervalMargin
         invalidate()
     }
@@ -224,7 +223,9 @@ abstract class AbstractIndicatorsView(
         super.onMeasure(newWidthMS, newHeightMS)
     }
 
-    private val mPath = Path()
+    private val mPath1 = Path()
+    private val mPath2 = Path()
+    private val mPath3 = Path()
     private val mMatrix = Matrix()
     private val mBackgroundCirclePaint by lazy {
         val paint = Paint()
@@ -244,27 +245,41 @@ abstract class AbstractIndicatorsView(
     }
 
     private fun drawBackgroundCircle(canvas: Canvas) {
-        mPath.reset()
-        onDrawBackgroundCircle(mPath, circleRadius)
+        mPath1.reset()
+        mPath2.reset()
+        mPath3.reset()
+        onDrawBackgroundCircle(mPath1, mPath2, mPath3, circleRadius)
         judgeStyle(
             horizontal = {
                 mMatrix.setTranslate(frontMargin, wrapWidth / 2)
-                mPath.transform(mMatrix)
-                canvas.drawPath(mPath, mBackgroundCirclePaint)
+                mPath1.transform(mMatrix)
+                mPath2.transform(mMatrix)
+                mPath3.transform(mMatrix)
+                canvas.drawPath(mPath1, mBackgroundCirclePaint)
                 repeat(amount - 1) {
                     mMatrix.setTranslate(intervalMargin, 0F)
-                    mPath.transform(mMatrix)
-                    canvas.drawPath(mPath, mBackgroundCirclePaint)
+                    mPath1.transform(mMatrix)
+                    mPath2.transform(mMatrix)
+                    mPath3.transform(mMatrix)
+                    canvas.drawPath(mPath1, mBackgroundCirclePaint)
+                    canvas.drawPath(mPath2, mBackgroundCirclePaint)
+                    canvas.drawPath(mPath3, mBackgroundCirclePaint)
                 }
             },
             vertical = {
                 mMatrix.setTranslate(wrapWidth / 2, frontMargin)
-                mPath.transform(mMatrix)
-                canvas.drawPath(mPath, mBackgroundCirclePaint)
+                mPath1.transform(mMatrix)
+                mPath2.transform(mMatrix)
+                mPath3.transform(mMatrix)
+                canvas.drawPath(mPath1, mBackgroundCirclePaint)
                 repeat(amount - 1) {
                     mMatrix.setTranslate(0F, intervalMargin)
-                    mPath.transform(mMatrix)
-                    canvas.drawPath(mPath, mBackgroundCirclePaint)
+                    mPath1.transform(mMatrix)
+                    mPath2.transform(mMatrix)
+                    mPath3.transform(mMatrix)
+                    canvas.drawPath(mPath1, mBackgroundCirclePaint)
+                    canvas.drawPath(mPath2, mBackgroundCirclePaint)
+                    canvas.drawPath(mPath3, mBackgroundCirclePaint)
                 }
             }
         )
@@ -278,22 +293,26 @@ abstract class AbstractIndicatorsView(
         paint
     }
     private fun drawMovePath(canvas: Canvas) {
-        mPath.reset()
-        onDrawMovePath(mPath, circleRadius, offsetPixels, intervalMargin)
+        mPath1.reset()
+        mPath2.reset()
+        mPath3.reset()
+        onDrawMovePath(mPath1, mPath2, mPath3, circleRadius, offsetPixels, intervalMargin)
         val p = if (position >= idlePosition || positionFloat == 0F) position else position + 1
         judgeStyle(
             horizontal = {
                 mMatrix.setTranslate(frontMargin + p * intervalMargin, wrapWidth / 2)
-                mPath.transform(mMatrix)
-                canvas.drawPath(mPath, mMovePathPaint)
             },
             vertical = {
                 mMatrix.setTranslate(wrapWidth / 2, frontMargin + p * intervalMargin)
                 mMatrix.postRotate(90F, wrapWidth / 2, frontMargin + p * intervalMargin)
-                mPath.transform(mMatrix)
-                canvas.drawPath(mPath, mMovePathPaint)
             }
         )
+        mPath1.transform(mMatrix)
+        mPath2.transform(mMatrix)
+        mPath3.transform(mMatrix)
+        canvas.drawPath(mPath1, mMovePathPaint)
+        canvas.drawPath(mPath2, mMovePathPaint)
+        canvas.drawPath(mPath3, mMovePathPaint)
     }
 
     private inline fun judgeStyle(horizontal: () -> Unit, vertical: () -> Unit) {
@@ -311,34 +330,42 @@ abstract class AbstractIndicatorsView(
 
     /**
      * 用于绘制背景
+     * @param width 自身 View 的宽
+     * @param height 自身 View 的高
      */
     open fun onDrawBackground(canvas: Canvas, width: Int, height: Int) {
+        // 对于 xml 中的 indicators_backgroundColor 属性, 实现方式是写在了 IIndicator 接口中
     }
 
     /**
      * 用于绘制背景的小圆点
      *
-     * **NOTE：** 你只需要绘制一个 path 即可
+     * **NOTE：** 坐标会在内部转换, 只需修改 path, 每个圆的中心坐标为(0, 0), 且每个圆点都会以该 path
+     * 来绘制(意思是你只需绘制一个小圆点即可). 有三个 path 只是用来绘制复杂图形使用
      */
-    open fun onDrawBackgroundCircle(path: Path, radius: Float) {
-        path.addCircle(0F, 0F, radius, Path.Direction.CCW)
+    open fun onDrawBackgroundCircle(path1: Path, path2: Path, path3: Path, radius: Float) {
+        path1.addCircle(0F, 0F, radius, Path.Direction.CCW)
     }
 
     /**
-     * 用于在移动时绘制图形，请自己实现 path 的绘制，只需绘制一个区间的轨迹
+     * 用于在移动时绘制图形，请自己实现 path 的绘制，只需绘制一个区间的轨迹. 有三个 path 只是用来绘制复杂图形使用
      *
      * **NOTE：**
      *
      * 1、你只需要使用 offsetPixels 的值来绘制从 -intervalMargin 到 +intervalMargin 之间对应的 path 即可
      *
      * 2、参考系是水平的，坐标为 (-intervalMargin, 0) <---> (0, 0) <---> (+intervalMargin, 0)，
-     *     在绘图时会对 path 自动进行旋转或移动来展示全部的圆点动画
+     *    在内部绘图时会自动对 path 进行旋转或移动来以一个路径而显示全部路径的圆点动画
+     *
+     * 3、看不懂? 那你去看我写的一些实现类 MoveIndicators
      *
      * @param offsetPixels 值只会在 -intervalMargin 到 +intervalMargin 之间
      * @param intervalMargin 两个圆点间的距离值
      */
     abstract fun onDrawMovePath(
-        path: Path,
+        path1: Path,
+        path2: Path,
+        path3: Path,
         radius: Float,
         offsetPixels: Float,
         intervalMargin: Float,

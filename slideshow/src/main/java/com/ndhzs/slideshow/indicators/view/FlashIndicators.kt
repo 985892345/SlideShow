@@ -14,11 +14,13 @@ class FlashIndicators(
     context: Context
 ) : AbstractIndicatorsView(context)  {
     override fun onDrawMovePath(
-        path: Path,
+        path1: Path,
+        path2: Path,
+        path3: Path,
         radius: Float,
         offsetPixels: Float,
-        intervalMargin: Float,
+        intervalMargin: Float
     ) {
-        path.addCircle(0F, 0F, radius, Path.Direction.CCW)
+        path1.addCircle(0F, 0F, radius, Path.Direction.CCW)
     }
 }

@@ -19,6 +19,7 @@ public class ZoomOutPageTransformer implements ViewPager2.PageTransformer {
         this.mMinAlpha = minAlpha;
     }
 
+    @Override
     public void transformPage(View view, float position) {
         int pageWidth = view.getWidth();
         int pageHeight = view.getHeight();
