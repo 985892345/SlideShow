@@ -39,7 +39,6 @@ class BaseApplication : Application(), Thread.UncaughtExceptionHandler {
     override fun uncaughtException(t: Thread, e: Throwable) {
         val sdf = SimpleDateFormat("yyyy-M-d, HH:mm:ss", Locale.CHINA)
         val time = sdf.format(Date())
-        Log.d("123","(BaseApplication.kt:38)-->> $time")
         val file = appContext.getExternalFilesDir("error") // 得取该地址不用申请读写权限
         val file2 = File.createTempFile(time, ".txt", file)
 

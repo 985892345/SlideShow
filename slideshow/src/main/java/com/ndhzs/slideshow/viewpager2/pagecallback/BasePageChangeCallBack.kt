@@ -1,6 +1,5 @@
 package com.ndhzs.slideshow.viewpager2.pagecallback
 
-import android.util.Log
 import androidx.viewpager2.widget.ViewPager2
 import com.ndhzs.slideshow.myinterface.IIndicator
 

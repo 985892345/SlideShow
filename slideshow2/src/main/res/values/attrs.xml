@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SlideShow2">
+
+        <attr name="show_layoutId" format="reference"/>
+
+        <attr name="show_frameDistance" format="dimension"/>
+        <attr name="show_pageDistance" format="dimension"/>
+        <attr name="show_isAutoSlide" format="boolean"/>
+        <attr name="show_isCyclical" format="boolean"/>
+
+        <attr name="show_autoSlideDuration" format="float"/>
+        <attr name="show_autoSlideIntervalDt" format="float"/>
+    </declare-styleable>
+
+    <declare-styleable name="AbstractIndicatorsView">
+        <attr name="indicators_orientation" format="enum">
+            <enum name="horizontal" value="0"/>
+            <enum name="vertical" value="1"/>
+        </attr>
+        <!--指示器圆点半径大小-->
+        <attr name="indicators_circleRadius" format="dimension"/>
+        <!--指示器圆点颜色-->
+        <attr name="indicators_circleColor" format="color"/>
+        <!--指示器两个圆点间的距离值-->
+        <attr name="indicators_intervalMargin" format="dimension"/>
+        <!--指示器圆点背景颜色-->
+        <attr name="indicators_circleBackground" format="color"/>
+    </declare-styleable>
+</resources>

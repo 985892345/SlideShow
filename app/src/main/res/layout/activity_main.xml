@@ -7,7 +7,7 @@
     android:background="@android:color/darker_gray"
     tools:context=".MainActivity">
 
-    <com.ndhzs.slideshow.SlideShow
+    <com.ndhzs.slideshow2.SlideShow2
         android:id="@+id/slideShow"
         android:layout_width="300dp"
         android:layout_height="0dp"
@@ -20,16 +20,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:slide_adjacentPageInterval="16dp"
-        app:slide_viewHeight="400dp"
-        app:slide_imgRadius="16dp"
-        app:slide_outPageInterval="40dp"
-        app:slide_backgroundColor="#FAFAFA"
-        app:indicators_circleRadius="8dp"
-        app:indicators_intervalMargin="42dp"
-        app:indicators_wrapWidth="30dp"
-        app:indicators_style="water_drop"
-        app:indicators_backgroundColor="@color/test"/>
+        app:show_pageDistance="16dp"
+        app:show_frameDistance="60dp" >
+
+        <com.ndhzs.slideshow2.indicators.view.WaterDropIndicators
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal" />
+
+    </com.ndhzs.slideshow2.SlideShow2>
 
     <Button
         android:id="@+id/button"

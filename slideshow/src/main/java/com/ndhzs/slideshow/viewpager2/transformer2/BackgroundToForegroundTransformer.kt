@@ -17,14 +17,15 @@
 package com.ndhzs.slideshow.viewpager2.transformer2
 
 import android.view.View
-import com.ndhzs.slideshow.viewpager2.transformer2.ABaseTransformer
+import kotlin.math.abs
+import kotlin.math.max
 
 open class BackgroundToForegroundTransformer : ABaseTransformer() {
 
     override fun onTransform(page: View, position: Float) {
         val height = page.height.toFloat()
         val width = page.width.toFloat()
-        val scale = min(if (position < 0) 1f else Math.abs(1f - position), 0.5f)
+        val scale = max(if (position < 0) 1f else abs(1f - position), 0.5f)
 
         page.scaleX = scale
         page.scaleY = scale

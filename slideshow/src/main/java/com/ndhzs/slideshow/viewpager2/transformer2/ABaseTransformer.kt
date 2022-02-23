@@ -134,19 +134,4 @@ abstract class ABaseTransformer : ViewPager2.PageTransformer {
      * center. 1 is one full page position to the right, and -1 is one page position to the left.
      */
     protected open fun onPostTransform(page: View, position: Float) {}
-
-    companion object {
-
-        /**
-         * Same as [Math.min] without double casting, zero closest to infinity handling, or NaN support.
-         *
-         * @param value
-         * @param min
-         * @return
-         */
-        @JvmStatic
-        protected fun min(value: Float, min: Float): Float {
-            return if (value < min) min else value
-        }
-    }
 }
