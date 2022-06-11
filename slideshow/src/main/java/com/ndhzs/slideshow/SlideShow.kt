@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import androidx.cardview.widget.CardView
 import androidx.core.animation.addListener
+import androidx.core.view.NestedScrollingChildHelper
 import androidx.core.view.NestedScrollingParent2
 import androidx.core.view.NestedScrollingParentHelper
 import androidx.core.view.ViewCompat

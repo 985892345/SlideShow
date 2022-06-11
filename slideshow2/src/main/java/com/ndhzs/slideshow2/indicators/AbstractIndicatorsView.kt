@@ -19,31 +19,17 @@ import com.ndhzs.slideshow2.utils.lazyUnlock
  * @email 2767465918@qq.com
  * @date 2022/2/23 16:38
  */
-abstract class AbstractIndicatorsView : View, OnPageChangeCallback {
+abstract class AbstractIndicatorsView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+    defStyleRes: Int = 0
+) : View(context, attrs, defStyleAttr, defStyleRes), OnPageChangeCallback {
 
     fun getAttrs(): IndicatorsAttrs = mAttrs
 
-    private val mAttrs: IndicatorsAttrs
-
-    constructor(context: Context) : super(context) {
-        mAttrs = IndicatorsAttrs()
-    }
-
-    constructor(context: Context, attrs: AttributeSet) : this(context, attrs, 0)
-    constructor(
-        context: Context,
-        attrs: AttributeSet,
-        defStyleAttr: Int,
-    ) : this(context, attrs, defStyleAttr, 0)
-
-    constructor(
-        context: Context,
-        attrs: AttributeSet,
-        defStyleAttr: Int,
-        defStyleRes: Int,
-    ) : super(context, attrs, defStyleAttr, defStyleRes) {
-        mAttrs = IndicatorsAttrs.newInstance(context, attrs, defStyleAttr, defStyleRes)
-    }
+    private val mAttrs: IndicatorsAttrs =
+        IndicatorsAttrs.newInstance(this, attrs, defStyleAttr, defStyleRes)
 
     private var mAmount = 0
 
@@ -212,4 +198,5 @@ abstract class AbstractIndicatorsView : View, OnPageChangeCallback {
         offsetPixels: Float,
         intervalMargin: Float,
     )
+
 }

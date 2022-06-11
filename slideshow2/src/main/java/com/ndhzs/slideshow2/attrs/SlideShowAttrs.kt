@@ -3,6 +3,7 @@ package com.ndhzs.slideshow2.attrs
 import android.content.Context
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.View
 import androidx.annotation.Dimension
 import androidx.annotation.LayoutRes
 import androidx.viewpager2.widget.ViewPager2
@@ -43,15 +44,15 @@ class SlideShowAttrs(
     companion object {
 
         fun newInstance(
-            context: Context,
-            attrs: AttributeSet,
+            view: View,
+            attrs: AttributeSet?,
             defStyleAttr: Int,
             defStyleRes: Int
         ) : SlideShowAttrs {
-            val ty = context.obtainStyledAttributes(attrs, R.styleable.ViewPager2, defStyleAttr, defStyleRes)
+            val ty = view.context.obtainStyledAttributes(attrs, R.styleable.ViewPager2, defStyleAttr, defStyleRes)
             val orientation = ty.getInt(R.styleable.ViewPager2_android_orientation, ORIENTATION)
             ty.recycle()
-            return newAttrs(context, attrs, R.styleable.SlideShow2, defStyleAttr, defStyleRes) {
+            return newAttrs(view, attrs, R.styleable.SlideShow2, defStyleAttr, defStyleRes) {
                 SlideShowAttrs(
                     orientation,
                     R.styleable.SlideShow2_show_frameDistance.dimens(FRAME_DISTANCE),

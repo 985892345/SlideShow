@@ -4,7 +4,6 @@ import android.animation.TimeInterpolator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.LinearInterpolator
@@ -28,7 +27,12 @@ import kotlin.math.max
  * @email 2767465918@qq.com
  * @date 2022/2/22 10:47
  */
-class SlideShow2 : CardView {
+class SlideShow2 @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+    defStyleRes: Int = 0
+) : CardView(context, attrs, defStyleAttr) {
 
     /**
      * 设置一般的 Adapter
@@ -210,54 +214,6 @@ class SlideShow2 : CardView {
         }
     }
 
-    constructor(context: Context, attrs: SlideShowAttrs) : super(context) {
-        mAttrs = attrs
-        mViewPager = ViewPager2(context)
-        init()
-    }
-
-    constructor(context: Context, attrs: AttributeSet) : this(context, attrs, R.attr.cardViewStyle)
-
-    constructor(
-        context: Context,
-        attrs: AttributeSet,
-        defStyleAttr: Int
-    ) : this(context, attrs, defStyleAttr, 0)
-    constructor(
-        context: Context,
-        attrs: AttributeSet,
-        defStyleAttr: Int,
-        defStyleRes: Int
-    ) : super(context, attrs, defStyleAttr)  {
-        mAttrs = SlideShowAttrs.newInstance(context, attrs, defStyleAttr, defStyleRes)
-        mViewPager = ViewPager2(context, attrs, defStyleAttr, defStyleRes)
-        init()
-    }
-
-    fun init() {
-        cardElevation = 0F
-        attachViewToParent(
-            mViewPager, 0,
-            LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-        )
-
-        if (isAutoSlide()) {
-            // 让开始时处于中心的 0 位置
-            setCurrentItem(0, false)
-        } else {
-            if (mAttrs.frameDistance != SlideShowAttrs.FRAME_DISTANCE) {
-                /*
-                * 下面调用两次是故意这样的，在设置 currentItem 时有 bug，
-                * 如果你设置了 show_frameDistance 后首次打开页面时会卡在左边，
-                * 即使调用 setCurrentItem(0, false) 也是无效的，
-                * 最后得出结论：初始时不带动画的设置 currentItem，它都会卡在左边
-                * */
-                setCurrentItem(1, true)
-                setCurrentItem(0, false)
-            }
-        }
-    }
-
     override fun onFinishInflate() {
         super.onFinishInflate()
         children.forEach {
@@ -423,6 +379,32 @@ class SlideShow2 : CardView {
         val outerAdapter = getOuterAdapter()
         if (outerAdapter != null) {
             view.setAmount(outerAdapter.itemCount)
+        }
+    }
+
+    init {
+        mAttrs = SlideShowAttrs.newInstance(this, attrs, defStyleAttr, defStyleRes)
+        mViewPager = ViewPager2(context, attrs, defStyleAttr, defStyleRes)
+        cardElevation = 0F
+        attachViewToParent(
+            mViewPager, 0,
+            LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+        )
+
+        if (isAutoSlide()) {
+            // 让开始时处于中心的 0 位置
+            setCurrentItem(0, false)
+        } else {
+            if (mAttrs.frameDistance != SlideShowAttrs.FRAME_DISTANCE) {
+                /*
+                * 下面调用两次是故意这样的，在设置 currentItem 时有 bug，
+                * 如果你设置了 show_frameDistance 后首次打开页面时会卡在左边，
+                * 即使调用 setCurrentItem(0, false) 也是无效的，
+                * 最后得出结论：初始时不带动画的设置 currentItem，它都会卡在左边
+                * */
+                setCurrentItem(1, true)
+                setCurrentItem(0, false)
+            }
         }
     }
 }

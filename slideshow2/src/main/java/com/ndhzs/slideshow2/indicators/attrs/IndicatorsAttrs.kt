@@ -1,7 +1,7 @@
 package com.ndhzs.slideshow2.indicators.attrs
 
-import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import androidx.viewpager2.widget.ViewPager2
 import com.ndhzs.slideshow2.R
 import com.ndhzs.slideshow2.base.BaseViewAttrs
@@ -25,12 +25,12 @@ open class IndicatorsAttrs(
 
     companion object {
         fun newInstance(
-            context: Context,
-            attrs: AttributeSet,
+            view: View,
+            attrs: AttributeSet?,
             defStyleAttr: Int,
             defStyleRes: Int
         ) : IndicatorsAttrs {
-            return newAttrs(context, attrs, R.styleable.AbstractIndicatorsView, defStyleAttr, defStyleRes) {
+            return newAttrs(view, attrs, R.styleable.AbstractIndicatorsView, defStyleAttr, defStyleRes) {
                 IndicatorsAttrs(
                     R.styleable.AbstractIndicatorsView_indicators_orientation.int(ORIENTATION),
                     R.styleable.AbstractIndicatorsView_indicators_circleRadius.dimens(CIRCLE_RADIUS),
@@ -43,6 +43,7 @@ open class IndicatorsAttrs(
         }
 
         private const val ORIENTATION = ViewPager2.ORIENTATION_HORIZONTAL
+
         /**
          * 指示器圆点半径大小默认值
          */

@@ -16,7 +16,6 @@
             <option value="$PROJECT_DIR$/slideshow2" />
           </set>
         </option>
-        <option name="resolveModulePerSourceSet" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

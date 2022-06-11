@@ -2,59 +2,72 @@ package com.ndhzs.slideshow2.base
 
 import android.content.Context
 import android.content.res.TypedArray
+import android.os.Build
 import android.util.AttributeSet
+import android.view.View
+import androidx.annotation.ColorRes
+import androidx.annotation.DimenRes
 import androidx.annotation.StyleableRes
+import androidx.core.content.ContextCompat
 
 /**
  * ...
  * @author 985892345 (Guo Xiangrui)
  * @email 2767465918@qq.com
- * @date 2022/2/22 10:51
+ * @date 2022/1/13
  */
 internal interface BaseViewAttrs {
 
+    fun <T> newAttrs(
+        view: View,
+        attrs: AttributeSet?,
+        @StyleableRes
+        styleableId: IntArray,
+        defStyleAttr: Int = 0,
+        defStyleRes: Int = 0,
+        func: Typedef.() -> T
+    ): T = Companion.newAttrs(view, attrs, styleableId, defStyleAttr, defStyleRes, func)
+
     companion object {
-        inline fun <T> newAttrs(
-            context: Context,
-            attrs: AttributeSet,
+        fun <T> newAttrs(
+            view: View,
+            attrs: AttributeSet?,
             @StyleableRes
             styleableId: IntArray,
-            defStyleAttr: Int,
-            defStyleRes: Int,
+            defStyleAttr: Int = 0,
+            defStyleRes: Int = 0,
             func: Typedef.() -> T
         ): T {
-            val ty = context.obtainStyledAttributes(attrs, styleableId, defStyleAttr, defStyleRes)
+            val ty = view.context.obtainStyledAttributes(attrs, styleableId, defStyleAttr, defStyleRes)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // 这是保存在 Debug 模式中能看到的信息，具体怎么查看，你可以去看看这个方法的源码
+                view.saveAttributeDataForStyleable(view.context, styleableId, attrs, ty, defStyleAttr, defStyleRes)
+            }
             try {
-                return Typedef(ty).func()
+                return Typedef(ty, view.context).func()
             } finally {
                 ty.recycle()
             }
         }
     }
 
-    class Typedef(val ty: TypedArray) {
+    class Typedef(val ty: TypedArray, private val context: Context) {
         fun Int.int(defValue: Int): Int = this.int(ty, defValue)
         fun Int.color(defValue: Int): Int = this.color(ty, defValue)
+        fun Int.colorById(@ColorRes defValueId: Int): Int = this.color(ContextCompat.getColor(context, defValueId))
         fun Int.dimens(defValue: Int): Int = this.dimens(ty, defValue)
         fun Int.dimens(defValue: Float): Float = this.dimens(ty, defValue)
+        fun Int.layoutDimens(defValue: Int): Int = this.layoutDimens(ty, defValue)
+        fun Int.dimensById(@DimenRes defValueId: Int): Int = this.dimens(context.resources.getDimensionPixelSize(defValueId))
         fun Int.string(defValue: String? = null): String = this.string(ty, defValue)
         fun Int.boolean(defValue: Boolean): Boolean = this.boolean(ty, defValue)
         fun Int.float(defValue: Float): Float = this.float(ty, defValue)
-        inline fun <reified E: RuntimeException> Int.intOrThrow(
+        internal inline fun <reified E: RuntimeException> Int.intOrThrow(
             attrsName: String): Int = this.intOrThrow<E>(ty, attrsName)
-        inline fun <reified E: RuntimeException> Int.stringOrThrow(
+        internal inline fun <reified E: RuntimeException> Int.stringOrThrow(
             attrsName: String): String = this.stringOrThrow<E>(ty, attrsName)
     }
 }
-
-internal inline fun <T> Context.getAttrs(
-    attrs: AttributeSet,
-    @StyleableRes
-    styleableId: IntArray,
-    defStyleAttr: Int,
-    defStyleRes: Int,
-    func: BaseViewAttrs.Typedef.() -> T
-) = BaseViewAttrs.newAttrs(this, attrs, styleableId, defStyleAttr, defStyleRes, func)
 
 internal fun Int.int(ty: TypedArray, defValue: Int): Int {
     return ty.getInt(this, defValue)
@@ -70,6 +83,10 @@ internal fun Int.dimens(ty: TypedArray, defValue: Int): Int {
 
 internal fun Int.dimens(ty: TypedArray, defValue: Float): Float {
     return ty.getDimension(this, defValue)
+}
+
+internal fun Int.layoutDimens(ty: TypedArray, defValue: Int): Int {
+    return ty.getLayoutDimension(this, defValue)
 }
 
 internal fun Int.string(ty: TypedArray, defValue: String? = null): String {
