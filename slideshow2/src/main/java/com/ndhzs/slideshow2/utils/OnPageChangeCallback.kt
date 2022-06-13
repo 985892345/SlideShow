@@ -10,9 +10,9 @@ import androidx.viewpager2.widget.ViewPager2.ScrollState
  * @date 2022/2/23 10:28
  */
 interface OnPageChangeCallback {
-    fun onPageScrolled(position: Int, positionOffset: Float, @Px positionOffsetPixels: Int) { }
-
-    fun onPageSelected(position: Int) { }
-
-    fun onPageScrollStateChanged(@ScrollState state: Int) { }
+  fun onPageScrolled(position: Int, positionOffset: Float, @Px positionOffsetPixels: Int) {}
+  
+  fun onPageSelected(position: Int) {}
+  
+  fun onPageScrollStateChanged(@ScrollState state: Int) {}
 }

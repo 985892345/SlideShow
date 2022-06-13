@@ -11,5 +11,5 @@ import com.ndhzs.slideshow2.base.ImageViewAdapter
  */
 
 fun <T> SlideShow2.setImgAdapter(imgAdapter: ImageViewAdapter<T>) {
-    setAdapter(imgAdapter)
+  setAdapter(imgAdapter)
 }

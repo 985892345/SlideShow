@@ -3,7 +3,6 @@ package com.ndhzs.slideshow2.indicators.view
 import android.content.Context
 import android.graphics.Path
 import android.util.AttributeSet
-import com.ndhzs.slideshow2.base.BaseViewAttrs
 import com.ndhzs.slideshow2.indicators.AbstractIndicatorsView
 
 /**
@@ -13,16 +12,16 @@ import com.ndhzs.slideshow2.indicators.AbstractIndicatorsView
  * @data 2021/7/16
  */
 class FlashIndicators(
-    context: Context,
-    attrs: AttributeSet
-) : AbstractIndicatorsView(context, attrs)  {
-
-    override fun onDrawMovePath(
-        path: Path,
-        radius: Float,
-        offsetPixels: Float,
-        intervalMargin: Float
-    ) {
-        path.addCircle(0F, 0F, radius, Path.Direction.CCW)
-    }
+  context: Context,
+  attrs: AttributeSet,
+) : AbstractIndicatorsView(context, attrs) {
+  
+  override fun onDrawMovePath(
+    path: Path,
+    radius: Float,
+    offsetPixels: Float,
+    intervalMargin: Float,
+  ) {
+    path.addCircle(0F, 0F, radius, Path.Direction.CCW)
+  }
 }

@@ -19,9 +19,9 @@ package com.ndhzs.slideshow2.viewpager.transformer2
 import android.view.View
 
 open class AccordionTransformer : ABaseTransformer() {
-
-    override fun onTransform(page: View, position: Float) {
-        page.pivotX = if (position < 0) 0f else page.width.toFloat()
-        page.scaleX = if (position < 0) 1f + position else 1f - position
-    }
+  
+  override fun onTransform(page: View, position: Float) {
+    page.pivotX = if (position < 0) 0f else page.width.toFloat()
+    page.scaleX = if (position < 0) 1f + position else 1f - position
+  }
 }

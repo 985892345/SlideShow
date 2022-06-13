@@ -19,10 +19,10 @@ package com.ndhzs.slideshow2.viewpager.transformer2
 import android.view.View
 
 open class DefaultTransformer : ABaseTransformer() {
-
-    public override val isPagingEnabled: Boolean
-        get() = true
-
-    override fun onTransform(page: View, position: Float) {}
-
+  
+  public override val isPagingEnabled: Boolean
+    get() = true
+  
+  override fun onTransform(page: View, position: Float) {}
+  
 }

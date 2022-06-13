@@ -20,13 +20,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:show_isCyclical="true"
         app:show_pageDistance="16dp"
-        app:show_frameDistance="60dp" >
+        app:show_frameDistance="60dp"
+        app:show_marginTop="20dp"
+        app:show_marginBottom="20dp">
 
         <com.ndhzs.slideshow2.indicators.view.WaterDropIndicators
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal" />
+            android:layout_gravity="bottom|center_horizontal"
+            app:indicators_circleRadius="4dp"
+            app:indicators_intervalMargin="12dp"
+            app:indicators_paddingBottom="3dp"
+            app:indicators_circleColor="@android:color/holo_orange_dark"/>
 
     </com.ndhzs.slideshow2.SlideShow2>
 

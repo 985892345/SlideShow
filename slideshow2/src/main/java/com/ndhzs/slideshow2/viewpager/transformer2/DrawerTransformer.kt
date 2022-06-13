@@ -8,9 +8,9 @@ import android.view.View
  * @author dkzwm
  */
 open class DrawerTransformer : ABaseTransformer() {
-
-    override fun onTransform(page: View, position: Float) {
-        if (position <= 0) page.translationX = 0f
-        else if (position <= 1) page.translationX = -page.width / 2 * position
-    }
+  
+  override fun onTransform(page: View, position: Float) {
+    if (position <= 0) page.translationX = 0f
+    else if (position <= 1) page.translationX = -page.width / 2 * position
+  }
 }

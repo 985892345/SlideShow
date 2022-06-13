@@ -2,15 +2,22 @@
 <resources>
     <declare-styleable name="SlideShow2">
 
-        <attr name="show_layoutId" format="reference"/>
+        <attr name="show_orientation">
+            <enum name="horizontal" value="0"/>
+            <enum name="vertical" value="1"/>
+        </attr>
 
         <attr name="show_frameDistance" format="dimension"/>
         <attr name="show_pageDistance" format="dimension"/>
         <attr name="show_isAutoSlide" format="boolean"/>
         <attr name="show_isCyclical" format="boolean"/>
 
-        <attr name="show_autoSlideDuration" format="float"/>
-        <attr name="show_autoSlideIntervalDt" format="float"/>
+        <attr name="show_autoSlideDuration" format="integer"/>
+        <attr name="show_autoSlideIntervalDt" format="integer"/>
+        <attr name="show_indicatorsViewId" format="reference"/>
+
+        <attr name="show_marginTop" format="dimension"/>
+        <attr name="show_marginBottom" format="dimension"/>
     </declare-styleable>
 
     <declare-styleable name="AbstractIndicatorsView">
@@ -26,5 +33,25 @@
         <attr name="indicators_intervalMargin" format="dimension"/>
         <!--指示器圆点背景颜色-->
         <attr name="indicators_circleBackground" format="color"/>
+        <!--指示器的 Gravity-->
+        <attr name="indicators_gravity">
+            <flag name="top" value="0x30" />
+            <flag name="bottom" value="0x50" />
+            <flag name="left" value="0x03" />
+            <flag name="right" value="0x05" />
+            <flag name="center_vertical" value="0x10" />
+            <flag name="center_horizontal" value="0x01" />
+            <flag name="center" value="0x11" />
+            <flag name="start" value="0x00800003" />
+            <flag name="end" value="0x00800005" />
+        </attr>
+        <!--指示器上边距值-->
+        <attr name="indicators_paddingTop" format="dimension"/>
+        <!--指示器下边距值-->
+        <attr name="indicators_paddingBottom" format="dimension"/>
+        <!--指示器左边距值-->
+        <attr name="indicators_paddingLeft" format="dimension"/>
+        <!--指示器右边距值-->
+        <attr name="indicators_paddingRight" format="dimension"/>
     </declare-styleable>
 </resources>

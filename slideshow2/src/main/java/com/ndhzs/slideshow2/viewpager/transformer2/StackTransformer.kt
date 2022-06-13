@@ -19,8 +19,8 @@ package com.ndhzs.slideshow2.viewpager.transformer2
 import android.view.View
 
 open class StackTransformer : ABaseTransformer() {
-
-    override fun onTransform(page: View, position: Float) {
-        page.translationX = if (position < 0) 0f else -page.width * position
-    }
+  
+  override fun onTransform(page: View, position: Float) {
+    page.translationX = if (position < 0) 0f else -page.width * position
+  }
 }
