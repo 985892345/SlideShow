@@ -6,7 +6,6 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import androidx.viewpager2.widget.ViewPager2
@@ -31,7 +30,7 @@ abstract class AbstractIndicatorsView @JvmOverloads constructor(
   private val mAttrs: IndicatorsAttrs =
     IndicatorsAttrs.newInstance(this, attrs, defStyleAttr, defStyleRes)
   
-  private var mAmount = 0
+  private var mAmount = 1
   
   /**
    * 圆点位置

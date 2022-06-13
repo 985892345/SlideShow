@@ -29,7 +29,7 @@
         <attr name="indicators_circleRadius" format="dimension"/>
         <!--指示器圆点颜色-->
         <attr name="indicators_circleColor" format="color"/>
-        <!--指示器两个圆点间的距离值-->
+        <!--指示器两个圆点圆心的距离值-->
         <attr name="indicators_intervalMargin" format="dimension"/>
         <!--指示器圆点背景颜色-->
         <attr name="indicators_circleBackground" format="color"/>

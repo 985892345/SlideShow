@@ -249,8 +249,6 @@ class SlideShow2 @JvmOverloads constructor(
         }
       }
     }
-    
-    mViewPager.postOnAnimation { setPageInterval() }
   }
   
   private val mIndicators = ArrayList<AbstractIndicatorsView>(2)
@@ -394,7 +392,7 @@ class SlideShow2 @JvmOverloads constructor(
   
   /**
    * 设置 ViewPager2 内部页面的边距，Orientation 为水平时设置左右的间隔，垂直时设置上下的间隔
-   *
+   * ```
    * ---------------------------------------------------------------------------------
    * |     RecyclerView
    * |                     ----------------------------------------------------------
@@ -409,6 +407,7 @@ class SlideShow2 @JvmOverloads constructor(
    * |                     |                            -------------------------
    * |                     ---------------------------------------------------------
    * --------------------------------------------------------------------------------
+   * ```
    */
   private fun setPageInterval() {
     if (mViewPager.adapter is InnerAdapter<*>) {
