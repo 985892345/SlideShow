@@ -36,10 +36,10 @@ android {
 }
 
 dependencies {
-  implementation(project(":slideshow"))
-  implementation(project(":slideshow2"))
+//  implementation(project(":slideshow"))
+//  implementation(project(":slideshow2"))
   
-//  implementation("com.github.985892345:SlideShow:main-SNAPSHOT")
+  implementation("com.github.985892345:SlideShow:2.0.0-alpha1")
   
   implementation("androidx.core:core-ktx:1.7.0")
   implementation("androidx.appcompat:appcompat:1.4.1")

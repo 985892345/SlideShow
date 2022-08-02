@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="280dp">
 
-    <com.ndhzs.slideshow.SlideShow
+    <!--<com.ndhzs.slideshow.SlideShow
         android:id="@+id/recycler_slideShow"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -18,6 +18,6 @@
         app:slide_adjacentPageInterval="40dp"
         app:slide_imgRadius="20dp"
         app:indicators_style="move"
-        app:indicators_circleColor="@color/black"/>
+        app:indicators_circleColor="@color/black"/>-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,6 +4,13 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Android_Studio/Project/Library/SlideShow/app/src/main/res/layout/activity_main.xml" value="4.5" />
+        <entry key="..\:/Android_Studio/Project/Library/SlideShow/app/src/main/res/layout/activity_viewshow.xml" value="0.15602836879432624" />
+        <entry key="..\:/Android_Studio/Project/Library/SlideShow/app/src/main/res/layout/fg_1.xml" value="0.25" />
+        <entry key="..\:/Android_Studio/Project/Library/SlideShow/app/src/main/res/layout/fg_2.xml" value="0.15602836879432624" />
+        <entry key="..\:/Android_Studio/Project/Library/SlideShow/app/src/main/res/layout/fg_2_1.xml" value="0.25" />
+        <entry key="..\:/Android_Studio/Project/Library/SlideShow/app/src/main/res/layout/fg_2_2.xml" value="0.25" />
+        <entry key="..\:/Android_Studio/Project/Library/SlideShow/app/src/main/res/layout/fg_3.xml" value="0.25" />
+        <entry key="..\:/Android_Studio/Project/Library/SlideShow/app/src/main/res/layout/item_recycler_slideshow.xml" value="0.4108843537414966" />
       </map>
     </option>
   </component>

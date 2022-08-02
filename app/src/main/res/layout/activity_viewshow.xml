@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ViewShowActivity">
 
-    <com.ndhzs.slideshow.SlideShow
+    <!--<com.ndhzs.slideshow.SlideShow
         android:id="@+id/viewpager_slideShow"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -16,9 +16,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:indicators_style="zoom"
-        app:indicators_circleRadius="5dp"/>
+        app:indicators_circleRadius="5dp"/>-->
 
-    <Button
+    <!--<Button
         android:id="@+id/btn_1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -49,7 +49,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/viewpager_slideShow"
-        tools:ignore="HardcodedText" />
+        tools:ignore="HardcodedText" />-->
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

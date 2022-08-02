@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/test">
 
-    <com.ndhzs.slideshow.SlideShow
+    <!--<com.ndhzs.slideshow.SlideShow
         android:id="@+id/fg_2_slideShow"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -20,6 +20,6 @@
         app:indicators_wrapWidth="18dp"
         app:indicators_circleRadius="6dp"
         app:indicators_intervalMargin="30dp"
-        app:indicators_circleColor="@android:color/holo_red_light"/>
+        app:indicators_circleColor="@android:color/holo_red_light"/>-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
