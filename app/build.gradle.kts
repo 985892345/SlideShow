@@ -39,6 +39,8 @@ dependencies {
   implementation(project(":slideshow"))
   implementation(project(":slideshow2"))
   
+//  implementation("com.github.985892345:SlideShow:main-SNAPSHOT")
+  
   implementation("androidx.core:core-ktx:1.7.0")
   implementation("androidx.appcompat:appcompat:1.4.1")
   implementation("com.google.android.material:material:1.5.0")

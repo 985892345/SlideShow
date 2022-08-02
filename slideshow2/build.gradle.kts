@@ -51,6 +51,15 @@ afterEvaluate {
       create<MavenPublication>("release") {
         from(components["release"])
       }
+//
+//      repositories {
+//        maven{
+//          url = uri("$rootDir/maven")
+//          group = "com.mredrock.team"
+//          name = name
+//          version = "cache"
+//        }
+//      }
     }
   }
 }
