@@ -42,7 +42,7 @@ class ImageViewAdapter<T> private constructor(
       return this
     }
   
-    override fun onBind(call: ViewAdapter<T, ShapeableImageView>.Wrapper.(data: T) -> Unit): Builder<T> {
+    override fun onBind(call: ViewAdapter<T, ShapeableImageView>.Wrapper.() -> Unit): Builder<T> {
       super.onBind(call)
       return this
     }

@@ -2,14 +2,15 @@ plugins {
   id("com.android.library")
   id("org.jetbrains.kotlin.android")
   `maven-publish`
+  signing
 }
 
 android {
-  compileSdk = 31
+  compileSdk = 32
   
   defaultConfig {
     minSdk = 21
-    targetSdk = 31
+    targetSdk = 32
     
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     consumerProguardFiles("consumer-rules.pro")
@@ -29,34 +30,79 @@ android {
     jvmTarget = "1.8"
   }
   publishing {
-    singleVariant("release")
+    singleVariant("release") {
+      withJavadocJar()
+      withSourcesJar()
+    }
   }
-}
-
-configurations.all {
-  resolutionStrategy.cacheChangingModulesFor(0, TimeUnit.SECONDS)
 }
 
 dependencies {
   implementation("androidx.core:core-ktx:1.8.0")
-  implementation("androidx.appcompat:appcompat:1.4.2")
+  implementation("androidx.appcompat:appcompat:1.5.0")
   implementation("com.google.android.material:material:1.6.1")
   testImplementation("junit:junit:4.13.2")
   androidTestImplementation("androidx.test.ext:junit:1.1.3")
   androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
 }
 
+group = "io.github.985892345"
+version = "2.0.0-SNAPSHOT"
+
 afterEvaluate {
   publishing {
     publications {
-      // Creates a Maven publication called "release".
       create<MavenPublication>("release") {
+        groupId = project.group.toString()
+        artifactId = "SlideShow"
+        version = project.version.toString()
         from(components["release"])
+        signing {
+          sign(this@create)
+        }
+
+        pom {
+          name.set("SlideShow")
+          description.set("ViewPager2的整合库，可以更方便的用于轮播图。部分代码参考了第三方库Banner")
+          url.set("https://github.com/985892345/SlideShow")
+
+          licenses {
+            license {
+              name.set("Apache-2.0 license")
+              url.set("https://github.com/985892345/SlideShow/blob/main/LICENSE")
+            }
+          }
+
+          developers {
+            developer {
+              id.set("985892345")
+              name.set("GuoXiangrui")
+              email.set("guo985892345@formail.com")
+            }
+          }
+
+          scm {
+            connection.set("https://github.com/985892345/SlideShow.git")
+            developerConnection.set("https://github.com/985892345/SlideShow.git")
+            url.set("https://github.com/985892345/SlideShow")
+          }
+        }
       }
       repositories {
         maven {
-          name = "Local"
-          url = uri("$buildDir/local")
+          name = "course"
+          url = uri("A:\\Android_Studio\\Project\\CyxbsMredrock\\course\\CyxbsMobile_Android\\build\\maven")
+        }
+        maven {
+          // https://s01.oss.sonatype.org/
+          name = "mavenCentral" // 点击 publishReleasePublicationToMavenCentralRepository 发布到 mavenCentral
+          val releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+          val snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+          setUrl(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
+          credentials {
+            username = project.properties["mavenCentralUsername"].toString()
+            password = project.properties["mavenCentralPassword"].toString()
+          }
         }
       }
     }

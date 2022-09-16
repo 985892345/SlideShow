@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-  compileSdk = 31
+  compileSdk = 32
   
   defaultConfig {
     applicationId = "com.ndhzs.slideshowdemo"
     minSdk = 21
-    targetSdk = 31
+    targetSdk = 32
     versionCode = 1
     versionName = "1.0"
     
@@ -36,7 +36,7 @@ android {
 
 dependencies {
   implementation("androidx.core:core-ktx:1.8.0")
-  implementation("androidx.appcompat:appcompat:1.4.2")
+  implementation("androidx.appcompat:appcompat:1.5.0")
   implementation("com.google.android.material:material:1.6.1")
   implementation("androidx.constraintlayout:constraintlayout:2.1.4")
   testImplementation("junit:junit:4.13.2")

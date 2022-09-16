@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
       .setImgAdapter(
         ImageViewAdapter.Builder(colorList)
           .onBind {
-            view.setBackgroundColor(it)
+            view.setBackgroundColor(data)
           }
       )
   }

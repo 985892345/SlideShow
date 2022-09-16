@@ -41,7 +41,7 @@ open class ViewAdapter<T, V: View> protected constructor(
   
   override fun onBindViewHolder(holder: Holder, position: Int) {
     builder.onBind.forEachInline {
-      it.invoke(holder.wrapper, builder.data[position])
+      it.invoke(holder.wrapper)
     }
   }
   
@@ -54,14 +54,14 @@ open class ViewAdapter<T, V: View> protected constructor(
     internal val newInstance: ViewGroup.() -> V
   ) {
     internal val onCreate = ArrayList<ViewAdapter<T, V>.Wrapper.() -> Unit>(2)
-    internal val onBind = ArrayList<ViewAdapter<T, V>.Wrapper.(data: T) -> Unit>(2)
+    internal val onBind = ArrayList<ViewAdapter<T, V>.Wrapper.() -> Unit>(2)
   
     open fun onCreate(call: ViewAdapter<T, V>.Wrapper.() -> Unit): Builder<T, V> {
       onCreate.add(call)
       return this
     }
   
-    open fun onBind(call: ViewAdapter<T, V>.Wrapper.(data: T) -> Unit): Builder<T, V> {
+    open fun onBind(call: ViewAdapter<T, V>.Wrapper.() -> Unit): Builder<T, V> {
       onBind.add(call)
       return this
     }
