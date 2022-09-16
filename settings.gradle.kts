@@ -24,4 +24,4 @@ dependencyResolutionManagement {
 rootProject.name = "SlideShow"
 //include(":slideshow")
 include(":app")
-include(":slideshow2")
+include(":slideshow")
