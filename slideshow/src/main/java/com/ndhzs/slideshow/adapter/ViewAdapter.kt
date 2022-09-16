@@ -20,8 +20,14 @@ open class ViewAdapter<T, V: View> protected constructor(
 ): RecyclerView.Adapter<ViewAdapter<T, V>.Holder>() {
   
   inner class Holder(val view: V) : RecyclerView.ViewHolder(view) {
+    val wrapper = Wrapper(this)
+  }
+  
+  inner class Wrapper(val holder: Holder) {
+    val view: V
+      get() = holder.view
     val realPosition: Int
-      get() = layoutPosition % itemCount
+      get() = holder.layoutPosition % itemCount
     val data: T
       get() = builder.data[realPosition]
   }
@@ -29,13 +35,13 @@ open class ViewAdapter<T, V: View> protected constructor(
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
     val view = builder.newInstance(parent)
     val holder = Holder(view)
-    builder.onCreate.forEachInline { it.invoke(holder) }
+    builder.onCreate.forEachInline { it.invoke(holder.wrapper) }
     return holder
   }
   
   override fun onBindViewHolder(holder: Holder, position: Int) {
     builder.onBind.forEachInline {
-      it.invoke(holder, builder.data[position])
+      it.invoke(holder.wrapper, builder.data[position])
     }
   }
   
@@ -47,15 +53,15 @@ open class ViewAdapter<T, V: View> protected constructor(
     internal val data: List<T>,
     internal val newInstance: ViewGroup.() -> V
   ) {
-    internal val onCreate = ArrayList<ViewAdapter<T, V>.Holder.() -> Unit>(2)
-    internal val onBind = ArrayList<ViewAdapter<T, V>.Holder.(data: T) -> Unit>(2)
+    internal val onCreate = ArrayList<ViewAdapter<T, V>.Wrapper.() -> Unit>(2)
+    internal val onBind = ArrayList<ViewAdapter<T, V>.Wrapper.(data: T) -> Unit>(2)
   
-    open fun onCreate(call: ViewAdapter<T, V>.Holder.() -> Unit): Builder<T, V> {
+    open fun onCreate(call: ViewAdapter<T, V>.Wrapper.() -> Unit): Builder<T, V> {
       onCreate.add(call)
       return this
     }
   
-    open fun onBind(call: ViewAdapter<T, V>.Holder.(data: T) -> Unit): Builder<T, V> {
+    open fun onBind(call: ViewAdapter<T, V>.Wrapper.(data: T) -> Unit): Builder<T, V> {
       onBind.add(call)
       return this
     }

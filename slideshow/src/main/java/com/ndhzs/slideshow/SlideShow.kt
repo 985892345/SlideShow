@@ -174,7 +174,7 @@ class SlideShow @JvmOverloads constructor(
   }
   
   /**
-   * 得到你说看到的位置，但这个位置是取余后的结果，并不是真实的位置
+   * 得到你所看到的位置，但这个位置是取余后的结果，并不是真实的位置
    */
   fun getCurrentItem(): Int {
     return getShowPosition(mViewPager.currentItem)
