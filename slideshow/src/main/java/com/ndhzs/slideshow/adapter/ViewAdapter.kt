@@ -17,18 +17,23 @@ import com.ndhzs.slideshow.utils.forEachInline
  */
 open class ViewAdapter<T, V: View> protected constructor(
   private val builder: Builder<T, V>
-): RecyclerView.Adapter<ViewAdapter.Holder<V>>() {
+): RecyclerView.Adapter<ViewAdapter<T, V>.Holder>() {
   
-  class Holder<V: View>(val view: V) : RecyclerView.ViewHolder(view)
+  inner class Holder(val view: V) : RecyclerView.ViewHolder(view) {
+    val realPosition: Int
+      get() = layoutPosition % itemCount
+    val data: T
+      get() = builder.data[realPosition]
+  }
   
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder<V> {
+  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
     val view = builder.newInstance(parent)
     val holder = Holder(view)
     builder.onCreate.forEachInline { it.invoke(holder) }
     return holder
   }
   
-  override fun onBindViewHolder(holder: Holder<V>, position: Int) {
+  override fun onBindViewHolder(holder: Holder, position: Int) {
     builder.onBind.forEachInline {
       it.invoke(holder, builder.data[position])
     }
@@ -42,15 +47,15 @@ open class ViewAdapter<T, V: View> protected constructor(
     internal val data: List<T>,
     internal val newInstance: ViewGroup.() -> V
   ) {
-    internal val onCreate = ArrayList<Holder<V>.() -> Unit>(2)
-    internal val onBind = ArrayList<Holder<V>.(data: T) -> Unit>(2)
+    internal val onCreate = ArrayList<ViewAdapter<T, V>.Holder.() -> Unit>(2)
+    internal val onBind = ArrayList<ViewAdapter<T, V>.Holder.(data: T) -> Unit>(2)
   
-    open fun onCreate(call: Holder<V>.() -> Unit): Builder<T, V> {
+    open fun onCreate(call: ViewAdapter<T, V>.Holder.() -> Unit): Builder<T, V> {
       onCreate.add(call)
       return this
     }
   
-    open fun onBind(call: Holder<V>.(data: T) -> Unit): Builder<T, V> {
+    open fun onBind(call: ViewAdapter<T, V>.Holder.(data: T) -> Unit): Builder<T, V> {
       onBind.add(call)
       return this
     }

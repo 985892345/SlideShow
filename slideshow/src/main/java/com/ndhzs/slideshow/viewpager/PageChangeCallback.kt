@@ -3,6 +3,7 @@ package com.ndhzs.slideshow.viewpager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.ndhzs.slideshow.utils.OnPageChangeCallback
+import com.ndhzs.slideshow.utils.forEachReversed
 
 /**
  * ...
@@ -54,14 +55,14 @@ class PageChangeCallback(
       if (mPositionFloat % outerAdapter.itemCount > outerAdapter.itemCount - 1) { // 当划出边界时
         val pf =
           (1 - positionOffset) * (outerAdapter.itemCount - 1) // 这里可以表示从右边界到左边界(或相反)经过的值
-        mCallbacks.forEach {
+        mCallbacks.forEachReversed {
           it.onPageScrolled(pf.toInt(), pf - pf.toInt(), positionOffsetPixels)
         }
         return
       }
     }
     val outerPosition = getOuterPos(innerAdapter, position)
-    mCallbacks.forEach {
+    mCallbacks.forEachReversed {
       it.onPageScrolled(outerPosition, positionOffset, positionOffsetPixels)
     }
   }
@@ -72,7 +73,7 @@ class PageChangeCallback(
   
   private fun pageSelected(position: Int) {
     val outerPosition = getOuterPos(innerAdapter, position)
-    mCallbacks.forEach {
+    mCallbacks.forEachReversed {
       it.onPageSelected(outerPosition)
     }
   }
@@ -91,7 +92,7 @@ class PageChangeCallback(
         )
       }
     }
-    mCallbacks.forEach {
+    mCallbacks.forEachReversed {
       it.onPageScrollStateChanged(state)
     }
   }

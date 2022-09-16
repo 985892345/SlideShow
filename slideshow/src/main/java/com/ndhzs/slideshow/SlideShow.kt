@@ -43,6 +43,9 @@ class SlideShow @JvmOverloads constructor(
   
   /**
    * 设置 Adapter
+   *
+   * ## 注意
+   * - 如果开启了循环。那么 ViewHolder#getLayoutPosition() 需要对 getItemCount() 取余，不然会导致数组越界
    */
   fun <VH : RecyclerView.ViewHolder> setAdapter(adapter: RecyclerView.Adapter<VH>) {
     if (getOuterAdapter() != null) error("不允许再次设置 Adapter!")
@@ -171,13 +174,20 @@ class SlideShow @JvmOverloads constructor(
   }
   
   /**
-   * 得到你说看到的位置，但这个位置时取余后的结果，并不是真实的位置
+   * 得到你说看到的位置，但这个位置是取余后的结果，并不是真实的位置
    */
   fun getCurrentItem(): Int {
+    return getShowPosition(mViewPager.currentItem)
+  }
+  
+  /**
+   * 得到显示的位置，该位置是取余后的结果，并不是真实的位置
+   */
+  fun getShowPosition(position: Int): Int {
     if (getOuterAdapter() != null) {
-      return PageChangeCallback.getOuterPos(getInnerAdapter()!!, mViewPager.currentItem)
+      return PageChangeCallback.getOuterPos(getInnerAdapter()!!, position)
     }
-    return mViewPager.currentItem
+    return position
   }
   
   /**
