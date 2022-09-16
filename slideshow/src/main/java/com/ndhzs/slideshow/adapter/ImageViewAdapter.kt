@@ -21,7 +21,7 @@ class ImageViewAdapter<T> private constructor(
   ) : ViewAdapter.Builder<T, ShapeableImageView>(
     data,
     {
-      ShapeableImageView(it.context).apply {
+      ShapeableImageView(context).apply {
         layoutParams = ViewGroup.LayoutParams(
           ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
         )
@@ -42,7 +42,7 @@ class ImageViewAdapter<T> private constructor(
       return this
     }
   
-    override fun onBind(call: Holder<ShapeableImageView>.(T) -> Unit): Builder<T> {
+    override fun onBind(call: Holder<ShapeableImageView>.(data: T) -> Unit): Builder<T> {
       super.onBind(call)
       return this
     }

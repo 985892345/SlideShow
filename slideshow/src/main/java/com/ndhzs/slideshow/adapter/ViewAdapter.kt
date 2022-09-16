@@ -40,17 +40,17 @@ open class ViewAdapter<T, V: View> protected constructor(
   
   open class Builder<T, V : View>(
     internal val data: List<T>,
-    internal val newInstance: (parent: ViewGroup) -> V
+    internal val newInstance: ViewGroup.() -> V
   ) {
     internal val onCreate = ArrayList<Holder<V>.() -> Unit>(2)
-    internal val onBind = ArrayList<Holder<V>.(T) -> Unit>(2)
+    internal val onBind = ArrayList<Holder<V>.(data: T) -> Unit>(2)
   
     open fun onCreate(call: Holder<V>.() -> Unit): Builder<T, V> {
       onCreate.add(call)
       return this
     }
   
-    open fun onBind(call: Holder<V>.(T) -> Unit): Builder<T, V> {
+    open fun onBind(call: Holder<V>.(data: T) -> Unit): Builder<T, V> {
       onBind.add(call)
       return this
     }

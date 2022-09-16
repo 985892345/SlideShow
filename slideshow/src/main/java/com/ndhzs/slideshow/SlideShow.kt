@@ -171,6 +171,16 @@ class SlideShow @JvmOverloads constructor(
   }
   
   /**
+   * 得到你说看到的位置，但这个位置时取余后的结果，并不是真实的位置
+   */
+  fun getCurrentItem(): Int {
+    if (getOuterAdapter() != null) {
+      return PageChangeCallback.getOuterPos(getInnerAdapter()!!, mViewPager.currentItem)
+    }
+    return mViewPager.currentItem
+  }
+  
+  /**
    * 进行可控制时间的滑动
    */
   fun smoothSlide(
@@ -479,9 +489,5 @@ class SlideShow @JvmOverloads constructor(
         outerAdapter.unregisterAdapterDataObserver(observe)
       }
     }
-  }
-  
-  override fun setBackgroundColor(color: Int) {
-    setCardBackgroundColor(color)
   }
 }

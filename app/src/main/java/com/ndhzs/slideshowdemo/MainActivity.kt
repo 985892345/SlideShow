@@ -26,8 +26,8 @@ class MainActivity : AppCompatActivity() {
     )
     
     mSlideShow.setTransformer(ScaleInTransformer()) // 设置移动动画
-//      .setIsAutoSlide(true)
-//      .setIsCyclical(true)
+      .setIsAutoSlide(true)
+      .setIsCyclical(true)
       .setTimeInterpolator(AccelerateDecelerateInterpolator())
       .setImgAdapter(
         ImageViewAdapter.Builder(colorList)
