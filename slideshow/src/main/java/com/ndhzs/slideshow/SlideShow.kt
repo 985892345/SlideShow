@@ -3,6 +3,7 @@ package com.ndhzs.slideshow
 import android.animation.TimeInterpolator
 import android.animation.ValueAnimator
 import android.content.Context
+import android.graphics.Color
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -12,6 +13,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.animation.addListener
 import androidx.core.view.iterator
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.ndhzs.slideshow.attrs.SlideShowAttrs
 import com.ndhzs.slideshow.indicators.AbstractIndicatorsView
@@ -24,7 +26,10 @@ import com.ndhzs.slideshow.viewpager.transformer.MultipleTransformer
 import kotlin.math.max
 
 /**
- * ...
+ *
+ * ## 注意
+ * 因为继承的 CardView，所以默认有层白色的背景，如果需要取消的话，请使用 app:cardBackgroundColor="@android:color/transparent"
+ *
  * @author 985892345 (Guo Xiangrui)
  * @email 2767465918@qq.com
  * @date 2022/2/22 10:47
@@ -37,10 +42,13 @@ class SlideShow @JvmOverloads constructor(
 ) : CardView(context, attrs, defStyleAttr) {
   
   /**
-   * 设置一般的 Adapter
+   * 设置 Adapter
    */
   fun <VH : RecyclerView.ViewHolder> setAdapter(adapter: RecyclerView.Adapter<VH>) {
     if (getOuterAdapter() != null) error("不允许再次设置 Adapter!")
+    if (adapter is FragmentStateAdapter && isCyclical()) {
+      error("暂不支持循环的 FragmentStateAdapter")
+    }
     mViewPager.adapter = InnerAdapter(adapter, mAttrs)
     mIndicators.forEach {
       setIndicators(it)
@@ -113,7 +121,11 @@ class SlideShow @JvmOverloads constructor(
    */
   fun setIsCyclical(boolean: Boolean): SlideShow {
     mAttrs.isCyclical = boolean
-    if (getOuterAdapter() != null) {
+    val outerAdapter = getOuterAdapter()
+    if (outerAdapter is FragmentStateAdapter && boolean) {
+      error("暂不支持循环的 FragmentStateAdapter")
+    }
+    if (outerAdapter != null) {
       getInnerAdapter()!!.setIsCyclical(boolean)
     }
     return this
@@ -121,6 +133,8 @@ class SlideShow @JvmOverloads constructor(
   
   /**
    * 设置自动滑动时间
+   *
+   * 单位：毫秒
    */
   fun setAutoSlideTime(
     duration: Int = mAttrs.autoSlideDuration,
@@ -212,21 +226,21 @@ class SlideShow @JvmOverloads constructor(
    * 设置 Vp2 的边距值
    */
   fun setMargin(
-    marginTop: Int = Int.MIN_VALUE,
-    marginBottom: Int = Int.MIN_VALUE,
-    marginLeft: Int = Int.MIN_VALUE,
-    marginRight: Int = Int.MIN_VALUE
+    marginTop: Int = mAttrs.marginTop,
+    marginBottom: Int = mAttrs.marginBottom,
+    marginLeft: Int = mAttrs.marginLeft,
+    marginRight: Int = mAttrs.marginRight
   ) {
-    if (marginTop != Int.MIN_VALUE) mAttrs.marginTop = marginTop
-    if (marginBottom != Int.MIN_VALUE) mAttrs.marginBottom = marginBottom
-    if (marginLeft != Int.MIN_VALUE) mAttrs.marginLeft = marginLeft
-    if (marginRight != Int.MIN_VALUE) mAttrs.marginRight = marginRight
+    mAttrs.marginTop = marginTop
+    mAttrs.marginBottom = marginBottom
+    mAttrs.marginLeft = marginLeft
+    mAttrs.marginRight = marginRight
     val lp = mViewPager.layoutParams as? LayoutParams
     if (lp != null) {
-      if (marginTop != Int.MIN_VALUE) lp.topMargin = marginTop
-      if (marginBottom != Int.MIN_VALUE) lp.bottomMargin = marginBottom
-      if (marginLeft != Int.MIN_VALUE) lp.leftMargin = marginLeft
-      if (marginRight != Int.MIN_VALUE) lp.rightMargin = marginRight
+      lp.topMargin = marginTop
+      lp.bottomMargin = marginBottom
+      lp.leftMargin = marginLeft
+      lp.rightMargin = marginRight
       mViewPager.layoutParams = lp
     }
   }
@@ -247,7 +261,11 @@ class SlideShow @JvmOverloads constructor(
   init {
     mAttrs = SlideShowAttrs.newInstance(this, attrs, defStyleAttr, defStyleRes)
     mViewPager = ViewPager2(context, attrs, defStyleAttr, defStyleRes)
-    mViewPager.getChildAt(0).overScrollMode = OVER_SCROLL_NEVER
+    mViewPager.setBackgroundColor(Color.TRANSPARENT)
+    mViewPager.getChildAt(0).apply {
+      overScrollMode = OVER_SCROLL_NEVER
+      setBackgroundColor(Color.TRANSPARENT)
+    }
     cardElevation = 0F
     attachViewToParent(
       mViewPager, 0,
@@ -461,5 +479,9 @@ class SlideShow @JvmOverloads constructor(
         outerAdapter.unregisterAdapterDataObserver(observe)
       }
     }
+  }
+  
+  override fun setBackgroundColor(color: Int) {
+    setCardBackgroundColor(color)
   }
 }

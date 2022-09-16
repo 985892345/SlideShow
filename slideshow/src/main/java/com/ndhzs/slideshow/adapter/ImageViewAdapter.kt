@@ -1,7 +1,6 @@
 package com.ndhzs.slideshow.adapter
 
 import android.view.ViewGroup
-import android.widget.ImageView
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.ndhzs.slideshow.SlideShow
@@ -26,7 +25,6 @@ class ImageViewAdapter<T> private constructor(
         layoutParams = ViewGroup.LayoutParams(
           ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
         )
-        scaleType = ImageView.ScaleType.CENTER_INSIDE
         if (radius > 0) {
           shapeAppearanceModel = ShapeAppearanceModel.builder()
             .setTopLeftCornerSize(radius)
