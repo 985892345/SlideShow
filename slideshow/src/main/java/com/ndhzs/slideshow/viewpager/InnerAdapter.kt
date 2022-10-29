@@ -23,12 +23,12 @@ class InnerAdapter<VH : RecyclerView.ViewHolder>(
   val attrs: SlideShowAttrs,
 ) : RecyclerView.Adapter<VH>() {
   
-  private var mIsCyclical = attrs.isCyclical
+  private val mIsCyclical
+    get() = attrs.isCyclical
   
   @SuppressLint("NotifyDataSetChanged")
   internal fun setIsCyclical(boolean: Boolean) {
     if (boolean != mIsCyclical) {
-      mIsCyclical = boolean
       outAdapter.notifyDataSetChanged()
     }
   }
@@ -37,23 +37,19 @@ class InnerAdapter<VH : RecyclerView.ViewHolder>(
     val holder = outAdapter.onCreateViewHolder(parent, viewType)
     val view = holder.itemView
     var lp = view.layoutParams
-    if (lp is ViewGroup.LayoutParams) {
-      lp = ViewGroup.MarginLayoutParams(lp)
-    } else if (lp == null) {
-      lp = ViewGroup.MarginLayoutParams(
-        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
-      )
+    lp = if (lp is ViewGroup.LayoutParams) {
+      ViewGroup.MarginLayoutParams(lp)
+    } else {
+      ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
     }
-    if (lp is ViewGroup.MarginLayoutParams) {
-      if (attrs.pageDistance != SlideShowAttrs.PAGE_DISTANCE) {
-        val margin = attrs.pageDistance / 2
-        if (attrs.orientation == ViewPager2.ORIENTATION_HORIZONTAL) {
-          lp.leftMargin = margin
-          lp.rightMargin = margin
-        } else {
-          lp.topMargin = margin
-          lp.bottomMargin = margin
-        }
+    if (attrs.pageDistance != SlideShowAttrs.PAGE_DISTANCE) {
+      val margin = attrs.pageDistance / 2
+      if (attrs.orientation == ViewPager2.ORIENTATION_HORIZONTAL) {
+        lp.leftMargin = margin
+        lp.rightMargin = margin
+      } else {
+        lp.topMargin = margin
+        lp.bottomMargin = margin
       }
     }
     view.layoutParams = lp
@@ -80,7 +76,7 @@ class InnerAdapter<VH : RecyclerView.ViewHolder>(
       return outAdapter.itemCount
     }
     val outerItemCount = outAdapter.itemCount
-    return if (outerItemCount <= 10) 30 else outerItemCount * 3
+    return if (outerItemCount <= 10) 50 else outerItemCount * 5
   }
   
   override fun getItemViewType(position: Int): Int {
@@ -138,22 +134,35 @@ class InnerAdapter<VH : RecyclerView.ViewHolder>(
       }
       
       override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
-        notifyItemRangeChanged(positionStart, itemCount)
+        var position = positionStart
+        val outerItemCount = outAdapter.itemCount
+        while (position < this@InnerAdapter.itemCount) {
+          notifyItemRangeChanged(positionStart, itemCount)
+          position += outerItemCount
+        }
       }
       
       override fun onItemRangeChanged(positionStart: Int, itemCount: Int, payload: Any?) {
-        notifyItemRangeChanged(positionStart, itemCount, payload)
+        var position = positionStart
+        val outerItemCount = outAdapter.itemCount
+        while (position < this@InnerAdapter.itemCount) {
+          notifyItemRangeChanged(positionStart, itemCount, payload)
+          position += outerItemCount
+        }
       }
       
       override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+        if (mIsCyclical) error("开启了循环后不允许 insert 新值")
         notifyItemRangeInserted(positionStart, itemCount)
       }
       
       override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+        if (mIsCyclical) error("开启了循环后不允许 remove 值")
         notifyItemRangeRemoved(positionStart, itemCount)
       }
       
       override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+        if (mIsCyclical) error("开启了循环后不允许 move 值")
         // 官方传的 itemCount 是一个为 1 的常量
         notifyItemMoved(fromPosition, toPosition)
       }

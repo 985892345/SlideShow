@@ -29,17 +29,11 @@ android {
   kotlinOptions {
     jvmTarget = "1.8"
   }
-  publishing {
-    singleVariant("release") {
-      withJavadocJar()
-      withSourcesJar()
-    }
-  }
 }
 
 dependencies {
   implementation("androidx.core:core-ktx:1.8.0")
-  implementation("androidx.appcompat:appcompat:1.5.0")
+  implementation("androidx.appcompat:appcompat:1.4.2")
   implementation("com.google.android.material:material:1.6.1")
   testImplementation("junit:junit:4.13.2")
   androidTestImplementation("androidx.test.ext:junit:1.1.3")
@@ -48,13 +42,25 @@ dependencies {
 
 group = "io.github.985892345"
 version = "2.0.0-SNAPSHOT"
+val projectArtifact = "SlideShow"
+val projectGithubName = projectArtifact
+val projectDescription = "ViewPager2的整合库，可以更方便的用于轮播图。部分代码参考了第三方库Banner"
+
+android {
+  publishing {
+    singleVariant("release") {
+      withJavadocJar()
+      withSourcesJar()
+    }
+  }
+}
 
 afterEvaluate {
   publishing {
     publications {
       create<MavenPublication>("release") {
         groupId = project.group.toString()
-        artifactId = "SlideShow"
+        artifactId = projectArtifact
         version = project.version.toString()
         from(components["release"])
         signing {
@@ -62,14 +68,14 @@ afterEvaluate {
         }
 
         pom {
-          name.set("SlideShow")
-          description.set("ViewPager2的整合库，可以更方便的用于轮播图。部分代码参考了第三方库Banner")
-          url.set("https://github.com/985892345/SlideShow")
+          name.set(projectArtifact)
+          description.set(projectDescription)
+          url.set("https://github.com/985892345/$projectGithubName")
 
           licenses {
             license {
               name.set("Apache-2.0 license")
-              url.set("https://github.com/985892345/SlideShow/blob/main/LICENSE")
+              url.set("https://github.com/985892345/$projectGithubName/blob/main/LICENSE")
             }
           }
 
@@ -82,17 +88,13 @@ afterEvaluate {
           }
 
           scm {
-            connection.set("https://github.com/985892345/SlideShow.git")
-            developerConnection.set("https://github.com/985892345/SlideShow.git")
-            url.set("https://github.com/985892345/SlideShow")
+            connection.set("https://github.com/985892345/$projectGithubName.git")
+            developerConnection.set("https://github.com/985892345/$projectGithubName.git")
+            url.set("https://github.com/985892345/$projectGithubName")
           }
         }
       }
       repositories {
-        maven {
-          name = "course"
-          url = uri("A:\\Android_Studio\\Project\\CyxbsMredrock\\course\\CyxbsMobile_Android\\build\\maven")
-        }
         maven {
           // https://s01.oss.sonatype.org/
           name = "mavenCentral" // 点击 publishReleasePublicationToMavenCentralRepository 发布到 mavenCentral

@@ -17,6 +17,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.ndhzs.slideshow.attrs.SlideShowAttrs
 import com.ndhzs.slideshow.indicators.AbstractIndicatorsView
+import com.ndhzs.slideshow.indicators.view.WaterDropIndicators
 import com.ndhzs.slideshow.utils.OnPageChangeCallback
 import com.ndhzs.slideshow.utils.forEachInline
 import com.ndhzs.slideshow.utils.lazyUnlock
@@ -26,9 +27,60 @@ import com.ndhzs.slideshow.viewpager.transformer.MultipleTransformer
 import kotlin.math.max
 
 /**
+ * 一个 Banner 封装库
+ *
+ * ## 简易用法
+ * ```
+ * <com.ndhzs.slideshow.SlideShow
+ *     android:layout_width="match_parent"
+ *     android:layout_height="match_parent"
+ *     app:cardCornerRadius="20dp"
+ *     app:show_isCyclical="true"
+ *     app:show_isAutoSlide="true"
+ *     app:show_pageDistance="16dp"
+ *     app:show_frameDistance="60dp"
+ *     app:show_marginTop="20dp"
+ *     app:show_marginBottom="20dp">
+ *
+ *     <!--设置圆点指示器-->
+ *     <com.ndhzs.slideshow.indicators.view.WaterDropIndicators
+ *         android:layout_width="match_parent"
+ *         android:layout_height="wrap_content"
+ *         android:layout_gravity="bottom|center_horizontal"
+ *         app:indicators_circleRadius="4dp"
+ *         app:indicators_intervalMargin="12dp"
+ *         app:indicators_paddingBottom="3dp"
+ *         app:indicators_circleColor="@android:color/holo_orange_dark"/>
+ *
+ * </com.ndhzs.slideshow.SlideShow>
+ * ```
+ *
+ * ## 指示器
+ * 本控件中包含了部分常用的指示器，推荐：[WaterDropIndicators]
+ *
+ * ### 如何设置
+ * 推荐两种设置方法，可以不用单独使用代码添加
+ * - 你可以像上面示例一样直接写在 SlideShow 布局内
+ * - 与 SlideShow 写在同一层父布局下
+ *
+ * 当然，你也可以设置在其他地方，只是需要你手动调用 [addIndicatorsView]
+ *
+ * ## 其他功能
+ * - [isCyclical]：开启循环
+ * - [isAutoSlide]：开启自动滚动
+ * - [smoothSlide]：可控制时间的滚动
  *
  * ## 注意
- * 因为继承的 CardView，所以默认有层白色的背景，如果需要取消的话，请使用 app:cardBackgroundColor="@android:color/transparent"
+ * ### 循环注意事项
+ * 循环的实现原理是通过包裹你的 Adapter 单独设置多余的页数来实现的，但这就意味着会有多余的页数，有以下几点需要注意：
+ * - ViewHolder 得到 layoutPosition 需要进行取余操作: layoutPosition % itemCount
+ * - 开启循环后不允许插入和移动值，但调用 notifyDataSetChanged() 是允许的
+ *
+ * ### 设置背景
+ * 因为继承的 CardView，所以默认有层白色的背景，如果需要取消的话，请使用
+ * ```
+ * app:cardBackgroundColor="@android:color/transparent"
+ * ```
  *
  * @author 985892345 (Guo Xiangrui)
  * @email 2767465918@qq.com
@@ -61,7 +113,7 @@ class SlideShow @JvmOverloads constructor(
     ) {
       setPageInterval()
     }
-    setCurrentItem(0, false)
+    setCurrentItem(mStartPosition, false)
   }
   
   fun getOuterAdapter(): RecyclerView.Adapter<*>? {
@@ -108,11 +160,10 @@ class SlideShow @JvmOverloads constructor(
    */
   fun setIsAutoSlide(boolean: Boolean): SlideShow {
     if (isAutoSlide() != boolean) {
+      mAttrs.isAutoSlide = boolean
       if (boolean) {
-        mAttrs.isAutoSlide = true
         startAutoSlide()
       } else {
-        mAttrs.isAutoSlide = false
         stopAutoSlide()
       }
     }
@@ -123,13 +174,15 @@ class SlideShow @JvmOverloads constructor(
    * 开启循环轮播图
    */
   fun setIsCyclical(boolean: Boolean): SlideShow {
-    mAttrs.isCyclical = boolean
-    val outerAdapter = getOuterAdapter()
-    if (outerAdapter is FragmentStateAdapter && boolean) {
-      error("暂不支持循环的 FragmentStateAdapter")
-    }
-    if (outerAdapter != null) {
-      getInnerAdapter()!!.setIsCyclical(boolean)
+    if (isCyclical() != boolean) {
+      mAttrs.isCyclical = boolean
+      val outerAdapter = getOuterAdapter()
+      if (outerAdapter is FragmentStateAdapter && boolean) {
+        error("暂不支持循环的 FragmentStateAdapter")
+      }
+      if (outerAdapter != null) {
+        getInnerAdapter()!!.setIsCyclical(boolean)
+      }
     }
     return this
   }
@@ -272,7 +325,18 @@ class SlideShow @JvmOverloads constructor(
   
   @ViewPager2.Orientation
   fun getOrientation(): Int = mAttrs.orientation
-  fun isUserInputEnabled(): Boolean = mViewPager.isUserInputEnabled
+  
+  var offscreenPageLimit: Int
+    get() = mViewPager.offscreenPageLimit
+    set(value) {
+      mViewPager.offscreenPageLimit = value
+    }
+  
+  var isUserInputEnabled: Boolean
+    get() = mViewPager.isUserInputEnabled
+    set(value) {
+      mViewPager.isUserInputEnabled = value
+    }
   
   private val mAttrs: SlideShowAttrs
   private val mViewPager: ViewPager2
@@ -299,7 +363,7 @@ class SlideShow @JvmOverloads constructor(
   }
   
   private val mIndicators = ArrayList<AbstractIndicatorsView>(2)
-  private val mPageChangeCallback by lazyUnlock { PageChangeCallback(mViewPager) }
+  private val mPageChangeCallback = PageChangeCallback(mViewPager)
   private val mPageTransformers by lazyUnlock {
     MultipleTransformer().apply {
       mViewPager.setPageTransformer(this)
@@ -336,7 +400,7 @@ class SlideShow @JvmOverloads constructor(
   }
   
   override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-    if (isUserInputEnabled()) {
+    if (isUserInputEnabled) {
       if (isAutoSlide()) {
         when (ev.action) {
           MotionEvent.ACTION_DOWN -> {
@@ -371,8 +435,8 @@ class SlideShow @JvmOverloads constructor(
       if (!mViewPager.isFakeDragging) {
         fakeDrag(1, duration, mInterpolator)
       }
-      val next = duration + getAutoSlideIntervalDt()
-      postDelayed(this, next.toLong())
+      val internalDt = getAutoSlideIntervalDt()
+      postDelayed(this, internalDt.toLong())
     }
   }
   

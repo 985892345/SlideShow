@@ -38,10 +38,9 @@ class PageChangeCallback(
   
   private var mCallbacks = ArrayList<OnPageChangeCallback>()
   private var mPositionFloat = 0F
-  private var mIdlePosition = -1
   
   override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-    if (mIdlePosition == -1) mIdlePosition = position
+    if (viewPager2.adapter == null) return
     mPositionFloat = position + positionOffset
     pageScrolledCallback(position, positionOffset, positionOffsetPixels)
   }
@@ -68,6 +67,7 @@ class PageChangeCallback(
   }
   
   override fun onPageSelected(position: Int) {
+    if (viewPager2.adapter == null) return
     pageSelected(position)
   }
   
@@ -79,17 +79,14 @@ class PageChangeCallback(
   }
   
   override fun onPageScrollStateChanged(state: Int) {
+    if (viewPager2.adapter == null) return
     if (state == ViewPager2.SCROLL_STATE_IDLE) {
-      mIdlePosition = mPositionFloat.toInt()
       /*
       * 开启循环后，vp 一来就处于中间位置，且左右两边划到边界时需要划很久，只要一旦停下来就快速移到中间位置
       * */
       if (isCyclical) {
-        viewPager2.setCurrentItem(
-          getCenterPos(
-            viewPager2.currentItem, innerAdapter
-          ), false
-        )
+        val centerPos = getCenterPos(viewPager2.currentItem, innerAdapter)
+        viewPager2.setCurrentItem(centerPos, false)
       }
     }
     mCallbacks.forEachReversed {
@@ -123,6 +120,7 @@ class PageChangeCallback(
     fun getCenterPos(currentItem: Int, innerAdapter: InnerAdapter<*>): Int {
       val innerItemCount = innerAdapter.itemCount
       val outerItemCount = innerAdapter.outAdapter.itemCount
+      if (outerItemCount == 0) return currentItem
       val dataPosition = currentItem % outerItemCount
       val centerPosition = innerItemCount / 2
       return centerPosition + (dataPosition - centerPosition % outerItemCount)

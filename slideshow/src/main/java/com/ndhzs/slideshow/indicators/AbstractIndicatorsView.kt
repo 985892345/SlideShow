@@ -14,7 +14,11 @@ import com.ndhzs.slideshow.utils.OnPageChangeCallback
 import com.ndhzs.slideshow.utils.lazyUnlock
 
 /**
- * ...
+ * 指示器父类
+ *
+ * 该类定义了一些通用的方法，只需要子类实现一段滑动过程的绘制即可实现整个过程的绘制
+ * 详细可以看 [onDrawMovePath] 方法
+ *
  * @author 985892345 (Guo Xiangrui)
  * @email 2767465918@qq.com
  * @date 2022/2/23 16:38
@@ -253,7 +257,7 @@ abstract class AbstractIndicatorsView @JvmOverloads constructor(
   }
   
   /**
-   * 用于在移动时绘制图形，请自己实现 path 的绘制，只需绘制一个区间的轨迹. 有三个 path 只是用来绘制复杂图形使用
+   * 用于在移动时绘制图形，请自己实现 path 的绘制，只需绘制一个区间的轨迹
    *
    * ```
    * 1、你只需要使用 offsetPixels 的值来绘制从 -intervalMargin 到 +intervalMargin 之间对应的 path 即可
@@ -261,7 +265,7 @@ abstract class AbstractIndicatorsView @JvmOverloads constructor(
    * 2、参考系是水平的，坐标为 (-intervalMargin, 0) <---> (0, 0) <---> (+intervalMargin, 0)，
    *    在内部绘图时会自动对 path 进行旋转或移动来以一个路径而显示全部路径的圆点动画
    *
-   * 3、看不懂? 那你去看我写的一些实现类 MoveIndicators
+   * 3、可以参考：MoveIndicators
    * ```
    * @param offsetPixels 值只会在 -intervalMargin 到 +intervalMargin 之间
    * @param intervalMargin 两个圆点间的距离值
